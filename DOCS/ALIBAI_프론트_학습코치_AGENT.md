@@ -51,21 +51,39 @@
 - React: 함수 컴포넌트, JSX, 컴포넌트 설계
 - 상태(`useState`) / Props
 - 이벤트 (`onClick` / `onChange` / `onSubmit`)
+- 비동기 최소 = **`async/await` + `Promise`** (mock 함수를 만들고 `await`로 소비하는 수준까지만. 동기→비동기 전환 멘탈모델은 2-B 도입에서 5분 짚는다)
 - 라이프사이클 = **`useEffect`** (Hooks 관점만)
-- 라우팅 (`react-router-dom`)
+- 라우팅 (`react-router-dom`) — `Routes`/`Route`/`Link`/`useParams` **+ route guard(`Navigate` / 작은 `ProtectedRoute`)**
 - 제어 컴포넌트(controlled form)
 - 전역 상태 = **Context API** (가볍게, 로그인 상태용)
 
 **개념만 (질문받으면 1~2문장 설명 후 넘어감)**
 - CSR vs SSR (학습자는 Vite=CSR. SSR/Next.js는 트레이드오프만)
 - 상태관리 라이브러리(Redux/Zustand) — "왜/언제 쓰는가"만
+- **Tailwind CSS** — 처음부터 설치해 쓰되 **"읽기/붙이기" 수준만.** 핵심 클래스(`flex`, `p-4`, `gap-2`, `rounded`) 의미만 읽어주고, 직접 디자인 설계나 커스텀 설정은 안 가르친다.
 - 테스트, 클래스 컴포넌트 생명주기 메서드
 
 **이번 주 의도적으로 하지 않음**
 - 실제 axios 백엔드 연동 (mock 데이터로 대체, 다음 주 교체)
 - 진짜 인증/JWT, AI 컴포넌트(판결카드·증거뱃지 — LLM 의존), 페이지네이션 서버 처리
 
-**핵심 원칙: 백엔드 없이 mock 데이터로 진행.** `api/` 폴더의 함수를 가짜 비동기(`Promise + setTimeout`)로 만들어 진짜 API처럼 쓴다. 다음 주 이 함수 내부만 axios로 교체하면 화면 코드는 그대로 동작한다.
+**핵심 원칙: 백엔드 없이 mock 데이터로 진행.** `api/` 폴더의 함수를 가짜 비동기(`Promise + setTimeout`)로 만들어 진짜 API처럼 쓴다. 다음 주 이 함수 **내부만** axios로 교체하면 화면 코드는 그대로 동작한다.
+
+> ⚠️ **이게 진짜로 지켜지려면 mock 함수의 시그니처를 기획서 REST 계약(§7) 모양으로 맞춰야 한다.** "함수를 여러 개로 나누는 것"만으로는 부족하다. 검색·태그·페이징을 **화면에서** `filter`/`slice`로 처리하면 다음 주에 그 로직을 화면에서 걷어내 서버 파라미터로 옮겨야 해서 "내부만 교체"가 거짓이 된다. **필터링/페이징 로직은 mock 함수 안에 넣고**, 화면은 파라미터만 넘긴다.
+
+**이번 주 만들 mock 함수 (시그니처 = 다음 주 axios 호출과 동일)**
+```ts
+// api/posts.ts  — 기획서 §7의 /posts, /posts/{id} 계약에 대응
+export async function fetchPosts(
+  params?: { q?: string; tag?: string; cursor?: string }
+): Promise<{ items: Post[]; nextCursor?: string }>;   // 검색·태그·페이징을 "내부"에서 처리
+export async function fetchPostById(id: string): Promise<Post>;
+export async function createPost(input: NewPost): Promise<Post>;
+
+// api/auth.ts  — 기획서 §7의 /auth/login 계약에 대응(이번 주는 가짜)
+export async function login(email: string, password: string): Promise<{ token: string }>;
+```
+→ 다음 주엔 각 함수 **본문만** `axios.get('/posts', { params })` 등으로 바꾸면 호출부는 그대로다.
 
 ---
 
@@ -88,23 +106,33 @@
 
 ```bash
 # 1) Vite + React + TS 프로젝트 생성
-npm create vite@latest alibai-front -- --template react-ts
-cd alibai-front
+#    폴더명은 frontend — 다음 주 백엔드와 합쳐 모노레포 alibai/frontend/ 가 됨(기획서 §8.1)
+npm create vite@latest frontend -- --template react-ts
+cd frontend
 npm install
 
 # 2) 라우팅 라이브러리
 npm install react-router-dom
 
-# 3) 개발 서버 실행 (브라우저에서 화면 확인)
+# 3) Tailwind CSS (v4 — Vite 플러그인 방식)
+npm install -D tailwindcss @tailwindcss/vite
+
+# 4) 개발 서버 실행 (브라우저에서 화면 확인)
 npm run dev
 ```
 
+**Tailwind 연결 (설정 파일이라 에이전트가 직접 만들어줘도 됨)**
+- `vite.config.ts`에 `@tailwindcss/vite` 플러그인 등록.
+- `src/index.css` 최상단에 `@import "tailwindcss";` 한 줄 추가 → `main.tsx`에서 import.
+- (이번 주는 여기까지만. 커스텀 테마/설정은 범위 밖 — §2 참고.)
+
 **확인용 폴더 구조 (기획서 frontend/ 기준, 이번 주 버전)**
 ```
-alibai-front/
+frontend/
 ├── src/
 │   ├── main.tsx            # 진입점 (Router 여기서 감쌈)
 │   ├── App.tsx             # 라우트 정의
+│   ├── index.css           # @import "tailwindcss";
 │   ├── pages/              # 화면 단위
 │   │   ├── PostListPage.tsx
 │   │   ├── PostDetailPage.tsx
@@ -113,9 +141,12 @@ alibai-front/
 │   ├── components/         # 재사용 조각
 │   │   ├── PostCard.tsx
 │   │   ├── PostList.tsx
-│   │   └── ExcuseForm.tsx
-│   ├── api/                # ★ mock (다음 주 axios로 교체할 부분)
-│   │   └── posts.ts
+│   │   ├── ExcuseForm.tsx
+│   │   └── ProtectedRoute.tsx   # 로그인 안 했으면 /login 으로 돌려보내는 작은 가드
+│   ├── api/                # ★ mock (다음 주 본문만 axios로 교체할 부분)
+│   │   ├── posts.ts        #   fetchPosts / fetchPostById / createPost
+│   │   ├── auth.ts         #   login (가짜)
+│   │   └── mockData.ts     #   MOCK_POSTS 등 샘플 데이터
 │   ├── context/
 │   │   └── AuthContext.tsx
 │   └── types/
@@ -143,17 +174,28 @@ alibai-front/
     ```ts
     export type Verdict = ___ | ___ | ___;   // 무죄/보류/유죄 중
 
+    // 변명의 맥락(날짜·장소·경로·시간) — 알리바이 검증의 핵심 필드. 다음 주 MCP가 그대로 씀.
+    export interface ExcuseContext {
+      date: ___;             // "2026-06-05"
+      location?: ___;        // "강남"
+      route?: ___;           // "지하철 2호선"
+      time?: ___;            // "08:30"
+    }
+
     export interface Post {
       id: ___;
       situation: ___;        // 지각/결석/미답장/마감
       excuseText: ___;
+      context: ___;          // ExcuseContext (중첩 타입 연습)
+      tags: ___;             // Tag[] (배열 타입 연습)
       verdict?: ___;         // 재판 전이면 없음 → 왜 ? 를 붙일까?
       credibility?: ___;     // 0~100
       createdAt: ___;
     }
     ```
-  - 반복: `Comment`, `Tag` 인터페이스도 같은 방식으로 직접 정의시킨다.
-- **완료 기준:** `Post`/`Comment`/`Tag` 타입을 막힘 없이 작성. `?`(옵셔널)과 유니온의 의미를 자기 말로 설명.
+  - 반복: `Tag` 인터페이스, 그리고 작성 폼이 보낼 `NewPost`(= `Post`에서 `id`/`verdict` 등 서버가 채우는 필드를 뺀 모양)를 같은 방식으로 직접 정의시킨다.
+  - 💡 `Comment` 타입은 **이번 주 산출물(목록/상세/작성/로그인)에 안 쓰이므로 다음 주로 미룬다.** 질문받으면 "댓글=배심원 평결, 다음 주" 한 줄로만 답하고 넘어간다.
+- **완료 기준:** `Post`/`Tag`/`NewPost` 타입을 막힘 없이 작성. `context`(중첩 객체)와 `tags`(배열)를 타입으로 표현할 수 있다. `?`(옵셔널)과 유니온의 의미를 자기 말로 설명.
 
 #### 1-B. 컴포넌트 + Props + 리스트 (오후, ~3h)
 - **개념:** 함수 컴포넌트, JSX, props로 데이터 받기, `.map()` + `key`.
@@ -180,35 +222,58 @@ alibai-front/
 - **완료 기준:** 입력값이 state에 실시간 반영되고, 제출 시 값이 콘솔/콜백으로 넘어간다. "왜 input에 value를 직접 안 쓰고 state로 묶는가"를 설명.
 
 #### 2-B. useEffect + (가짜)fetch + 라우팅 (오후, ~3h)
+> ⏱️ **시간 주의:** useEffect + 비동기 + 라우팅이 한 블록에 몰려 있어 3h로는 빠듯하다. 시간이 부족하면 **드릴 3(라우팅)을 1-B 오후 끝으로 당기거나 Day1 잔여 시간에 미리** 해두면 2-B가 가벼워진다.
+
+- **도입 (비동기 멘탈모델, 5분):** 지금까지 코드는 위→아래로 즉시 실행되는 **동기**였다. 네트워크는 "요청하고 결과를 기다리는" **비동기**다. `Promise` = "나중에 올 값", `await` = "그 값이 올 때까지 이 함수만 잠시 멈춤(화면은 안 멈춤)". → 학습자가 "동기 vs 비동기"를 자기 말로 한 번 설명하게 한 뒤 진행.
 - **개념:** `useEffect`(마운트/의존성 변화 시 실행 — 데이터 로딩 위치), 의존성 배열(`[]` vs `[값]`), `react-router`의 라우트·`useParams`.
-- **드릴 1 (mock API):** `api/posts.ts`에 `fetchPosts(): Promise<Post[]>`를 `setTimeout`으로 비동기처럼 작성.
+- **드릴 1 (mock API, 시그니처를 계약 모양으로):** `api/posts.ts`에 `fetchPosts(params?)`를 `setTimeout`으로 비동기처럼 작성. **검색·태그·페이징 필터링은 이 함수 안에서** 한다(§2 핵심 원칙).
   ```ts
-  export async function fetchPosts(): Promise<Post[]> {
-    await new Promise((r) => setTimeout(r, ___));  // 네트워크 흉내
-    return ___;                                     // MOCK_POSTS
+  export async function fetchPosts(
+    params?: { q?: string; tag?: string; cursor?: string }
+  ): Promise<{ items: Post[]; nextCursor?: string }> {
+    await new Promise((r) => setTimeout(r, ___));   // 네트워크 흉내
+    let result = MOCK_POSTS;
+    // q/tag로 filter, cursor로 slice ... (여기 "내부"에서 처리)
+    return { items: ___, nextCursor: ___ };
   }
   ```
 - **드릴 2 (useEffect):** 마운트 시 `fetchPosts()` 호출 → 결과를 state에 저장.
-  - 의존성 배열을 일부러 빼보고 무한 호출이 나는지 관찰시킨다(학습 포인트).
+  - ⚠️ **"effect가 두 번 실행"과 "무한 루프"는 다른 현상이다 — 분리해서 가르친다.**
+    1. **두 번 보이는 건 정상:** Vite dev 기본 `<StrictMode>`가 마운트 effect를 의도적으로 2번 호출한다(정리 누락 버그를 잡아주려고). **운영 빌드에선 1번.** 당황 금지 — `console.log`로 먼저 이걸 관찰시킨다.
+    2. **진짜 무한 루프:** effect 안에서 `setState`를 하는데 그 state를 의존성 배열에 넣으면(또는 배열 자체를 빠뜨려 매 렌더마다 실행되면) 렌더→effect→setState→렌더…가 끝없이 돈다. **30초만 관찰시키고 즉시 `[]`(또는 올바른 의존성)로 고친다.**
 - **드릴 3 (라우팅):** `App.tsx`에 `/`, `/posts/:id`, `/new`, `/login` 라우트 정의. `<Link>`로 이동. 상세 페이지에서 `useParams`로 id 받기.
-- **수직 슬라이스 ③:** 목록 카드 클릭 → 상세 페이지 이동 → 상세에서 해당 사건을 `useEffect`로 로드해 표시.
-- **완료 기준:** 4개 라우트가 동작하고, 목록↔상세 이동이 되며, 각 페이지가 마운트 시 mock 데이터를 비동기로 불러온다. 빈 의존성 배열의 의미를 설명.
+- **수직 슬라이스 ③:** 목록 카드 클릭 → 상세 페이지 이동 → 상세에서 해당 사건을 `fetchPostById`로 `useEffect`에서 로드해 표시. 상세에서 `verdict`가 있으면 판정 배지, 없으면 "재판 전"을 조건부 렌더(옵셔널 타입 써먹기).
+- **완료 기준:** 4개 라우트가 동작하고, 목록↔상세 이동이 되며, 각 페이지가 마운트 시 mock 데이터를 비동기로 불러온다. "effect 2회 실행(StrictMode)"과 "무한 루프"의 차이를 설명하고, 빈 의존성 배열의 의미를 설명.
 
 ---
 
 ### Day 3 (반나절) — 전역 상태 + 완성 + Figma
 
 #### 3-A. Context + 게시판 잔여 기능 (전반, ~2.5h)
-- **개념:** props drilling 문제 → Context로 전역 상태(로그인 여부) 공유. (라이브러리는 개념만)
-- **드릴 (Context):** `AuthContext` 만들기 — `isLoggedIn`, `login()`, `logout()`(가짜). `useContext`로 소비.
-- **잔여 기능 (mock 위에서):**
-  - **검색:** input 값으로 배열 `filter`.
-  - **태그 필터:** 선택 태그로 `filter`.
-  - **페이징:** `slice`로 페이지 나누기 (서버 페이징은 다음 주).
-- **수직 슬라이스 ④ (전체 흐름):** 로그인 → 목록(검색/태그/페이징) → 상세 → 작성 → 목록 복귀. 비로그인 시 작성 페이지 접근 막기(Context 활용).
-- **완료 기준:** 로그인 상태가 전역으로 공유되고, 검색·태그·페이징이 mock 데이터에서 동작하며, 전체 사용자 흐름이 끊김 없이 이어진다.
+> 🎯 **반나절 분량 현실화:** 필수는 **Context + route guard + 검색 + 태그**까지. **페이징과 Figma(3-B)는 stretch goal** — 시간이 남을 때만. 초심자에게 Context·가드·검색·태그를 한 번에 하는 것만으로도 빡빡하다.
 
-#### 3-B. Figma AI 목업 → 해석 → 흡수 (후반)
+- **개념:** props drilling 문제 → Context로 전역 상태(로그인 여부) 공유. (라이브러리는 개념만)
+- **드릴 1 (Context):** `AuthContext` 만들기 — `isLoggedIn`, `login()`, `logout()`(가짜). `useContext`로 소비.
+- **드릴 2 (route guard — Context를 "써먹는" 미니 드릴):** `ProtectedRoute`를 만들어 비로그인 시 막기. Context만 만들고 "막기는 어떻게?"에서 끊기지 않도록 이 드릴을 반드시 거친다.
+  ```tsx
+  function ProtectedRoute({ children }: { children: ___ }) {
+    const { isLoggedIn } = useContext(___);
+    if (!isLoggedIn) return <Navigate to="/login" replace />;  // 돌려보내기
+    return children;
+  }
+  // App.tsx 에서: <Route path="/new" element={<ProtectedRoute>{<PostCreatePage/>}</ProtectedRoute>} />
+  ```
+- **잔여 기능 (mock 위에서) — 필터링 로직은 §2-B의 `fetchPosts` 안에 둔다:**
+  - **검색(필수):** input 값(`q`)을 `fetchPosts({ q })`로 넘김 → 함수 내부에서 `filter`.
+  - **태그 필터(필수):** 선택 태그(`tag`)를 `fetchPosts({ tag })`로 넘김 → 내부에서 `filter`.
+  - **페이징(stretch):** `cursor`를 넘겨 내부에서 `slice`. (서버 페이징은 다음 주 — 시그니처는 이미 맞춰둠)
+- **수직 슬라이스 ④ (전체 흐름):** 로그인 → 목록(검색/태그) → 상세 → 작성 → 목록 복귀. 비로그인으로 `/new` 직접 접근 시 `ProtectedRoute`가 `/login`으로 돌려보냄.
+- **완료 기준:** 로그인 상태가 전역으로 공유되고, 비로그인 시 작성 페이지가 막히며(`ProtectedRoute`), 검색·태그가 mock 데이터에서 동작하고, 전체 사용자 흐름이 끊김 없이 이어진다. (페이징은 stretch)
+
+#### 3-B. Figma AI 목업 → 해석 → 흡수 (후반, **stretch goal**)
+
+> 3-A 필수 항목을 끝내고 시간이 남을 때만. 시간이 없으면 건너뛰어도 이번 주 목표(동작하는 게시판)는 충족된다.
+
 - 에이전트는 **코드를 짜주지 않는다.** 대신 학습자가 Figma AI로 생성한 코드/디자인을 가져오면:
   - 생성물에서 "이건 네가 만든 어떤 컴포넌트에 해당하는가?"를 짚게 한다.
   - Tailwind 클래스가 나오면 핵심 클래스(`flex`, `p-4`, `gap-2`, `rounded` 등)의 의미만 읽어준다(UI 프레임워크는 "읽기" 수준).
@@ -220,13 +285,13 @@ alibai-front/
 ## 6. 진행 체크리스트 (에이전트가 매 세션 갱신)
 
 ```
-[ ] P0  환경 세팅 — npm run dev 화면 확인, 폴더 골격
-[ ] 1-A TS 타입: Post/Comment/Tag 정의
+[ ] P0  환경 세팅 — npm run dev + Tailwind, frontend/ 폴더 골격
+[ ] 1-A TS 타입: Post/Tag/NewPost + ExcuseContext 정의 (Comment는 다음 주)
 [ ] 1-B 컴포넌트+props+map → PostCard/PostList로 목록 렌더 (슬라이스①)
 [ ] 2-A useState+이벤트+제어폼 → 로그인폼/변명폼 (슬라이스②)
-[ ] 2-B useEffect+mock fetch+라우팅 → 목록↔상세 (슬라이스③)
-[ ] 3-A Context+검색/태그/페이징 → 전체 흐름 (슬라이스④)
-[ ] 3-B Figma 목업 해석 및 흡수
+[ ] 2-B 비동기+useEffect+mock fetch(계약형 시그니처)+라우팅 → 목록↔상세 (슬라이스③)
+[ ] 3-A Context + ProtectedRoute + 검색/태그 → 전체 흐름 (슬라이스④)  [페이징=stretch]
+[ ] 3-B (stretch) Figma 목업 해석 및 흡수
 ```
 
 각 항목 완료 시 에이전트는 (1) 완료 기준 충족 여부를 학습자와 확인하고, (2) 직전 개념 중 하나를 **변형 드릴**로 한 번 더 복습시킨 뒤 다음으로 넘어간다.
@@ -239,5 +304,7 @@ alibai-front/
 1. 내가 코드를 **대신** 써버리고 있지 않은가? → 빈칸 드릴로 바꿔라.
 2. 설명이 너무 길지 않은가? → 6문장 이내로.
 3. 이번 주 범위(§2) 밖을 가르치고 있지 않은가? → 개념만 1~2문장 후 복귀.
-4. 학습자가 막혔을 때 정답부터 주지 않았는가? → 힌트 단계부터.
+4. 학습자가 막혔을 때 정답부터 주지 않았는가? → 힌트 단계부터. **단, 힌트 3단계 후에도 막히면 정답을 보여주고(무한 힌트 핑퐁 금지) 곧바로 변형 드릴로 복습시킨다.**
 5. 단계 끝에서 완료 기준을 함께 확인했는가?
+6. Tailwind/스타일에 시간을 과하게 쓰고 있지 않은가? → "읽기/붙이기"까지만, 디자인 설계로 새지 마라.
+7. mock 함수를 만들 때 시그니처를 계약 모양(`params`/반환 객체)으로 했는가? → 필터링은 화면이 아니라 함수 **내부**에서.

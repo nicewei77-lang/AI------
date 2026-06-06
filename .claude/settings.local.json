@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/wiseungcheol/Desktop/**)",
+      "Bash(read f *)",
+      "Bash(xargs -0 -I{} echo \"{}\")",
+      "Bash(echo \"=== by content \\(ALIBAI 프론트 학습코치\\) ===\"; grep -rl \"AI 학습 코치 지침서\" /Users/wiseungcheol 2>/dev/null | head; echo \"=== by glob ALIBAI ===\"; find /Users/wiseungcheol -maxdepth 6 -iname \"ALIBAI*.md\" 2>/dev/null | head; echo \"=== DOCS dirs ===\"; find /Users/wiseungcheol/Desktop -maxdepth 4 -type d -iname \"DOCS\" 2>/dev/null)",
+      "Read(//Users/wiseungcheol/**)",
+      "Bash(git ls-tree *)",
+      "Bash(git switch *)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(./node_modules/.bin/tsc -b)",
+      "Bash(echo \"tsc EXIT:$?\")",
+      "Bash(npm run *)",
+      "Bash(echo \"lint EXIT:$?\")"
+    ]
+  }
+}
