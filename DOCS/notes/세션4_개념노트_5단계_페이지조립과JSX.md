@@ -1,8 +1,9 @@
 # 세션 4 개념 노트 — 5단계(페이지 조립) + JSX/엘리먼트/훅
 
 > 날짜: 2026-06-08 (세션 4) · 복습용
-> 다룬 단계: **5단계 Day1 페이지 조립** (PostListPage 작성 + App.tsx 라우터 — 라우터는 다음 세션)
+> 다룬 단계: **5단계 Day1 페이지 조립** (PostListPage 작성 완료 + App.tsx 라우터는 다음 세션)
 > 이번 세션은 코드보다 **개념 Q&A**가 중심이었음. 아래는 내가 던진 질문 순서대로 전부 정리.
+> 라우터 코드는 다음 세션에 손으로 붙이지만, 오늘은 **왜 그런 모양으로 쓰는지**를 먼저 이해하는 쪽에 초점을 둠.
 
 ---
 
@@ -15,7 +16,7 @@
 import PostList from "../components/PostList";   // default export → 중괄호 없음
 import { MOCK_POSTS } from "../api/mockData";    // 이름 있는 export → 중괄호 필요
 
-function PostListPage() {                         // 인자 없음 (이유는 §8)
+function PostListPage() {                         // 인자 없음 (이유는 §11)
     return (
         <div className="mx-auto max-w-2xl px-4 py-8">
             <h1 className="mb-4 text-2xl font-bold">변명 게시판</h1>
@@ -27,7 +28,7 @@ function PostListPage() {                         // 인자 없음 (이유는 §
 export default PostListPage;
 ```
 
-`tsc -b` 통과. **남은 일: App.tsx에 라우터 연결** (§3 참고).
+`tsc -b` 통과. **남은 일: App.tsx에 라우터 연결** (§2 참고).
 
 ---
 
@@ -40,34 +41,17 @@ export default PostListPage;
 1. **크기/계층** — `PostCard`(카드 1장, 최소 부품) → `PostList`(카드 묶음, 중간 부품) → `PostListPage`(화면 전체, 최상위 조립).
 2. **데이터 조달 방식** ⭐ 가장 중요
    - 부품 컴포넌트(`PostCard`, `PostList`): 데이터를 **밖에서 props로 받기만** 함. 어디서 왔는지 몰라야 재사용됨.
-   - 페이지 컴포넌트(`PostListPage`): 데이터를 **직접 import해서 조달**하고 부품에 내려줌. (다음 주엔 `import {MOCK_POSTS}`가 `fetchPosts()`로 바뀜.)
-3. **라우터에 직접 연결됨(URL을 가짐)** — 페이지만 `<Route element={<PostListPage/>}>`에 꽂힘. 부품은 URL이 없음.
+   - **이번 단계의 페이지 컴포넌트(`PostListPage`)는** 데이터를 **직접 import해서 조달**하고 부품에 내려줌. (다음 주엔 `import {MOCK_POSTS}`가 `fetchPosts()`로 바뀜.)
+   - 즉, "페이지는 항상 import만 한다"가 아니라 **지금 우리가 연습 중인 페이지가 그렇게 동작한다**는 뜻.
+3. **라우터에 직접 연결됨(URL을 가짐)** — **이 커리큘럼에선** 페이지를 `<Route element={<PostListPage/>}>`에 꽂는다. 부품은 URL이 없음.
 
-> 한 줄: **페이지 = URL에 연결되고 + 데이터를 직접 조달해서 + 부품을 조립하는 최상위 컴포넌트.**
-
----
-
-## 2. 라우터 종류 (전체 분류)
-
-두 층위가 있음.
-
-### ① 최상위 라우터 3종 (URL을 어떻게 추적하느냐)
-
-| 라우터 | URL 모양 | 언제 |
-|---|---|---|
-| **`BrowserRouter`** | `site.com/posts/p1` (깔끔) | 일반 웹앱 표준 — **우리가 쓰는 것** |
-| `HashRouter` | `site.com/#/posts/p1` | 정적 호스팅(GitHub Pages), 서버 라우팅 설정 못 할 때 |
-| `MemoryRouter` | URL 안 바뀜(메모리에만) | 테스트, React Native |
-
-- `BrowserRouter`는 주소가 깨끗한 대신 새로고침 시 서버가 404 낼 수 있어 "모든 경로를 index.html로" 설정 필요(Vite 개발서버는 자동).
-- `HashRouter`는 `#` 뒤가 서버로 안 가서 그 설정 불필요(대신 주소 지저분).
-- **우리는 `BrowserRouter` 하나만. 이미 `main.tsx`에 깔려 있음.**
-
-### ② 경로 정의 도구들 (라우터 안에서 씀) → §3
+> 한 줄: **지금 만든 페이지 = URL에 연결되고, 현재 단계에서는 데이터를 직접 가져와, 부품을 조립하는 최상위 컴포넌트.**
 
 ---
 
-## 3. 라우터 3총사 (BrowserRouter / Routes / Route) — 한 세트로 끼워짐
+## 2. 라우터 3총사 (오늘 당장 쓰는 핵심)
+
+오늘 App.tsx에서 실제로 손으로 쓸 건 `Routes`와 `Route`다. 다만 이름이 비슷해서 헷갈리니, 먼저 **세 개가 한 세트로 움직인다**는 감각부터 잡는 게 중요하다.
 
 ```
 <BrowserRouter>      ← ① "지금 URL이 뭔지" 감시·방송 (main.tsx에 이미 있음, 안 건드림)
@@ -90,7 +74,8 @@ export default PostListPage;
 ### ③ Route
 - props 2개: `path="/"`(언제=주소) + `element={<PostListPage/>}`(무엇=화면).
 - 함정 1: element엔 **`<PostListPage />`** (꺾쇠 형태). `PostListPage`(이름만)도 `PostListPage()`(직접호출)도 아님.
-- 함정 2: `path`의 `:id`는 자리표시자(변수). `/posts/:id` → `/posts/p1`, `/posts/p99` 다 매칭. 값은 `useParams`로 꺼냄(7단계).
+- 함정 2: `element`는 "컴포넌트 함수 자체"가 아니라 **렌더할 엘리먼트**를 원함. 그래서 `<PostListPage />`처럼 쓴다.
+- 함정 3: `path`의 `:id`는 자리표시자(변수). `/posts/:id` → `/posts/p1`, `/posts/p99` 다 매칭. 값은 `useParams`로 꺼냄(7단계).
 
 ### 흐름 (/posts/p1 입력 시)
 ```
@@ -99,7 +84,7 @@ export default PostListPage;
 3. Route: 채택된 element={<PostDetailPage/>} 렌더
 ```
 
-이번 5단계에선 ②·③만 쓰면 됨(①은 이미 있음). 작성할 것:
+이번 5단계에선 ②·③만 직접 쓰면 됨(①은 이미 있음). 작성할 것:
 ```tsx
 <Routes>
   <Route path="/" element={<PostListPage />} />
@@ -111,19 +96,44 @@ export default PostListPage;
 
 ---
 
+## 3. 보충: 라우터 종류 (전체 분류)
+
+위 3총사를 이해한 뒤에 보면 덜 헷갈린다. 여기서 말하는 "라우터 종류"는 **맨 바깥에서 URL을 어떤 방식으로 추적하느냐**에 대한 분류다.
+
+### ① 최상위 라우터 3종 (URL을 어떻게 추적하느냐)
+
+| 라우터 | URL 모양 | 언제 |
+|---|---|---|
+| **`BrowserRouter`** | `site.com/posts/p1` (깔끔) | 일반 웹앱 표준 — **우리가 쓰는 것** |
+| `HashRouter` | `site.com/#/posts/p1` | 정적 호스팅(GitHub Pages), 서버 라우팅 설정 못 할 때 |
+| `MemoryRouter` | URL 안 바뀜(메모리에만) | 테스트, React Native |
+
+- `BrowserRouter`는 주소가 깨끗한 대신 새로고침 시 서버가 404 낼 수 있어 "모든 경로를 index.html로" 설정 필요(Vite 개발서버는 자동).
+- `HashRouter`는 `#` 뒤가 서버로 안 가서 그 설정 불필요(대신 주소 지저분).
+- **우리는 `BrowserRouter` 하나만. 이미 `main.tsx`에 깔려 있음.**
+
+---
+
 ## 4. `<PostList posts={MOCK_POSTS}/>` — 무슨 문법? 함수 호출인가?
 
 **JSX**. HTML처럼 생겼지만 HTML 아니고, 함수 호출처럼 보이지만 직접 호출도 아님.
 
-빌드되면 평범한 JS로 번역됨:
+개념적으로는 평범한 JS 호출 형태로 번역된다:
 ```tsx
 <PostList posts={MOCK_POSTS} />
-// ↓ 번역
+// ↓ 이런 식의 엘리먼트 생성 호출로 이해하면 됨
 React.createElement(PostList, { posts: MOCK_POSTS })
 ```
 
+> 정확한 내부 변환 함수 이름은 빌드 도구/설정에 따라 달라질 수 있다. 핵심은 **JSX가 그냥 문자열이 아니라, 결국 JS 코드로 바뀐다**는 점.
+
 - **직접 호출이 아님.** `PostList(...)`를 내가 부르는 게 아니라 "이걸 그려줘"라고 React에게 **부탁(주문서)**. 실제로 언제 부를지는 React가 결정.
 - 그래서 라우터도 `element={<PostListPage/>}` (호출 아닌 주문서 형태).
+
+### 헷갈리기 쉬운 3개 구분
+- `PostList` = **컴포넌트 함수 자체**(설계도)
+- `<PostList />` = **그 설계도를 써 달라는 JSX 엘리먼트**(주문서)
+- `<div>` = 나중에 실제 화면에 반영될 **HTML 태그를 가리키는 JSX 표기**
 
 문법 해부:
 ```
@@ -133,7 +143,7 @@ React.createElement(PostList, { posts: MOCK_POSTS })
 ```
 - `{}` = "여기부터 JS" 탈출구. `posts="MOCK_POSTS"`(따옴표)면 글자 11개, `posts={MOCK_POSTS}`면 변수(배열).
 
-> JSX = "이 컴포넌트를 이 props로 그려달라"는 명령서를 만드는 문법. `React.createElement(...)`로 번역됨.
+> JSX = "이 컴포넌트를 이 props로 그려달라"는 명령서를 만드는 문법. 결국 **엘리먼트 생성 JS 코드**로 바뀐다.
 
 ---
 
@@ -192,6 +202,8 @@ React.createElement(PostList, { posts: MOCK_POSTS })
 
 ### 훅 = 컴포넌트(함수)에 "기억력 + 생명주기"를 달아주는 특수 함수. 전부 `use`로 시작.
 
+> 지금 단계 핵심 한 줄: **훅은 React가 컴포넌트를 호출하는 흐름 안에서만 안전하게 동작한다.**
+
 **왜 필요:** 함수는 부를 때마다 처음부터 시작하고 끝나면 다 잊음. 근데 화면엔 기억이 필요(검색어, 로딩 여부, 받아온 목록…). 평범한 변수는 다시 불리면 사라짐. **그 "다시 불려도 안 사라지는 기억"을 React가 대신 보관해주는 창구가 훅.**
 
 대표 훅:
@@ -206,7 +218,7 @@ React.createElement(PostList, { posts: MOCK_POSTS })
 
 ```tsx
 <PostList posts={MOCK_POSTS} />
-// 번역 → React.createElement(PostList, { posts: MOCK_POSTS })
+// 개념적으로는 이런 엘리먼트 생성 코드가 된다고 이해하면 됨
 // 결과 엘리먼트:
 {
   type: PostList,
@@ -322,10 +334,11 @@ function PostList({ posts }) {       // ① 구조분해(꺼내기)
 |---|---|---|
 | `PostCard({post})` | 있음 | 부모(PostList)가 props로 줌 |
 | `PostList({posts})` | 있음 | 부모(페이지)가 props로 줌 |
-| `PostListPage()` | **없음** | **자기가 직접 import** |
+| `PostListPage()` | **없음** | **현재 단계에선 자기가 직접 import** |
 
 - 페이지는 라우터가 `<PostListPage/>`로 **props 없이** 부름 → 받을 게 없어 인자 없음.
 - 데이터는 위에서 `import {MOCK_POSTS}`로 직접 조달(§1의 역할 분리).
+- 다만 이건 "페이지는 원래 무조건 인자 없음"이 아니라, **지금 만든 이 페이지가 그런 구조**라는 뜻. 나중엔 props/context/훅 결과를 함께 쓸 수도 있다.
 
 > 규칙: **위에서 import로 직접 가져오면 → 인자 없음. 부모가 `<태그 x={}/>`로 넘기면 → 인자 있음.**
 
@@ -344,13 +357,20 @@ py-8       → padding 상하
 ```
 → "가운데 정렬된, 적당히 좁고, 안쪽 여백 있는 박스".
 
-### 이름 규칙 = `속성-크기`
-| 앞 | 뜻 | 뒤 | 뜻 |
-|---|---|---|---|
-| `m`=margin, `p`=padding | 여백 | `x`좌우 `y`상하 | 방향 |
-| `w`=width `h`=height | 크기 | 숫자 `4`,`8` | 크기(숫자×4px, `4`=16px) |
-| `text` | 글자 | `auto/full/2xl` | 값 |
-| `bg` | 배경 | `gap/flex` | 간격/배치 |
+### 읽을 때는 "쪼개서 읽기"가 핵심
+Tailwind 클래스는 **모든 게 딱 하나의 공식으로 통일되는 건 아니다.** 대신 지금 단계에선 자주 보는 조각만 읽으면 충분하다.
+
+- `m` / `p` = margin / padding
+- `x` / `y` / `t` / `b` = 좌우 / 상하 / 위 / 아래
+- 숫자 `4`, `8` = spacing 크기 단계 (`4`는 보통 16px, `8`은 32px 정도로 읽으면 됨)
+- `max-w-2xl` = 최대 너비를 `2xl` 크기로 제한
+- `text-2xl` = 글자 크기 키움
+- `font-bold` = 글자 굵게
+
+즉:
+- `px-4` = padding x 4 = 좌우 안쪽 여백
+- `py-8` = padding y 8 = 위아래 안쪽 여백
+- `mb-4` = margin bottom 4 = 아래 바깥 여백
 
 ### 찾는 법 (외우지 말고)
 1. 공식 문서 tailwindcss.com 검색
@@ -381,6 +401,14 @@ py-8       → padding 상하
 // mb-4 = 제목 아래 여백 16px / text-2xl = 큰 글자 / font-bold = 굵게
 ```
 읽는 법: **`m`/`p` + `t/b/l/r/x/y` + 숫자**로 분해. `mb-4` = margin, bottom, 4단계.
+
+---
+
+## 14. 오늘 핵심 3줄 요약
+
+1. `PostListPage`는 **현재 단계에서** 데이터를 직접 가져와 `PostList`를 조립하는 페이지 컴포넌트다.
+2. `<PostList posts={MOCK_POSTS} />`는 함수를 직접 호출하는 게 아니라, React에게 넘기는 **JSX 엘리먼트 주문서**다.
+3. 훅은 React가 컴포넌트를 호출하는 흐름 안에서만 안전하게 동작하므로, `PostList()`를 직접 부르지 않고 `<PostList />`처럼 React에게 호출권을 넘긴다.
 
 ---
 
