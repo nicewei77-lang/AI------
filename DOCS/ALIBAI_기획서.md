@@ -73,7 +73,7 @@
 | 기능 | 설명 | 비고 |
 |---|---|---|
 | 회원가입 / 로그인 | 이메일 + 비밀번호, JWT 인증 | 피고인 등록 |
-| 게시물 CRUD | 변명(=사건) 작성/조회/수정/삭제 | 본문 + 상황 메타데이터(날짜·장소·경로) |
+| 게시물 CRUD | 변명(=사건) 작성/조회/수정/삭제 | 제목 + 본문 + 상황 메타데이터(날짜·장소·경로). 변명 유형 분류는 태그가 담당 |
 | 댓글 | 다른 사용자의 의견 = 배심원 평결 | AI 판결도 댓글 형태로 부착 |
 | 태그 | 변명 유형 분류 (지각/결석/미답장/마감) | 일부 자동 태깅(Agent) |
 | 페이징 | 사건 목록 페이지네이션 | cursor 또는 offset |
@@ -273,7 +273,7 @@ CREATE TABLE users (
 CREATE TABLE posts (
   id            BIGSERIAL PRIMARY KEY,
   author_id     BIGINT REFERENCES users(id) ON DELETE CASCADE,
-  situation     TEXT,                         -- 지각/결석/미답장/마감 ...
+  title         TEXT NOT NULL,                -- 글 제목 (변명 유형 분류는 tags가 담당)
   excuse_text   TEXT NOT NULL,
   context       JSONB,                        -- {date, location, route, time}
   verdict       TEXT,                         -- 무죄/보류/유죄
