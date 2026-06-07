@@ -45,4 +45,5 @@ function PostCard({post}: PostCardProps) {
     );
 }
 
+export default PostCard;
 

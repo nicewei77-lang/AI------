@@ -1,7 +1,5 @@
 // Day 1 드릴에서 직접 작성합니다.
 // posts 배열을 map으로 렌더링하는 목록 컴포넌트를 만드세요.
-export default PostCard;
-
 import type {Post} from "../types/post";   // 데이터 타입
 import PostCard from "./PostCard";                // 카드 컴포넌트 (default export였음)
 
@@ -20,3 +18,4 @@ function PostList({posts}: PostListProps) {
 }
 
 export default PostList;
+
