@@ -387,7 +387,7 @@ React 내부: const cleanup = 콜백();   // 콜백이 async면 → cleanup에 P
 useEffect(async () => {
     await fetchPosts();   // return 안 씀
 }, []);                    // 그래도 콜백은 Promise<undefined> 반환 → cleanup 자리 깨짐
-```
+```  
 
 undefined를 돌려주려면 콜백이 **async가 아니어야** 한다 → 그러면 await를 못 쓴다 → 그래서 async를 안쪽 `load`로 옮긴다.
 
