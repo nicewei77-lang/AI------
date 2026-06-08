@@ -15,25 +15,4 @@ function PostListPage() {
     );
 }
 
-// 이 페이지를 App에서 쓸 수 있게 내보낸다.
-
-
-// 데이터와 부품 컴포넌트를 불러온다.
-import PostList from "../components/PostList";
-import mockData from "../api/mockData";
-// 실제 화면을 그리는 함수를 정의한다.
-function PostListPage() {
-    <div className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-4 text-2xl font-bold"></h1>
-        <PostList posts={MOCK_POSTS}/>
-    </div>
-}
-
-
-// 이 페이지를 App에서 쓸 수 있게 내보낸다.
 export default PostListPage;
-
-
-function PostListPage() {
-    <PostList posts={MOCK_POSTS}/>
-}

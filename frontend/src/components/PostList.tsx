@@ -18,4 +18,3 @@ function PostList({posts}: PostListProps) {
 }
 
 export default PostList;
-

@@ -52,5 +52,21 @@ export const MOCK_POSTS: Post[] = [
         tags: [{id: "t3", label: "결근"}],
         verdict: "유죄", 
         createdAt: "2026-06-28T22:30:10",
+    },
+
+        {
+        id: "p4",
+        title: "야붕이 이거 ㅈ된거 맞냐?",
+        excuseText: "차에 고양이가 들어가서 출근 못함...",
+        context: {
+            date: "2026-04-23",
+            location: "중앙시장역",
+            time: "25:00",
+            route: "역 근처",
+            
+        },
+        tags: [{id: "t4", label: "결근"}],
+        verdict: "유죄", 
+        createdAt: "2026-06-28T22:30:10",
     }
 ];
