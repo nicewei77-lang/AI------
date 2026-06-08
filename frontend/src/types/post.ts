@@ -54,9 +54,9 @@ C 헤더처럼 "본체와 분리된, 컴파일 타임에 검사되는 약속"이
 export interface Post {
     id: string;
     title: string;
+    tags: Tag[];
     excuseText: string;
     context: ExcuseContext;
-    tags: Tag[];
     verdict?: Verdict;
     credibility?: number;
     createdAt: string;
