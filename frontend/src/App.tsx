@@ -8,7 +8,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PostListPage/>} />
-      <Route path="/posts/id" element={<PostDetailPage/>}/>
+      <Route path="/posts/:id" element={<PostDetailPage/>}/>
     </Routes>
   );
 }

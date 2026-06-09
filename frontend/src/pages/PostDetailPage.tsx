@@ -5,7 +5,7 @@ import {useParams} from "react-router-dom";
 import {fetchPostById} from "../api/posts";
 import type {Post} from "../types/post";
 
-function postDetailPage() {
+function PostDetailPage() {
     const {id} = useParams();
     const [post, setPost] = useState<Post | null>(null);
     const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ function postDetailPage() {
             } finally {
                 setLoading(false);
             }
-        };
+        }
     load();
     }, [id]);   
 
@@ -36,4 +36,4 @@ function postDetailPage() {
     );
 }
 
-export default postDetailPage;
+export default PostDetailPage;
