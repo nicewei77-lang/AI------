@@ -42,3 +42,32 @@ function PostListPage() {
 }
 
 export default PostListPage;
+
+
+
+
+
+// 실제 화면을 그리는 함수를 정의한다.
+function PostListPage() {
+    // 기억 칸 3개
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // 첫 화면이 뜰 때 한 번만 데이터 로드
+    useEffect(() => {
+        async function load() {
+            try {
+                const data = await fetchPosts();
+                setPosts(data.items);
+            } catch {
+                setError("목록을 불러오지 못했습니다.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+    // 세 갈래 화면
+}
+
