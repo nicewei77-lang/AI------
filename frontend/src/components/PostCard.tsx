@@ -28,6 +28,7 @@ interface PostCardProps {
 */
 // Post 타입을 가져온다.
 import type {Post} from "../types/post";
+import {Link} from "react-router-dom";
 
 // 이 component가 받을 props의 모양을 약속한다.
 interface PostCardProps {
@@ -39,11 +40,14 @@ interface PostCardProps {
 function PostCard({post}: PostCardProps) {
     return (
         <article className="rounded border p-4">
-            <h2>{post.title}</h2>
+            <h2>
+                <Link to={`/posts/${post.id}`} className="hover:underline">
+                {post.title}
+                </Link>
+            </h2>
             <p>{post.excuseText}</p>
         </article>    
     );
 }
 
 export default PostCard;
-
