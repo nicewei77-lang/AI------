@@ -1,0 +1,21 @@
+# ALIBAI 백엔드용 PostgreSQL (pgvector 포함 — 다음 AI 단계 대비)
+services:
+  db:
+    image: pgvector/pgvector:pg16        # Postgres 16 + pgvector 확장
+    container_name: alibai-db
+    environment:
+      POSTGRES_USER: alibai
+      POSTGRES_PASSWORD: alibai_dev_pw     # 개발용 비밀번호 (배포 시 .env로)
+      POSTGRES_DB: alibai
+    ports:
+      - "5432:5432"                        # 호스트 5432 ↔ 컨테이너 5432
+    volumes:
+      - alibai_pgdata:/var/lib/postgresql/data   # 데이터 영속화
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alibai -d alibai"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  alibai_pgdata:
