@@ -76,6 +76,7 @@
 | 게시물 CRUD | 변명(=사건) 작성/조회/수정/삭제 | 제목 + 본문 + 상황 메타데이터(날짜·장소·경로). 변명 유형 분류는 태그가 담당 |
 | 댓글 | 다른 사용자의 의견 = 배심원 평결 | AI 판결도 댓글 형태로 부착 |
 | 태그 | 변명 유형 분류 (지각/결석/미답장/마감) | 일부 자동 태깅(Agent) |
+| 투표 | 글에 대한 up/down = 배심원 평결 | 합산 점수(net = up−down) 표시, 1인 1표 |
 | 페이징 | 사건 목록 페이지네이션 | cursor 또는 offset |
 | 검색 | 키워드 검색 + (확장) 의미 검색 | 의미 검색은 RAG 재사용 |
 
@@ -303,12 +304,24 @@ CREATE TABLE comments (
 -- 태그
 CREATE TABLE tags (
   id   BIGSERIAL PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,   -- 외부 API Tag.id로 노출되는 안정 문자열(t1 등)
   name TEXT UNIQUE NOT NULL
 );
 CREATE TABLE post_tags (
   post_id BIGINT REFERENCES posts(id) ON DELETE CASCADE,
   tag_id  BIGINT REFERENCES tags(id) ON DELETE CASCADE,
   PRIMARY KEY (post_id, tag_id)
+);
+
+-- 투표(배심원 평결) — 글/댓글에 up(+1)/down(-1). 합산 점수 = SUM(value)
+CREATE TABLE votes (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  target_type TEXT NOT NULL,                       -- 'post' | 'comment'
+  target_id   BIGINT NOT NULL,
+  value       SMALLINT NOT NULL,                    -- +1 | -1
+  created_at  TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, target_type, target_id)         -- 1인 1표
 );
 
 -- MCP 검증 감사 로그
@@ -332,17 +345,25 @@ CREATE TABLE verifications (
 | POST | `/auth/signup` | 회원가입 |
 | POST | `/auth/login` | 로그인 → JWT |
 | GET | `/posts` | 사건 목록 (페이징, `?cursor=`, `?tag=`, `?q=`) |
-| POST | `/posts` | 변명 제출 (등록 직후 임베딩 적재) |
+| POST | `/posts` | 변명 제출 (B단계는 DB 저장만, AI 단계에서 등록 직후 임베딩 적재 추가) |
 | GET | `/posts/{id}` | 사건 상세 (판결·증거 포함) |
 | PATCH | `/posts/{id}` | 수정 |
 | DELETE | `/posts/{id}` | 삭제 |
 | POST | `/posts/{id}/trial` | **재판 시작** → Agent 판정 트리거 |
 | GET | `/posts/{id}/comments` | 댓글 목록 |
 | POST | `/posts/{id}/comments` | 댓글 작성 |
+| POST | `/posts/{id}/vote` | 글 추천/비추천 (up/down, 1인 1표, 합산 점수 반환) |
 | GET | `/search?q=` | 키워드 + (확장) 의미 검색 |
 | GET | `/stats/me` | 내 변명 패턴 통계 (RAG 집계) |
 
 > `/trial`을 별도 엔드포인트로 둬서 "등록"과 "재판"을 분리 → 데모 시 판정 과정을 명확히 보여줄 수 있다.
+
+**프론트 ↔ 백엔드 JSON 계약 메모**
+
+- 외부 JSON은 프론트 기준 camelCase(`excuseText`, `createdAt`, `tagIds`)를 쓴다. DB/ORM 내부는 snake_case(`excuse_text`, `created_at`, `tag_ids`)로 두고 Pydantic alias로 연결한다.
+- `Tag.id`는 DB 숫자 PK가 아니라 외부 API용 문자열 slug다(예: `t1`). 백엔드는 `?tag=t1`과 `tagIds:["t1"]`를 `tags.slug`로 받아 내부에서 숫자 `tags.id`로 변환한다.
+- `POST /posts/{id}/vote` 요청 body는 `{ "value": 1 | -1 }`, 응답은 `{ "score": number, "myVote": 1 | -1 | 0 }`. 같은 값을 다시 누르면 취소, 반대 값을 누르면 전환한다.
+- `Post.score`는 투표 합산 점수(net = up − down)다. 백엔드는 응답에 포함하고, 프론트는 axios 전환/투표 UI 보충 때 타입과 mock 기본값을 맞춘다.
 
 ---
 
@@ -459,7 +480,7 @@ npm run dev
 | 단계 | 목표 | 산출물 |
 |---|---|---|
 | **P0** | 환경 세팅 | docker DB, 3개 repo 골격, .env, 헬스체크 |
-| **P1** | 순수 게시판 | 회원가입/로그인, 변명 CRUD, 댓글, 태그, 페이징, 키워드 검색 |
+| **P1** | 순수 게시판 | 회원가입/로그인, 변명 CRUD, 댓글, 태그, 투표, 페이징, 키워드 검색 |
 | **P2** | RAG | 등록 시 임베딩 적재, 전과/중복 검색, 패턴 통계 `/stats/me` |
 | **P3** | MCP(날씨) + 판결 | `check_weather` tool, MCP Client 연결, judge 노드로 판정 |
 | **P4** | Agent 고도화 | LangGraph state·재생성(counsel), 무한루프/예외처리, 뉴스·교통 tool 추가 |

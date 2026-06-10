@@ -87,7 +87,7 @@
 ```ts
 // api/posts.ts  — 기획서 §7의 /posts, /posts/{id} 계약에 대응
 export async function fetchPosts(
-  params?: { q?: string; tag?: string; cursor?: string }
+  params?: { q?: string; tagId?: string; cursor?: string }
 ): Promise<{ items: Post[]; nextCursor?: string }>;   // 검색·태그·페이징을 "내부"에서 처리
 export async function fetchPostById(id: string): Promise<Post>;
 export async function createPost(input: NewPost): Promise<Post>;
@@ -95,7 +95,7 @@ export async function createPost(input: NewPost): Promise<Post>;
 // api/auth.ts  — 기획서 §7의 /auth/login 계약에 대응(이번 주는 가짜)
 export async function login(email: string, password: string): Promise<{ token: string }>;
 ```
-→ 다음 주엔 각 함수 **본문만** `axios.get('/posts', { params })` 등으로 바꾸면 호출부는 그대로다.
+→ 다음 주엔 각 함수 **본문만** 바꾼다. 예: `fetchPosts({ tagId })`는 함수 내부에서 `axios.get('/posts', { params: { q, tag: tagId, cursor } })`처럼 URL 쿼리 키 `tag`로 변환하면 호출부는 그대로다.
 
 ---
 
@@ -241,11 +241,11 @@ frontend/
 - **드릴 1 (mock API, 시그니처를 계약 모양으로):** `api/posts.ts`에 `fetchPosts(params?)`를 `setTimeout`으로 비동기처럼 작성. **검색·태그·페이징 필터링은 이 함수 안에서** 한다(§2 핵심 원칙).
   ```ts
   export async function fetchPosts(
-    params?: { q?: string; tag?: string; cursor?: string }
+    params?: { q?: string; tagId?: string; cursor?: string }
   ): Promise<{ items: Post[]; nextCursor?: string }> {
     await new Promise((r) => setTimeout(r, ___));   // 네트워크 흉내
     let result = MOCK_POSTS;
-    // q/tag로 filter, cursor로 slice ... (여기 "내부"에서 처리)
+    // q/tagId로 filter, cursor로 slice ... (여기 "내부"에서 처리)
     return { items: ___, nextCursor: ___ };
   }
   ```
