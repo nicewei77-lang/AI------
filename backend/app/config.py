@@ -9,5 +9,3 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 # 다른 곳에서 쓸 객체 인스턴스 만들기
 settings = Settings()
-    
-    
