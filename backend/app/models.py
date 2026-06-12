@@ -41,6 +41,7 @@ class Post(Base):
     credibility: Mapped[int | None] = mapped_column(Integer, nullable=True)
     
     author: Mapped["User"]=relationship()
+    tags: Mapped[list["Tag"]] = relationship(secondary="post_tags")
     
     
 class Comment(Base):
