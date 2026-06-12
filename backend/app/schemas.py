@@ -12,6 +12,13 @@ class PostCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     
 
+class TagOut(BaseModel):
+    """ORM TAG(.slug/.name/.id) → 프론트 Tag({id, label})."""
+    id: str = Field(validation_alias="slug")
+    label: str = Field(validation_alias="name")
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PostOut(BaseModel):
     """글 작성 요청 1개 응답."""
     id: int
@@ -22,6 +29,7 @@ class PostOut(BaseModel):
     verdict: str | None = None
     credibility: int | None = None
     context: dict | None = None
+    tags: list[TagOut] = Field(default_factory=list)
     
     model_config = ConfigDict(
         from_attributes=True,
@@ -29,3 +37,6 @@ class PostOut(BaseModel):
     )
     
 
+
+    
+    
