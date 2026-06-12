@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Post
+from app.models import Post, Tag
 
 async def get_post(session: AsyncSession, post_id: int) -> Post | None:
     stmt = (
@@ -16,6 +16,7 @@ async def get_post(session: AsyncSession, post_id: int) -> Post | None:
 async def list_posts(
     session: AsyncSession,
     q: str | None = None,
+    tag: str | None = None,
     cursor: str | None = None,
     limit: int = 20,
 ) -> tuple[list[Post], str | None]:
@@ -26,6 +27,8 @@ async def list_posts(
     )
     if q:
         stmt = stmt.where(Post.title.ilike(f"%{q}%"))
+    if tag:
+        stmt = stmt.join(Post.tags).where(Tag.slug == tag)
     if cursor:
         stmt = stmt.where(Post.id < int(cursor))
         
