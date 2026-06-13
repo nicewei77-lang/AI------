@@ -29,4 +29,5 @@ async def create(
         context=body.context,
         tags=tags,
     )
+    await session.commit()
     return post
