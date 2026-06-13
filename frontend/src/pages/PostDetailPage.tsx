@@ -22,7 +22,7 @@ function PostDetailPage() {
             onClick={handleBack}
             className="mb-6 rounded border border-stone-300 px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-100"
         >
-            뒤로가기
+            back
         </button>
     );
 
