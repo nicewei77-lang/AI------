@@ -1,18 +1,20 @@
-// ⚠️ [임시 채움 — 코치] 9단계 복습 때 이 파일 전체를 지우고 아래 원래 스텁으로 되돌린 뒤 직접 작성하세요.
-//   원래 스텁:  export {}
-//   (되돌리기 목록은 DOCS/진도_체크포인트.md "임시 채움 되돌리기" 참고)
+// ⚠️ [코치 작성 — 9단계 재드릴 대상] mock 로그인을 실제 백엔드 호출로 교체.
+//   (시그니처 login(email, password) → {token} 은 그대로 유지 → AuthContext는 안 바뀜)
 
-// login(email, password) mock 함수 — 다음 주 본문만 axios로 교체할 부분.
+import {api} from "./http";
+
+// 백엔드 POST /auth/login: OAuth2 표준이라 JSON이 아니라 "폼"으로 username/password를 보낸다.
+// 응답은 {access_token, token_type}. 받은 토큰을 localStorage에 저장 → 이후 요청에 자동 첨부.
 export async function login(
     email: string,
     password: string
 ): Promise<{token: string}> {
-    // 네트워크 지연 흉내
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    // 가짜 검증: 둘 다 채워져 있으면 통과
-    if (!email || !password) {
-        throw new Error("이메일과 비밀번호를 입력하세요.");
-    }
-    // 가짜 토큰 (다음 주 실제 JWT로 교체)
-    return {token: "mock-token-" + email};
+    const data = await api<{access_token: string; token_type: string}>("/auth/login", {
+        method: "POST",
+        // 백엔드는 username으로 유저를 찾는다 → 입력값을 username 자리에 보낸다.
+        // (프론트가 'email'이라 부르는 것과 백엔드 'username'의 이름 정리는 9단계 몫)
+        form: {username: email, password},
+    });
+    localStorage.setItem("token", data.access_token);
+    return {token: data.access_token};
 }

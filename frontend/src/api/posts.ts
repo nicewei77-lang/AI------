@@ -1,57 +1,70 @@
-// Day 2 드릴에서 직접 작성합니다.
-// fetchPosts, fetchPostById, createPost를 mock API 형태로 구현하세요.
+// ⚠️ [코치 작성 — 9단계 재드릴 대상] mock(MOCK_POSTS 배열 읽기) → 실제 백엔드 HTTP 호출로 교체.
+//   시그니처는 그대로 유지(컴포넌트는 안 바뀜). 백엔드 JSON ↔ 프론트 Post 변환은 "이 함수 안에서".
 
-import type {Post, NewPost} from "../types/post";
-import {MOCK_POSTS} from "./mockData";
+import type {Post, NewPost, Tag, ExcuseContext} from "../types/post";
+import {api} from "./http";
 
-/* post 목록을 가져오는 함수 */
+// 백엔드 PostOut(JSON) 모양 — 프론트 Post와 다르다(id는 숫자, score/myVote가 더 있음).
+interface RawPost {
+    id: number;
+    title: string;
+    excuseText: string;
+    createdAt: string;
+    score: number;
+    myVote: number;
+    verdict: string | null;
+    credibility: number | null;
+    context: ExcuseContext | null;
+    tags: Tag[];
+}
+
+// 백엔드 응답 → 프론트 Post 모양으로 변환(경계에서 1번만 맞춰주면 컴포넌트는 그대로 쓴다)
+function toPost(raw: RawPost): Post {
+    return {
+        id: String(raw.id), // 백엔드 int → 프론트 string
+        title: raw.title,
+        tags: raw.tags ?? [],
+        excuseText: raw.excuseText,
+        context: raw.context ?? {date: "", location: "", time: "", route: undefined},
+        verdict: (raw.verdict ?? undefined) as Post["verdict"],
+        credibility: raw.credibility ?? undefined,
+        createdAt: raw.createdAt,
+    };
+}
+
+/* post 목록: GET /posts?q=&tag=&cursor= */
 export async function fetchPosts(
     params?: {q?: string; tagId?: string; cursor?: string}
 ): Promise<{items: Post[]; nextCursor?: string}> {
-    // 네트워크 지연(0.3초)을 흉내 낸다
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    // result를 전체 원본 데이터로 초기화한다.
-    let result = MOCK_POSTS;
-    // params이 있다면, 쿼리로 post의 title을 검사하여 filter한다.
-    if (params?.q) {
-        result = result.filter(
-            (post) => post.title.includes(params.q!)
-        );
-    }
-    // tag filter
-    if (params?.tagId) {
-        result = result.filter(
-            (post) => post.tags.some((t) => t.id === params.tagId)
-        );
-    }
-    // 반환 타입에 맞추어 값을 반환한다.
-    return {items: result, nextCursor: undefined};
-}
+    const qs = new URLSearchParams();
+    if (params?.q) qs.set("q", params.q);
+    if (params?.tagId) qs.set("tag", params.tagId); // 프론트 tagId → 백엔드 tag
+    if (params?.cursor) qs.set("cursor", params.cursor);
+    const query = qs.toString() ? `?${qs.toString()}` : "";
 
-/* id를 받아 post 한 개를 가져오는 함수 */
-export async function fetchPostById(id: string): Promise<Post> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    // 원본 데이터에서 id가 일치하는 post를 찾아 found에 저장한다.
-    const found = MOCK_POSTS.find((post) => post.id === id);
-    // 해당하는 id를 가진 post를 찾을 수 없을 경우 에러 메세지와 id를 호출부에 알린다.
-    if (!found) {
-        throw new Error("글을 찾을 수 없습니다: " + id);
-    }
-
-    return found;
-}
-
-/* 새 변명글을 제출하는 함수 */
-export async function createPost(input: NewPost): Promise<Post> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    // 반환할 Post를 만든다.
-    const newPost: Post = {
-        ...input,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
+    const data = await api<{items: RawPost[]; nextCursor: string | null}>(`/posts${query}`);
+    return {
+        items: data.items.map(toPost),
+        nextCursor: data.nextCursor ?? undefined,
     };
-    // 원본 데이터에 새로운 변명글을 추가한다.
-    MOCK_POSTS.push(newPost);
+}
 
-    return newPost;
+/* post 한 개: GET /posts/{id} */
+export async function fetchPostById(id: string): Promise<Post> {
+    const raw = await api<RawPost>(`/posts/${id}`);
+    return toPost(raw);
+}
+
+/* 새 변명글 제출: POST /posts (로그인 토큰은 http 래퍼가 자동 첨부) */
+export async function createPost(input: NewPost): Promise<Post> {
+    const raw = await api<RawPost>("/posts", {
+        method: "POST",
+        body: {
+            title: input.title,
+            excuseText: input.excuseText,
+            tagIds: input.tags.map((t) => t.id), // Tag[] → slug 문자열 배열
+            context: input.context,
+        },
+    });
+    return toPost(raw);
 }

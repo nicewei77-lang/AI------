@@ -5,6 +5,8 @@ from app.db import get_db
 from app.schemas import CommentCreate, CommentOut
 from app.repositories import comments as repo
 from app.services import comments as service
+from app.auth.deps import get_current_user
+from app.models import User
 
 router = APIRouter()
 
@@ -25,12 +27,13 @@ async def list_comments(
 )
 async def create_comment(
     post_id: int,
-    body: CommentCreate,                                        
+    body: CommentCreate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     try:
         comment = await service.create(
-            session, post_id, author_id=1, body=body.body,
+            session, post_id, author_id=current_user.id, body=body.body,
         )
     except LookupError as e:                                  
         raise HTTPException(status_code=404, detail=str(e))   

@@ -18,14 +18,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 // 앱 전체를 감싸 로그인 상태를 공급하는 Provider
 export function AuthProvider({children}: {children: ReactNode}) {
-    const [token, setToken] = useState<string | null>(null);
+    // 새로고침해도 로그인 유지: localStorage에 저장된 토큰으로 초기화
+    const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
 
     async function login(email: string, password: string) {
-        const res = await loginApi(email, password);
+        const res = await loginApi(email, password); // 내부에서 localStorage에도 저장됨
         setToken(res.token);
     }
 
     function logout() {
+        localStorage.removeItem("token"); // http 래퍼가 더는 토큰을 첨부하지 않도록 비움
         setToken(null);
     }
 
