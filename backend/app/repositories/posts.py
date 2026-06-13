@@ -39,3 +39,26 @@ async def list_posts(
     next_cursor = str(items[-1].id) if has_more else None
     
     return items, next_cursor
+
+
+async def create_post(
+    session: AsyncSession,
+    *,
+    author_id: int,
+    title: str,
+    excuse_text: str,
+    context: dict | None,
+    tags: list[Tag],
+) -> Post:
+    post = Post(
+        author_id=author_id,
+        title=title,
+        excuse_text=excuse_text,
+        context=context,
+        tags=tags
+    )
+    session.add(post)
+    await session.flush()
+    await session.refresh(post, ["created_at"])
+    
+    return post
