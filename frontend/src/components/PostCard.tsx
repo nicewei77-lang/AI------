@@ -38,14 +38,47 @@ interface PostCardProps {
 
 // Post 1개를 받아 카드 1장을 그리는 컴포넌트를 정의한다.
 function PostCard({post}: PostCardProps) {
+    const preview =
+        post.excuseText.length > 180
+            ? `${post.excuseText.slice(0, 180)}...`
+            : post.excuseText;
+
     return (
-        <article className="rounded border p-4">
-            <h2>
+        <article className="border-b border-stone-200 bg-white px-4 py-4 hover:bg-stone-50">
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+                <span>@{post.authorName}</span>
+                <span>·</span>
+                <time>{new Date(post.createdAt).toLocaleDateString()}</time>
+            </div>
+            <h2 className="mb-2 text-lg font-bold leading-snug text-stone-950">
                 <Link to={`/posts/${post.id}`} className="hover:underline">
-                {post.title}
+                    {post.title}
                 </Link>
             </h2>
-            <p>{post.excuseText}</p>
+            <p className="mb-3 whitespace-pre-wrap text-sm leading-6 text-stone-700">
+                {preview}
+            </p>
+            <div className="mb-3 flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                    <span
+                        key={tag.id}
+                        className="rounded-full bg-stone-100 px-2 py-1 text-xs font-medium text-stone-600"
+                    >
+                        #{tag.label}
+                    </span>
+                ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
+                <span className="rounded-full bg-stone-100 px-3 py-1 font-semibold">
+                    투표 {post.score}
+                </span>
+                <Link
+                    to={`/posts/${post.id}`}
+                    className="rounded-full bg-stone-100 px-3 py-1 hover:bg-stone-200"
+                >
+                    댓글 {post.commentCount}
+                </Link>
+            </div>
         </article>    
     );
 }

@@ -23,11 +23,13 @@ class TagOut(BaseModel):
 class PostOut(BaseModel):
     """글 작성 요청 1개 응답."""
     id: int
+    author_name: str = Field(alias="authorName")
     title: str
     excuse_text: str = Field(alias="excuseText")
     created_at: datetime = Field(alias="createdAt")
     score: int
     my_vote: int = Field(default=0, alias="myVote")   # 현재 사용자의 투표(1/-1), 없거나 비로그인=0
+    comment_count: int = Field(default=0, alias="commentCount")
     verdict: str | None = None
     credibility: int | None = None
     context: dict | None = None
@@ -51,7 +53,10 @@ class CommentOut(BaseModel):
     id: int
     body: str
     author_id: int = Field(alias="authorId")
+    author_name: str = Field(alias="authorName")
     created_at: datetime = Field(alias="createdAt")
+    like_count: int = Field(default=0, alias="likeCount")
+    my_like: bool = Field(default=False, alias="myLike")
     
     model_config = ConfigDict(
         from_attributes=True,
@@ -70,6 +75,13 @@ class VoteOut(BaseModel):
     """투표 응답: {score, myVote}"""
     score: int
     my_vote: int = Field(alias="myVote")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class CommentLikeOut(BaseModel):
+    """댓글 좋아요 응답: {likeCount, myLike}"""
+    like_count: int = Field(alias="likeCount")
+    my_like: bool = Field(alias="myLike")
     model_config = ConfigDict(populate_by_name=True)
 
 

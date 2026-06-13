@@ -8,6 +8,7 @@ import type {Post} from "../types/post";
 export const MOCK_POSTS: Post[] = [
     {
         id: "p1",
+        authorName: "demo",
         title: "지하철이 멈췄어요",
         excuseText: "2호선이 신도림에서 20분간 정차했습니다.",
         context: {
@@ -18,11 +19,15 @@ export const MOCK_POSTS: Post[] = [
          
         },
         tags: [{id: "t1", label: "지각"}],
+        score: 0,
+        myVote: 0,
+        commentCount: 0,
         createdAt: "2026-06-24T09:30:00",
     },
 
     {
         id: "p2",
+        authorName: "demo",
         title: "여친과 싸웠어요",
         excuseText: "에버라인이 폭발했습니다.",
         context: {
@@ -35,11 +40,15 @@ export const MOCK_POSTS: Post[] = [
         tags: [{id: "t2", label: "지각"}],
         verdict: "무죄",
         credibility: 32,
+        score: 0,
+        myVote: 0,
+        commentCount: 0,
         createdAt: "2026-06-28T22:30:10"
     },
     
     {
         id: "p3",
+        authorName: "demo",
         title: "이거 ㅈ된거 맞냐?",
         excuseText: "첫 출근 못함. 오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓오마이갓",
         context: {
@@ -51,11 +60,15 @@ export const MOCK_POSTS: Post[] = [
         },
         tags: [{id: "t3", label: "결근"}],
         verdict: "유죄", 
+        score: 0,
+        myVote: 0,
+        commentCount: 0,
         createdAt: "2026-06-28T22:30:10",
     },
 
         {
         id: "p4",
+        authorName: "demo",
         title: "야붕이 이거 ㅈ된거 맞냐?",
         excuseText: "차에 고양이가 들어가서 출근 못함...",
         context: {
@@ -67,6 +80,9 @@ export const MOCK_POSTS: Post[] = [
         },
         tags: [{id: "t4", label: "결근"}],
         verdict: "유죄", 
+        score: 0,
+        myVote: 0,
+        commentCount: 0,
         createdAt: "2026-06-28T22:30:10",
     }
 ];

@@ -7,11 +7,13 @@ import {api} from "./http";
 // 백엔드 PostOut(JSON) 모양 — 프론트 Post와 다르다(id는 숫자, score/myVote가 더 있음).
 interface RawPost {
     id: number;
+    authorName: string;
     title: string;
     excuseText: string;
     createdAt: string;
     score: number;
     myVote: number;
+    commentCount: number;
     verdict: string | null;
     credibility: number | null;
     context: ExcuseContext | null;
@@ -22,12 +24,16 @@ interface RawPost {
 function toPost(raw: RawPost): Post {
     return {
         id: String(raw.id), // 백엔드 int → 프론트 string
+        authorName: raw.authorName,
         title: raw.title,
         tags: raw.tags ?? [],
         excuseText: raw.excuseText,
         context: raw.context ?? {date: "", location: "", time: "", route: undefined},
         verdict: (raw.verdict ?? undefined) as Post["verdict"],
         credibility: raw.credibility ?? undefined,
+        score: raw.score,
+        myVote: raw.myVote as Post["myVote"],
+        commentCount: raw.commentCount,
         createdAt: raw.createdAt,
     };
 }
@@ -67,4 +73,19 @@ export async function createPost(input: NewPost): Promise<Post> {
         },
     });
     return toPost(raw);
+}
+
+/* post 투표: POST /posts/{id}/vote */
+export async function votePost(
+    postId: string,
+    value: 1 | -1,
+): Promise<{score: number; myVote: Post["myVote"]}> {
+    const data = await api<{score: number; myVote: number}>(`/posts/${postId}/vote`, {
+        method: "POST",
+        body: {value},
+    });
+    return {
+        score: data.score,
+        myVote: data.myVote as Post["myVote"],
+    };
 }

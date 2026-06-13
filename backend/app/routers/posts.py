@@ -50,5 +50,7 @@ async def create_post(
         post = await service.create(session, body, author_id=current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) 
-    
+    post.author_name = current_user.username
+    post.comment_count = 0
+    post.my_vote = 0
     return post

@@ -11,7 +11,7 @@ interface PostListProps {
 
 function PostList({posts}: PostListProps) {
     return (
-        <div className="flex flex-col gap-3">
+        <div className="overflow-hidden rounded border border-stone-200 bg-white">
             {posts.map((post) => (<PostCard key={post.id} post={post}/>))}
         </div>
     );

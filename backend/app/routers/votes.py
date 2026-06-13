@@ -23,4 +23,6 @@ async def vote(
         )
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     return VoteOut(score=score, my_vote=my_vote)

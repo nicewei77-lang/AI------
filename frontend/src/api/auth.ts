@@ -18,3 +18,22 @@ export async function login(
     localStorage.setItem("token", data.access_token);
     return {token: data.access_token};
 }
+
+// 백엔드 POST /auth/signup: 로그인과 달리 JSON 본문 {username, email, password}을 받고
+// 토큰이 아니라 생성된 유저(UserOut)를 돌려준다 → 가입 후엔 별도로 로그인해야 한다.
+export interface UserOut {
+    id: number;
+    username: string;
+    email: string;
+}
+
+export async function signup(
+    username: string,
+    email: string,
+    password: string
+): Promise<UserOut> {
+    return api<UserOut>("/auth/signup", {
+        method: "POST",
+        body: {username, email, password},
+    });
+}

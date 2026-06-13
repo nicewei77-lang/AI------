@@ -53,12 +53,16 @@ C 헤더처럼 "본체와 분리된, 컴파일 타임에 검사되는 약속"이
 /* 변명 게시글 타입. */
 export interface Post {
     id: string;
+    authorName: string;
     title: string;
     tags: Tag[];
     excuseText: string;
     context: ExcuseContext;
     verdict?: Verdict;
     credibility?: number;
+    score: number;
+    myVote: -1 | 0 | 1;
+    commentCount: number;
     createdAt: string;
 }
 
@@ -80,4 +84,15 @@ export interface NewPost {
     tags: Tag[];
     excuseText: string;
     context: ExcuseContext;
+}
+
+/* 댓글 타입. post 상세 페이지에서 댓글 목록/좋아요 상태를 그릴 때 쓴다. */
+export interface Comment {
+    id: string;
+    body: string;
+    authorId: number;
+    authorName: string;
+    createdAt: string;
+    likeCount: number;
+    myLike: boolean;
 }
