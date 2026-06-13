@@ -37,6 +37,23 @@ class PostOut(BaseModel):
     )
     
 
-
+class CommentCreate(BaseModel):
+    """댓글 1개 요청"""
+    body: str
+    
+    model_config = ConfigDict(populate_by_name=True)
+    
+    
+class CommentOut(BaseModel):
+    """댓글 1개 응답."""
+    id: int
+    body: str
+    author_id: int = Field(alias="authorId")
+    created_at: datetime = Field(alias="createdAt")
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+    )
     
     
