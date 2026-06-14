@@ -3,24 +3,41 @@
 //   (되돌리기 목록은 DOCS/진도_체크포인트.md "임시 채움 되돌리기" 참고)
 
 import {useNavigate} from "react-router-dom";
-import ExcuseForm from "../components/ExcuseForm";
+import {useState} from "react";
+import ProjectForm from "../components/ProjectForm";
 import {createPost} from "../api/posts";
 import type {NewPost} from "../types/post";
 
 function PostCreatePage() {
     const navigate = useNavigate();
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // ExcuseForm이 넘긴 입력을 createPost로 저장하고 상세로 이동
     async function handleCreate(input: NewPost) {
-        const created = await createPost(input);
-        navigate(`/posts/${created.id}`);
+        setSubmitting(true);
+        setError(null);
+        try {
+            const created = await createPost(input);
+            navigate(`/posts/${created.id}`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "프로젝트 등록에 실패했습니다.");
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
-        <div className="mx-auto max-w-2xl px-4 py-8">
-            <h1 className="mb-4 text-2xl font-bold">프로젝트 등록</h1>
-            <ExcuseForm onSubmit={handleCreate} />
-        </div>
+        <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-950">
+            <div className="mx-auto max-w-2xl rounded border border-stone-200 bg-white p-5">
+                <h1 className="mb-4 text-2xl font-bold">프로젝트 등록</h1>
+                {error ? (
+                    <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                        {error}
+                    </p>
+                ) : null}
+                <ProjectForm onSubmit={handleCreate} submitting={submitting} />
+            </div>
+        </main>
     );
 }
 

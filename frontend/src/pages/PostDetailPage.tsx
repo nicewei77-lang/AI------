@@ -3,9 +3,13 @@
 import {useState, useEffect} from "react";
 import type {FormEvent} from "react";
 import {useNavigate, useParams} from "react-router-dom";
+import {fetchLatestAnalysis, runAnalysis} from "../api/analysis";
 import {createComment, fetchComments, toggleCommentLike} from "../api/comments";
 import {fetchPostById, votePost} from "../api/posts";
+import AnalysisReport from "../components/analysis/AnalysisReport";
+import AnalysisStatusBadge from "../components/analysis/AnalysisStatusBadge";
 import {useAuth} from "../context/AuthContext";
+import type {AnalysisResponse} from "../types/analysis";
 import type {Comment, Post} from "../types/post";
 
 type PageMessage = {
@@ -24,6 +28,10 @@ function PostDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<PageMessage | null>(null);
     const [commentSubmitting, setCommentSubmitting] = useState(false);
+    const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
+    const [analysisLoading, setAnalysisLoading] = useState(true);
+    const [analysisRunning, setAnalysisRunning] = useState(false);
+    const [analysisError, setAnalysisError] = useState<string | null>(null);
 
     function handleBack() {
         navigate(-1);
@@ -35,7 +43,7 @@ function PostDetailPage() {
             onClick={handleBack}
             className="rounded-full border border-stone-300 px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-100"
         >
-            back
+            뒤로
         </button>
     );
 
@@ -45,6 +53,10 @@ function PostDetailPage() {
         let cancelled = false;
 
         async function load() {
+            setLoading(true);
+            setAnalysisLoading(true);
+            setAnalysis(null);
+            setAnalysisError(null);
             try {
                 const [postData, commentData] = await Promise.all([
                     fetchPostById(id!),
@@ -58,9 +70,29 @@ function PostDetailPage() {
             } catch (err) {
                 if (!cancelled) {
                     setError(err instanceof Error ? err.message : "글을 불러오지 못했습니다");
+                    setAnalysisLoading(false);
                 }
+                return;
             } finally {
                 if (!cancelled) setLoading(false);
+            }
+
+            try {
+                const latest = await fetchLatestAnalysis(id!);
+                if (!cancelled) {
+                    setAnalysis(latest);
+                    setAnalysisError(null);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    setAnalysisError(
+                        err instanceof Error
+                            ? err.message
+                            : "최신 AI 리포트를 확인하지 못했습니다.",
+                    );
+                }
+            } finally {
+                if (!cancelled) setAnalysisLoading(false);
             }
         }
         void load();
@@ -69,6 +101,46 @@ function PostDetailPage() {
             cancelled = true;
         };
     }, [id]);
+
+    async function handleRunAnalysis() {
+        if (!post) return;
+
+        setAnalysisRunning(true);
+        setAnalysisError(null);
+        setMessage(null);
+        setPost({...post, analysisStatus: "running"});
+
+        try {
+            const result = await runAnalysis(post.id);
+            setAnalysis(result);
+
+            const [refreshedPost, latest] = await Promise.all([
+                fetchPostById(post.id),
+                fetchLatestAnalysis(post.id),
+            ]);
+            setPost(refreshedPost);
+            setAnalysis(latest ?? result);
+            setMessage({
+                text:
+                    result.status === "completed"
+                        ? "AI 분석이 완료되었습니다."
+                        : "AI 분석 결과가 저장되었습니다.",
+                kind: result.status === "failed" || result.status === "refused" ? "info" : "success",
+            });
+        } catch (err) {
+            const text = err instanceof Error ? err.message : "AI 분석에 실패했습니다.";
+            setAnalysisError(text);
+            setMessage({text, kind: "error"});
+            try {
+                const refreshedPost = await fetchPostById(post.id);
+                setPost(refreshedPost);
+            } catch {
+                setPost((prev) => (prev ? {...prev, analysisStatus: "failed"} : prev));
+            }
+        } finally {
+            setAnalysisRunning(false);
+        }
+    }
 
     async function handleVote(value: 1 | -1) {
         if (!post) return;
@@ -187,6 +259,7 @@ function PostDetailPage() {
                         <span>@{post.authorName}</span>
                         <span>·</span>
                         <time>{new Date(post.createdAt).toLocaleString()}</time>
+                        <AnalysisStatusBadge status={post.analysisStatus} />
                     </div>
                     <h1 className="mb-4 text-2xl font-bold leading-tight">{post.title}</h1>
                     {post.oneLiner ? (
@@ -195,7 +268,8 @@ function PostDetailPage() {
 
                     <div className="mb-4 grid gap-2 rounded border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700">
                         <div>
-                            <span className="font-semibold">분석 상태</span> {post.analysisStatus}
+                            <span className="font-semibold">분석 상태</span>{" "}
+                            <AnalysisStatusBadge status={post.analysisStatus} />
                         </div>
                         {post.serviceUrl ? (
                             <a
@@ -287,6 +361,15 @@ function PostDetailPage() {
                         </button>
                     </div>
                 </article>
+
+                <AnalysisReport
+                    analysis={analysis}
+                    postStatus={post.analysisStatus}
+                    isLoading={analysisLoading}
+                    isRunning={analysisRunning}
+                    error={analysisError}
+                    onRun={() => void handleRunAnalysis()}
+                />
 
                 {message ? (
                     <p

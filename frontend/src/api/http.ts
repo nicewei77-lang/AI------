@@ -10,6 +10,19 @@ interface ApiOptions {
     form?: Record<string, string>; // x-www-form-urlencoded로 보낼 값(OAuth2 로그인용)
 }
 
+export class ApiError extends Error {
+    status: number;
+    detail?: string;
+
+    constructor(message: string, status: number, detail?: string) {
+        super(message);
+        this.name = "ApiError";
+        Object.setPrototypeOf(this, ApiError.prototype);
+        this.status = status;
+        this.detail = detail;
+    }
+}
+
 export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
     const headers: Record<string, string> = {};
 
@@ -38,7 +51,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
     //    (axios는 이 단계를 자동으로 해줌 — fetch의 가장 헷갈리는 지점)
     if (!res.ok) {
         const detail = (await res.json().catch(() => ({}))) as { detail?: string };
-        throw new Error(detail.detail ?? `요청 실패 (${res.status})`);
+        throw new ApiError(detail.detail ?? `요청 실패 (${res.status})`, res.status, detail.detail);
     }
 
     // 5) 응답 본문(스트림)을 JSON으로 파싱해 돌려준다

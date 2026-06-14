@@ -29,6 +29,7 @@ interface PostCardProps {
 // Post 타입을 가져온다.
 import type {Post} from "../types/post";
 import {Link} from "react-router-dom";
+import AnalysisStatusBadge from "./analysis/AnalysisStatusBadge";
 
 // 이 component가 받을 props의 모양을 약속한다.
 interface PostCardProps {
@@ -58,13 +59,16 @@ function PostCard({post}: PostCardProps) {
             {post.oneLiner ? (
                 <p className="mb-2 text-sm font-semibold text-stone-800">{post.oneLiner}</p>
             ) : null}
+            {post.aiSummary ? (
+                <p className="mb-3 rounded border border-stone-200 bg-stone-50 p-3 text-sm leading-6 text-stone-700">
+                    {post.aiSummary}
+                </p>
+            ) : null}
             <p className="mb-3 whitespace-pre-wrap text-sm leading-6 text-stone-700">
                 {preview}
             </p>
             <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
-                <span className="rounded-full bg-stone-100 px-2 py-1">
-                    {post.analysisStatus}
-                </span>
+                <AnalysisStatusBadge status={post.analysisStatus} />
                 {post.techStack.map((tech) => (
                     <span key={tech} className="rounded-full bg-stone-100 px-2 py-1">
                         {tech}
