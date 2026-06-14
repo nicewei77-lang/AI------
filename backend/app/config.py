@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     reasoning_effort: str = "medium"
     embedding_model: str = "text-embedding-3-small"
     rag_top_k: int = 3
-    rag_similarity_threshold: float = 0.72
+    rag_similarity_threshold: float = 0.18
     rag_min_indexed_posts: int = 2
     agent_max_turns: int = 6
     mcp_server_url: str | None = None

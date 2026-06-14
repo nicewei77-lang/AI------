@@ -19,6 +19,7 @@ from app.ai.runner import (
 from app.ai.schemas import ProjectAnalysisReport, ReportStatus
 from app.config import settings
 from app.mcp_client.client import record_mcp_evidence
+from app.mcp_client.tools import CHECK_DEPLOY_STATUS, FETCH_GITHUB_README, FETCH_SITE_OVERVIEW
 from app.models import AiReport, Post
 from app.rag.indexer import index_ai_report_embedding, index_post_embedding
 from app.rag.retriever import retrieve_similar_projects
@@ -91,6 +92,7 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
             tool_context=tool_context,
             rag_sources=rag_sources,
         )
+        run = _force_failed_if_external_evidence_unusable(post, run, tool_context.mcp_evidence)
     except Exception as exc:
         error = _error_payload("analysis_error", exc)
         run = ProjectAnalysisRun(
@@ -253,6 +255,70 @@ def _post_snapshot(post: Post) -> dict[str, Any]:
         "tags": [tag.slug for tag in post.tags],
         "created_at": post.created_at.isoformat() if post.created_at else None,
     }
+
+
+def _force_failed_if_external_evidence_unusable(
+    post: Post,
+    run: ProjectAnalysisRun,
+    mcp_evidence: list[CollectedMcpEvidence],
+) -> ProjectAnalysisRun:
+    if run.report.status.status != "completed":
+        return run
+    if _has_sufficient_written_context(post):
+        return run
+    expected_tools = _expected_external_tools(post)
+    if not expected_tools:
+        return run
+
+    relevant_evidence = [item for item in mcp_evidence if item.tool_name in expected_tools]
+    has_successful_evidence = any(_mcp_item_has_usable_result(item) for item in relevant_evidence)
+    if has_successful_evidence:
+        return run
+
+    message = (
+        "제출된 URL/GitHub에서 분석 가능한 외부 근거를 가져오지 못했습니다. "
+        "접속 가능한 배포 URL, 공개 GitHub 저장소, 또는 더 긴 프로젝트 설명이 필요합니다."
+    )
+    report = build_failed_report(
+        message,
+        mcp_evidence=mcp_evidence,
+        rag_sources=run.report.evidence.rag_sources,
+    )
+    return ProjectAnalysisRun(
+        report=report,
+        model=run.model,
+        reasoning_effort=run.reasoning_effort,
+        response_id=run.response_id,
+        trace_id=run.trace_id,
+        usage=run.usage,
+        error=run.error
+        or {
+            "type": "external_evidence_unavailable",
+            "message": message,
+        },
+    )
+
+
+def _has_sufficient_written_context(post: Post) -> bool:
+    description_text = f"{post.one_liner or ''}\n{post.body or ''}".strip()
+    return len(description_text) >= 200
+
+
+def _expected_external_tools(post: Post) -> set[str]:
+    tools: set[str] = set()
+    if (post.service_url or "").strip():
+        tools.update({CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW})
+    if (post.github_url or "").strip():
+        tools.add(FETCH_GITHUB_README)
+    return tools
+
+
+def _mcp_item_has_usable_result(item: CollectedMcpEvidence) -> bool:
+    if not item.success:
+        return False
+    if item.tool_name == CHECK_DEPLOY_STATUS and isinstance(item.result, dict):
+        return bool(item.result.get("is_reachable"))
+    return True
 
 
 def _report_from_db(ai_report: AiReport) -> ProjectAnalysisReport:

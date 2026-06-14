@@ -1504,6 +1504,14 @@ P1 과제 완성 기준:
 - URL 접속 실패 테스트
 - 분석 재시도 테스트
 
+Q2~Q4 결과물 개선 루프용 고정 테스트 사이트:
+
+| URL | 확인할 품질 |
+|---|---|
+| `https://frontend-yeoseojin-s-projects.vercel.app/` | 개인/부트캠프 프로젝트형 분석, 포트폴리오/발표 문장 톤 |
+| `https://m.bunjang.co.kr/` | 상용 서비스형 분석, 확인/추정 구분, 기능 과장 방지 |
+| `https://www.reddit.com/r/anime/?screen_view_count=1` | 커뮤니티/콘텐츠 피드형 분석, fetch 실패·본문 빈약·RAG 근거 처리 |
+
 ---
 
 ## 18. 데모 시나리오

@@ -192,6 +192,16 @@
 - **Q4 · RAG 정밀화(데이터 쌓인 뒤):** `semantic*0.65 + tag_overlap*0.15 + vote*0.10 + recency*0.05 + same_type*0.05`(기획서 §8.5). 게시물 20개 미만에선 의미 없으니 데이터 확보 후.
 - **Q5 · MCP 확장(선택):** M4의 `fetch_github_readme` 이후에도 가치가 분명할 때만 screenshot/Lighthouse/robots 등 §9.4 후보를 추가한다. 과제 필수 보강은 M4에서 끝내고, Q5는 품질 선택지로 둔다.
 
+**Q2~Q4 고정 테스트 사이트(결과물 개선 루프):**
+
+| URL | 용도 |
+|---|---|
+| `https://frontend-yeoseojin-s-projects.vercel.app/` | 개인/부트캠프 프로젝트형 분석 품질, 포트폴리오/발표 문장 톤 확인 |
+| `https://m.bunjang.co.kr/` | 상용 서비스형 분석 품질, 확인/추정 구분과 기능 과장 방지 확인 |
+| `https://www.reddit.com/r/anime/?screen_view_count=1` | 커뮤니티/콘텐츠 피드형 분석 품질, fetch 실패·본문 빈약·RAG 근거 처리 확인 |
+
+Q2는 위 URL들의 리포트를 before/after 평가셋으로 쓰고, Q3는 포트폴리오/발표 카드가 대상 성격에 맞게 달라지는지 본다. Q4는 세 URL의 임베딩/태그/유사도 결과가 cosine baseline보다 나아졌는지 비교한다.
+
 ---
 
 ## 3. 컷 리스트 (이번엔 안 한다)

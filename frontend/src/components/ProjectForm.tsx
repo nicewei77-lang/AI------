@@ -144,6 +144,9 @@ function ProjectForm({onSubmit, submitting = false}: ProjectFormProps) {
             >
                 {submitting ? "등록 중..." : "프로젝트 등록"}
             </button>
+            <p className="text-xs leading-5 text-stone-500">
+                등록한 URL·GitHub 저장소는 AI 분석과 유사 프로젝트 추천에 사용됩니다.
+            </p>
         </form>
     );
 }
