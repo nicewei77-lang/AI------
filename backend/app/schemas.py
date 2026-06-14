@@ -2,6 +2,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
 
+from app.ai.schemas import ProjectAnalysisReport, ReportStatus
+
 PostType = Literal["project", "idea"]
 AnalysisStatus = Literal["not_started", "running", "completed", "failed", "need_more_info"]
 
@@ -113,3 +115,27 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class AnalysisRunOut(BaseModel):
+    """동기 AI 분석 실행 응답."""
+
+    status: ReportStatus
+    report_id: int = Field(alias="reportId")
+    report: ProjectAnalysisReport
+    error: dict | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AnalysisLatestOut(AnalysisRunOut):
+    """최신 AI 분석 리포트 응답."""
+
+    created_at: datetime | None = Field(default=None, alias="createdAt")
+    model: str | None = None
+    reasoning_effort: str | None = Field(default=None, alias="reasoningEffort")
+    response_id: str | None = Field(default=None, alias="responseId")
+    trace_id: str | None = Field(default=None, alias="traceId")
+    usage: dict | None = None
+
+    model_config = ConfigDict(populate_by_name=True)

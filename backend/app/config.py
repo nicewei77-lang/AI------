@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     mcp_server_url: str | None = None
     mcp_server_command: str | None = None
+    mcp_request_timeout_seconds: float = 5.0
+    mcp_body_size_limit_bytes: int = 1_500_000
+    mcp_main_text_limit_chars: int = 4_000
+    mcp_max_links: int = 20
+    mcp_max_redirects: int = 5
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 # 다른 곳에서 쓸 객체 인스턴스 만들기
