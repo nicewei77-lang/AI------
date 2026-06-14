@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Post, Tag
 from app.schemas import PostCreate
 from app.repositories.posts import create_post
+from app.rag.indexer import index_post_embedding
 
 async def create(
     session: AsyncSession,
@@ -34,5 +35,6 @@ async def create(
         tech_stack=body.tech_stack,
         tags=tags,
     )
+    await index_post_embedding(session, post)
     await session.commit()
     return post

@@ -2,7 +2,7 @@ import type {AnalysisStatus} from "./post";
 
 export type ReportStatus = "completed" | "need_more_info" | "failed" | "refused";
 export type AnalysisBadgeStatus = AnalysisStatus | ReportStatus;
-export type EvidenceKind = "post_body" | "mcp_site" | "deploy_status" | "inferred" | "rag";
+export type EvidenceKind = "post_body" | "mcp_site" | "deploy_status" | "github_readme" | "inferred" | "rag";
 export type ConfidenceKind = "confirmed" | "inferred";
 export type Severity = "low" | "medium" | "high";
 export type Priority = "P0" | "P1" | "P2";
@@ -49,8 +49,8 @@ export interface Diagnosis {
 
 export interface McpSource {
     tool_name: string;
-    evidence_kind: "mcp_site" | "deploy_status";
-    based_on: "mcp_site" | "deploy_status";
+    evidence_kind: "mcp_site" | "deploy_status" | "github_readme";
+    based_on: "mcp_site" | "deploy_status" | "github_readme";
     success: boolean;
     summary: string;
     url?: string | null;

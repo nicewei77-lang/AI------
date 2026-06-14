@@ -7,10 +7,12 @@ from agents.mcp import create_static_tool_filter
 
 FETCH_SITE_OVERVIEW: Final = "fetch_site_overview"
 CHECK_DEPLOY_STATUS: Final = "check_deploy_status"
+FETCH_GITHUB_README: Final = "fetch_github_readme"
 
-ALLOWED_MCP_TOOLS: Final[tuple[str, str]] = (
+ALLOWED_MCP_TOOLS: Final[tuple[str, str, str]] = (
     FETCH_SITE_OVERVIEW,
     CHECK_DEPLOY_STATUS,
+    FETCH_GITHUB_README,
 )
 
 MCP_EVIDENCE_NOTICE: Final = (

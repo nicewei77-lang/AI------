@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 ReportStatus = Literal["completed", "need_more_info", "failed", "refused"]
-EvidenceKind = Literal["post_body", "mcp_site", "deploy_status", "inferred", "rag"]
+EvidenceKind = Literal["post_body", "mcp_site", "deploy_status", "github_readme", "inferred", "rag"]
 ConfidenceKind = Literal["confirmed", "inferred"]
 Severity = Literal["low", "medium", "high"]
 Priority = Literal["P0", "P1", "P2"]
@@ -58,8 +58,8 @@ class Diagnosis(ProjectLensBaseModel):
 
 class McpSource(ProjectLensBaseModel):
     tool_name: str
-    evidence_kind: Literal["mcp_site", "deploy_status"]
-    based_on: Literal["mcp_site", "deploy_status"]
+    evidence_kind: Literal["mcp_site", "deploy_status", "github_readme"]
+    based_on: Literal["mcp_site", "deploy_status", "github_readme"]
     success: bool
     summary: str
     url: str | None = None
@@ -94,4 +94,3 @@ class ProjectAnalysisReport(ProjectLensBaseModel):
     diagnosis: Diagnosis
     evidence: EvidenceBlock
     status: ReportStatusBlock
-

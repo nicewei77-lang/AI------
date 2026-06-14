@@ -8,8 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.ai.context import AnalysisToolContext, CollectedMcpEvidence
 from app.ai.runner import (
-    CollectedMcpEvidence,
     ProjectAnalysisRun,
     build_failed_report,
     build_need_more_info_report,
@@ -18,9 +18,10 @@ from app.ai.runner import (
 )
 from app.ai.schemas import ProjectAnalysisReport, ReportStatus
 from app.config import settings
-from app.mcp_client.client import call_mcp_tool, record_mcp_evidence
-from app.mcp_client.tools import CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW
+from app.mcp_client.client import record_mcp_evidence
 from app.models import AiReport, Post
+from app.rag.indexer import index_ai_report_embedding, index_post_embedding
+from app.rag.retriever import retrieve_similar_projects
 
 
 class AnalysisPostNotFoundError(LookupError):
@@ -71,35 +72,33 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
         )
         return await _persist_analysis(db, post, run, [])
 
-    mcp_evidence: list[CollectedMcpEvidence] = []
+    tool_context = AnalysisToolContext(
+        post_id=post.id,
+        service_url=post.service_url,
+        github_url=post.github_url,
+    )
+    rag_sources = []
     try:
-        mcp_evidence = await _collect_mcp_evidence(post)
-        failed_tools = [item for item in mcp_evidence if not item.success]
-        if failed_tools:
-            message = "; ".join(
-                f"{item.tool_name}: {item.error_message or 'unknown MCP error'}"
-                for item in failed_tools
-            )
-            report = build_failed_report(message, mcp_evidence=mcp_evidence)
-            run = ProjectAnalysisRun(
-                report=report,
-                model=settings.agent_model,
-                reasoning_effort=settings.reasoning_effort,
-                response_id=None,
-                trace_id=None,
-                usage=None,
-                error={"type": "mcp_error", "message": message},
-            )
-        else:
-            input_payload = build_runner_input(
-                post=_post_snapshot(post),
-                mcp_evidence=mcp_evidence,
-            )
-            run = await run_project_analysis(input_payload)
+        await index_post_embedding(db, post)
+        rag_sources = await retrieve_similar_projects(db, post)
+        input_payload = build_runner_input(
+            post=_post_snapshot(post),
+            mcp_evidence=tool_context.mcp_evidence,
+            rag_sources=rag_sources,
+        )
+        run = await run_project_analysis(
+            input_payload,
+            tool_context=tool_context,
+            rag_sources=rag_sources,
+        )
     except Exception as exc:
         error = _error_payload("analysis_error", exc)
         run = ProjectAnalysisRun(
-            report=build_failed_report(str(exc), mcp_evidence=mcp_evidence),
+            report=build_failed_report(
+                str(exc),
+                mcp_evidence=tool_context.mcp_evidence,
+                rag_sources=rag_sources,
+            ),
             model=settings.agent_model,
             reasoning_effort=settings.reasoning_effort,
             response_id=None,
@@ -108,7 +107,7 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
             error=error,
         )
 
-    return await _persist_analysis(db, post, run, mcp_evidence)
+    return await _persist_analysis(db, post, run, tool_context.mcp_evidence)
 
 
 async def get_latest_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnalysis:
@@ -157,44 +156,13 @@ def _missing_required_fields(post: Post) -> tuple[list[str], list[str]]:
     if not (post.title or "").strip():
         missing.append("title")
         questions.append("프로젝트 이름이나 제목을 적어주세요.")
-    if not (post.service_url or "").strip():
-        missing.append("serviceUrl")
-        questions.append("M2 분석을 위해 접근 가능한 배포 URL을 추가해주세요.")
-    if len((post.body or "").strip()) < 20 and len((post.one_liner or "").strip()) < 10:
+    has_external_source = bool((post.service_url or "").strip() or (post.github_url or "").strip())
+    description_text = f"{post.one_liner or ''}\n{post.body or ''}".strip()
+    if not has_external_source and len(description_text) < 200:
         missing.append("body")
-        questions.append("프로젝트가 해결하려는 문제와 핵심 기능을 조금 더 적어주세요.")
+        questions.append("배포 URL, GitHub URL, 또는 200자 이상의 프로젝트 설명을 추가해주세요.")
 
     return missing, questions
-
-
-async def _collect_mcp_evidence(post: Post) -> list[CollectedMcpEvidence]:
-    if not post.service_url:
-        return []
-
-    calls: list[CollectedMcpEvidence] = []
-    for tool_name in (FETCH_SITE_OVERVIEW, CHECK_DEPLOY_STATUS):
-        arguments = {"url": post.service_url}
-        try:
-            result = await call_mcp_tool(tool_name, arguments, db=None)
-            calls.append(
-                CollectedMcpEvidence(
-                    tool_name=tool_name,
-                    arguments=arguments,
-                    result=result,
-                    success=True,
-                )
-            )
-        except Exception as exc:
-            calls.append(
-                CollectedMcpEvidence(
-                    tool_name=tool_name,
-                    arguments=arguments,
-                    result=None,
-                    success=False,
-                    error_message=str(exc),
-                )
-            )
-    return calls
 
 
 async def _persist_analysis(
@@ -216,6 +184,7 @@ async def _persist_analysis(
         input_snapshot=build_runner_input(
             post=_post_snapshot(post),
             mcp_evidence=mcp_evidence,
+            rag_sources=run.report.evidence.rag_sources,
         ),
         report=run.report.model_dump(mode="json"),
         error=run.error,
@@ -234,6 +203,8 @@ async def _persist_analysis(
             post_id=post.id,
             report_id=ai_report.id,
         )
+
+    await index_ai_report_embedding(db, ai_report, run.report)
 
     post.analysis_status = _post_status_for_report(status)
     post.ai_summary = _summary_for_post(run.report)

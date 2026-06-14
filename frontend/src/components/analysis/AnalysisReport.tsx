@@ -8,6 +8,7 @@ import type {
 import AnalysisStatusBadge from "./AnalysisStatusBadge";
 import DiagnosisCard from "./DiagnosisCard";
 import ServiceUnderstandingCard from "./ServiceUnderstandingCard";
+import SimilarProjectsCard from "./SimilarProjectsCard";
 
 interface AnalysisReportProps {
     analysis: AnalysisResponse | null;
@@ -260,6 +261,7 @@ function AnalysisReport({
                     <StatusCard analysis={analysis} />
                     <ServiceUnderstandingCard service={analysis.report.service_understanding} />
                     <DiagnosisCard diagnosis={analysis.report.diagnosis} />
+                    <SimilarProjectsCard sources={analysis.report.evidence.rag_sources} />
                     <EvidenceCard analysis={analysis} />
                 </>
             ) : null}

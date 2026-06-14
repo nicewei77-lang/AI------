@@ -11,11 +11,16 @@ class Settings(BaseSettings):
     agent_model: str = "gpt-5.5"
     reasoning_effort: str = "medium"
     embedding_model: str = "text-embedding-3-small"
+    rag_top_k: int = 3
+    rag_similarity_threshold: float = 0.72
+    rag_min_indexed_posts: int = 2
+    agent_max_turns: int = 6
     mcp_server_url: str | None = None
     mcp_server_command: str | None = None
     mcp_request_timeout_seconds: float = 5.0
     mcp_body_size_limit_bytes: int = 1_500_000
     mcp_main_text_limit_chars: int = 4_000
+    mcp_github_readme_limit_chars: int = 6_000
     mcp_max_links: int = 20
     mcp_max_redirects: int = 5
     

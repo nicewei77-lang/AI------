@@ -8,6 +8,7 @@ const EVIDENCE_LABELS: Record<EvidenceKind, string> = {
     post_body: "게시글",
     mcp_site: "사이트",
     deploy_status: "배포 확인",
+    github_readme: "GitHub README",
     inferred: "추정",
     rag: "RAG",
 };

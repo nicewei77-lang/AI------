@@ -37,6 +37,7 @@ def _mcp_env() -> dict[str, str]:
         "MCP_TIMEOUT_SECONDS": str(settings.mcp_request_timeout_seconds),
         "MCP_BODY_SIZE_LIMIT_BYTES": str(settings.mcp_body_size_limit_bytes),
         "MCP_MAIN_TEXT_LIMIT_CHARS": str(settings.mcp_main_text_limit_chars),
+        "MCP_GITHUB_README_LIMIT_CHARS": str(settings.mcp_github_readme_limit_chars),
         "MCP_MAX_LINKS": str(settings.mcp_max_links),
         "MCP_MAX_REDIRECTS": str(settings.mcp_max_redirects),
     }
@@ -44,6 +45,8 @@ def _mcp_env() -> dict[str, str]:
         env["PATH"] = os.environ["PATH"]
     if os.environ.get("VIRTUAL_ENV"):
         env["VIRTUAL_ENV"] = os.environ["VIRTUAL_ENV"]
+    if os.environ.get("GITHUB_TOKEN"):
+        env["GITHUB_TOKEN"] = os.environ["GITHUB_TOKEN"]
     return env
 
 
