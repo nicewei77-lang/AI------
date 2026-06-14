@@ -1,7 +1,7 @@
 // ⚠️ [코치 작성 — 9단계 재드릴 대상] mock(MOCK_POSTS 배열 읽기) → 실제 백엔드 HTTP 호출로 교체.
 //   시그니처는 그대로 유지(컴포넌트는 안 바뀜). 백엔드 JSON ↔ 프론트 Post 변환은 "이 함수 안에서".
 
-import type {Post, NewPost, Tag, ExcuseContext} from "../types/post";
+import type {AnalysisStatus, Post, NewPost, PostType, Tag} from "../types/post";
 import {api} from "./http";
 
 // 백엔드 PostOut(JSON) 모양 — 프론트 Post와 다르다(id는 숫자, score/myVote가 더 있음).
@@ -9,14 +9,19 @@ interface RawPost {
     id: number;
     authorName: string;
     title: string;
-    excuseText: string;
+    body: string;
+    postType: PostType;
+    serviceUrl: string | null;
+    githubUrl: string | null;
+    oneLiner: string | null;
+    targetUser: string | null;
+    techStack: string[] | null;
+    analysisStatus: AnalysisStatus;
+    aiSummary: string | null;
     createdAt: string;
     score: number;
     myVote: number;
     commentCount: number;
-    verdict: string | null;
-    credibility: number | null;
-    context: ExcuseContext | null;
     tags: Tag[];
 }
 
@@ -27,10 +32,15 @@ function toPost(raw: RawPost): Post {
         authorName: raw.authorName,
         title: raw.title,
         tags: raw.tags ?? [],
-        excuseText: raw.excuseText,
-        context: raw.context ?? {date: "", location: "", time: "", route: undefined},
-        verdict: (raw.verdict ?? undefined) as Post["verdict"],
-        credibility: raw.credibility ?? undefined,
+        body: raw.body,
+        postType: raw.postType,
+        serviceUrl: raw.serviceUrl ?? undefined,
+        githubUrl: raw.githubUrl ?? undefined,
+        oneLiner: raw.oneLiner ?? undefined,
+        targetUser: raw.targetUser ?? undefined,
+        techStack: raw.techStack ?? [],
+        analysisStatus: raw.analysisStatus,
+        aiSummary: raw.aiSummary ?? undefined,
         score: raw.score,
         myVote: raw.myVote as Post["myVote"],
         commentCount: raw.commentCount,
@@ -67,9 +77,14 @@ export async function createPost(input: NewPost): Promise<Post> {
         method: "POST",
         body: {
             title: input.title,
-            excuseText: input.excuseText,
+            body: input.body,
+            postType: input.postType,
+            serviceUrl: input.serviceUrl,
+            githubUrl: input.githubUrl,
+            oneLiner: input.oneLiner,
+            targetUser: input.targetUser,
+            techStack: input.techStack,
             tagIds: input.tags.map((t) => t.id), // Tag[] → slug 문자열 배열
-            context: input.context,
         },
     });
     return toPost(raw);

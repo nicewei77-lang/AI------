@@ -21,4 +21,4 @@ def create_access_token(sub: str) -> str:
         "sub": sub,                       # 빈칸2: 누구의 토큰인가 (인자로 받은 값)
         "exp": expire,                       # 빈칸3: 만료시각 (위에서 만든 변수)
     }
-    return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")  # 빈칸4: 서명 알고리즘
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)  # 빈칸4: 서명 알고리즘

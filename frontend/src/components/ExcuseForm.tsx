@@ -13,15 +13,29 @@ interface ExcuseFormProps {
 
 function ExcuseForm({onSubmit}: ExcuseFormProps) {
     const [title, setTitle] = useState("");
-    const [excuseText, setExcuseText] = useState("");
+    const [body, setBody] = useState("");
+    const [oneLiner, setOneLiner] = useState("");
+    const [serviceUrl, setServiceUrl] = useState("");
+    const [githubUrl, setGithubUrl] = useState("");
+    const [targetUser, setTargetUser] = useState("");
+    const [techStackText, setTechStackText] = useState("");
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
+        const techStack = techStackText
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
         onSubmit({
-            title,
-            excuseText,
+            title: title.trim(),
+            body: body.trim(),
+            postType: "project",
+            serviceUrl: serviceUrl.trim() || undefined,
+            githubUrl: githubUrl.trim() || undefined,
+            oneLiner: oneLiner.trim() || undefined,
+            targetUser: targetUser.trim() || undefined,
+            techStack,
             tags: [],
-            context: {date: "", location: "", time: "", route: undefined},
         });
     }
 
@@ -33,14 +47,48 @@ function ExcuseForm({onSubmit}: ExcuseFormProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
             />
+            <input
+                className="rounded border p-2"
+                placeholder="한 줄 소개"
+                value={oneLiner}
+                onChange={(e) => setOneLiner(e.target.value)}
+            />
+            <input
+                className="rounded border p-2"
+                placeholder="서비스 URL"
+                value={serviceUrl}
+                onChange={(e) => setServiceUrl(e.target.value)}
+            />
+            <input
+                className="rounded border p-2"
+                placeholder="GitHub URL"
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+            />
+            <input
+                className="rounded border p-2"
+                placeholder="타깃 사용자"
+                value={targetUser}
+                onChange={(e) => setTargetUser(e.target.value)}
+            />
+            <input
+                className="rounded border p-2"
+                placeholder="기술 스택, 쉼표로 구분"
+                value={techStackText}
+                onChange={(e) => setTechStackText(e.target.value)}
+            />
             <textarea
                 className="rounded border p-2"
-                placeholder="변명 내용"
-                value={excuseText}
-                onChange={(e) => setExcuseText(e.target.value)}
+                placeholder="프로젝트 설명"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
             />
-            <button className="rounded bg-black p-2 text-white" type="submit">
-                제출
+            <button
+                className="rounded bg-black p-2 text-white disabled:cursor-not-allowed disabled:bg-stone-300"
+                type="submit"
+                disabled={!title.trim() || !body.trim()}
+            >
+                등록
             </button>
         </form>
     );

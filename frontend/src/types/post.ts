@@ -1,11 +1,11 @@
 // Day 1 드릴에서 직접 작성합니다.
-// Post, NewPost, Tag, ExcuseContext, Verdict를 채워 넣으세요.
+// Post, NewPost, Tag를 채워 넣으세요.
 
 // export: 다른 파일들이 이 type을 import해서 쓸 수 있도록 함
 // type 만들기: type ID = string;
 
-/* 현재 판정 상태 타입 */
-export type Verdict = "유죄" | "무죄" | "보류";
+export type PostType = "project" | "idea";
+export type AnalysisStatus = "not_started" | "running" | "completed" | "failed" | "need_more_info";
 
 // interface: 이 data는 이런 모양이어야 한다를 정의. 주로 여러 필드를 가진 객체의 모양을 정의할 때 씀.
 // type과 비슷하지만 나중에 다시 선언해서 필드를 추가할 수 있다.(declaration merging)
@@ -15,14 +15,6 @@ interface User {
   age: number;
 }
 */
-
-/* 변명 판정을 위해 글에서 추출할 메타데이터 타입.*/
-export interface ExcuseContext {
-    date: string;
-    location: string;
-    time: string;
-    route: string | undefined;
-}
 
 /* 
 1. 타입 합성(Type Composition)
@@ -50,16 +42,21 @@ C 헤더처럼 "본체와 분리된, 컴파일 타임에 검사되는 약속"이
 다른 점: TS 타입은 빌드 후 흔적 없이 사라지고(헤더는 링킹돼 남음), 유니온/옵셔널처럼 표현력이 훨씬 풍부하다.
 */
 
-/* 변명 게시글 타입. */
+/* 프로젝트 게시글 타입. */
 export interface Post {
     id: string;
     authorName: string;
     title: string;
     tags: Tag[];
-    excuseText: string;
-    context: ExcuseContext;
-    verdict?: Verdict;
-    credibility?: number;
+    body: string;
+    postType: PostType;
+    serviceUrl?: string;
+    githubUrl?: string;
+    oneLiner?: string;
+    targetUser?: string;
+    techStack: string[];
+    analysisStatus: AnalysisStatus;
+    aiSummary?: string;
     score: number;
     myVote: -1 | 0 | 1;
     commentCount: number;
@@ -75,15 +72,20 @@ export interface Tag {
 /*
 NewPost = "Post에서 서버/AI가 채우는 필드를 뺀 모양" (= 사용자가 직접 입력하는 것만)
     - 기준1: 필드 이름은 Post와 똑같이. (폼이 보낸 데이터가 그대로 저장돼 Post가 되므로)
-    - 기준2: id/createdAt(서버 발급), verdict/credibility(AI 판정)는 사용자가 안 적으니 제외.
+    - 기준2: id/createdAt/analysisStatus/aiSummary(서버·AI 발급)는 사용자가 안 적으니 제외.
 */
 
 /* 글 작성 페이지에 필요한 정보. */
 export interface NewPost {
     title: string;
     tags: Tag[];
-    excuseText: string;
-    context: ExcuseContext;
+    body: string;
+    postType: PostType;
+    serviceUrl?: string;
+    githubUrl?: string;
+    oneLiner?: string;
+    targetUser?: string;
+    techStack: string[];
 }
 
 /* 댓글 타입. post 상세 페이지에서 댓글 목록/좋아요 상태를 그릴 때 쓴다. */

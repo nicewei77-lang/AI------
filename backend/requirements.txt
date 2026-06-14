@@ -9,3 +9,7 @@ passlib[bcrypt]
 bcrypt<4.1
 python-multipart
 slowapi
+openai-agents
+openai
+httpx
+pgvector

@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Comment, Post, Tag, Vote
@@ -38,6 +38,7 @@ async def list_posts(
     session: AsyncSession,
     q: str | None = None,
     tag: str | None = None,
+    post_type: str | None = None,
     cursor: str | None = None,
     limit: int = 20,
     user_id: int | None = None,
@@ -48,9 +49,18 @@ async def list_posts(
         .order_by(Post.id.desc())
     )
     if q:
-        stmt = stmt.where(Post.title.ilike(f"%{q}%"))
+        pattern = f"%{q}%"
+        stmt = stmt.where(
+            or_(
+                Post.title.ilike(pattern),
+                Post.body.ilike(pattern),
+                Post.one_liner.ilike(pattern),
+            )
+        )
     if tag:
         stmt = stmt.join(Post.tags).where(Tag.slug == tag)
+    if post_type:
+        stmt = stmt.where(Post.post_type == post_type)
     if cursor:
         stmt = stmt.where(Post.id < int(cursor))
         
@@ -94,15 +104,25 @@ async def create_post(
     *,
     author_id: int,
     title: str,
-    excuse_text: str,
-    context: dict | None,
+    body: str,
+    post_type: str,
+    service_url: str | None,
+    github_url: str | None,
+    one_liner: str | None,
+    target_user: str | None,
+    tech_stack: list[str],
     tags: list[Tag],
 ) -> Post:
     post = Post(
         author_id=author_id,
         title=title,
-        excuse_text=excuse_text,
-        context=context,
+        body=body,
+        post_type=post_type,
+        service_url=service_url,
+        github_url=github_url,
+        one_liner=one_liner,
+        target_user=target_user,
+        tech_stack=tech_stack,
         tags=tags
     )
     session.add(post)

@@ -17,7 +17,7 @@ async def get_current_user(
     session: AsyncSession = Depends(get_db),
 ) -> User:
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         username = payload.get("sub")
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
@@ -37,7 +37,7 @@ async def get_current_user_optional(
     if token is None:
         return None
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         username = payload.get("sub")
     except JWTError:
         return None

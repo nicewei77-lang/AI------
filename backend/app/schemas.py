@@ -1,14 +1,22 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Annotated, Literal
+from typing import Literal
+
+PostType = Literal["project", "idea"]
+AnalysisStatus = Literal["not_started", "running", "completed", "failed", "need_more_info"]
 
 
 class PostCreate(BaseModel):
-    """글 작성 요청 body. 사용자가 직접 적는 필드만 포함(id·createdAt·verdict 제외)."""
+    """글 작성 요청 body. 사용자가 직접 적는 필드만 포함(id·createdAt·AI 분석 결과 제외)."""
     title: str
-    excuse_text: str = Field(alias="excuseText")
+    body: str
     tag_ids: list[str] = Field(default_factory=list, alias="tagIds")
-    context: dict | None = None
+    post_type: PostType = Field(default="project", alias="postType")
+    service_url: str | None = Field(default=None, alias="serviceUrl")
+    github_url: str | None = Field(default=None, alias="githubUrl")
+    one_liner: str | None = Field(default=None, alias="oneLiner")
+    target_user: str | None = Field(default=None, alias="targetUser")
+    tech_stack: list[str] = Field(default_factory=list, alias="techStack")
     
     model_config = ConfigDict(populate_by_name=True)
     
@@ -25,14 +33,19 @@ class PostOut(BaseModel):
     id: int
     author_name: str = Field(alias="authorName")
     title: str
-    excuse_text: str = Field(alias="excuseText")
+    body: str
+    post_type: PostType = Field(alias="postType")
+    service_url: str | None = Field(default=None, alias="serviceUrl")
+    github_url: str | None = Field(default=None, alias="githubUrl")
+    one_liner: str | None = Field(default=None, alias="oneLiner")
+    target_user: str | None = Field(default=None, alias="targetUser")
+    tech_stack: list[str] = Field(default_factory=list, alias="techStack")
+    analysis_status: AnalysisStatus = Field(alias="analysisStatus")
+    ai_summary: str | None = Field(default=None, alias="aiSummary")
     created_at: datetime = Field(alias="createdAt")
     score: int
     my_vote: int = Field(default=0, alias="myVote")   # 현재 사용자의 투표(1/-1), 없거나 비로그인=0
     comment_count: int = Field(default=0, alias="commentCount")
-    verdict: str | None = None
-    credibility: int | None = None
-    context: dict | None = None
     tags: list[TagOut] = Field(default_factory=list)
     
     model_config = ConfigDict(

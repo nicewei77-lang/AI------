@@ -189,7 +189,57 @@ function PostDetailPage() {
                         <time>{new Date(post.createdAt).toLocaleString()}</time>
                     </div>
                     <h1 className="mb-4 text-2xl font-bold leading-tight">{post.title}</h1>
-                    <p className="whitespace-pre-wrap leading-7 text-stone-800">{post.excuseText}</p>
+                    {post.oneLiner ? (
+                        <p className="mb-4 text-base font-semibold text-stone-800">{post.oneLiner}</p>
+                    ) : null}
+
+                    <div className="mb-4 grid gap-2 rounded border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700">
+                        <div>
+                            <span className="font-semibold">분석 상태</span> {post.analysisStatus}
+                        </div>
+                        {post.serviceUrl ? (
+                            <a
+                                className="font-semibold text-orange-700 hover:underline"
+                                href={post.serviceUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                서비스 URL
+                            </a>
+                        ) : null}
+                        {post.githubUrl ? (
+                            <a
+                                className="font-semibold text-orange-700 hover:underline"
+                                href={post.githubUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                GitHub URL
+                            </a>
+                        ) : null}
+                        {post.targetUser ? (
+                            <div>
+                                <span className="font-semibold">타깃 사용자</span> {post.targetUser}
+                            </div>
+                        ) : null}
+                        {post.techStack.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                                {post.techStack.map((tech) => (
+                                    <span key={tech} className="rounded-full bg-white px-2 py-1 text-xs">
+                                        {tech}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {post.aiSummary ? (
+                        <p className="mb-4 rounded border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700">
+                            {post.aiSummary}
+                        </p>
+                    ) : null}
+
+                    <p className="whitespace-pre-wrap leading-7 text-stone-800">{post.body}</p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
                         {post.tags.map((tag) => (

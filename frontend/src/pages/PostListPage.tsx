@@ -65,12 +65,12 @@ function PostListPage() {
             <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
                     <Link to="/" className="shrink-0 text-xl font-black text-orange-600">
-                        ALIBAI
+                        ProjectLens
                     </Link>
                     <form onSubmit={handleSearch} className="flex min-w-0 flex-1 gap-2">
                         <input
                             className="min-w-0 flex-1 rounded-full border border-stone-200 bg-stone-100 px-4 py-2 text-sm outline-none focus:border-orange-400 focus:bg-white"
-                            placeholder="게시글 검색"
+                            placeholder="프로젝트 검색"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                         />
@@ -88,7 +88,7 @@ function PostListPage() {
                                     to="/new"
                                     className="rounded-full border border-stone-300 px-3 py-2 text-sm font-semibold hover:bg-stone-100"
                                 >
-                                    새 글
+                                    새 프로젝트
                                 </Link>
                                 <button
                                     type="button"

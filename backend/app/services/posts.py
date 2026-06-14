@@ -25,8 +25,13 @@ async def create(
         session,
         author_id=author_id,
         title=body.title,
-        excuse_text=body.excuse_text,
-        context=body.context,
+        body=body.body,
+        post_type=body.post_type,
+        service_url=body.service_url,
+        github_url=body.github_url,
+        one_liner=body.one_liner,
+        target_user=body.target_user,
+        tech_stack=body.tech_stack,
         tags=tags,
     )
     await session.commit()

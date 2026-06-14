@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_db
-from app.schemas import PostCreate, PostOut
+from app.schemas import PostCreate, PostOut, PostType
 from app.repositories import posts as repo
 from app.services import posts as service
 from app.auth.deps import get_current_user, get_current_user_optional
@@ -14,12 +14,20 @@ router = APIRouter()
 async def list_posts(
     q: str | None = None,
     tag: str | None = None,
+    post_type: PostType | None = Query(default=None, alias="postType"),
     cursor: str | None = None,
     session: AsyncSession = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
     user_id = current_user.id if current_user else None
-    items, next_cursor = await repo.list_posts(session, q=q, tag=tag, cursor=cursor, user_id=user_id)
+    items, next_cursor = await repo.list_posts(
+        session,
+        q=q,
+        tag=tag,
+        post_type=post_type,
+        cursor=cursor,
+        user_id=user_id,
+    )
     
     return {
         "items": [PostOut.model_validate(p).model_dump(by_alias=True) for p in items],

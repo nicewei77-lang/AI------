@@ -39,9 +39,9 @@ interface PostCardProps {
 // Post 1개를 받아 카드 1장을 그리는 컴포넌트를 정의한다.
 function PostCard({post}: PostCardProps) {
     const preview =
-        post.excuseText.length > 180
-            ? `${post.excuseText.slice(0, 180)}...`
-            : post.excuseText;
+        post.body.length > 180
+            ? `${post.body.slice(0, 180)}...`
+            : post.body;
 
     return (
         <article className="border-b border-stone-200 bg-white px-4 py-4 hover:bg-stone-50">
@@ -55,9 +55,22 @@ function PostCard({post}: PostCardProps) {
                     {post.title}
                 </Link>
             </h2>
+            {post.oneLiner ? (
+                <p className="mb-2 text-sm font-semibold text-stone-800">{post.oneLiner}</p>
+            ) : null}
             <p className="mb-3 whitespace-pre-wrap text-sm leading-6 text-stone-700">
                 {preview}
             </p>
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+                <span className="rounded-full bg-stone-100 px-2 py-1">
+                    {post.analysisStatus}
+                </span>
+                {post.techStack.map((tech) => (
+                    <span key={tech} className="rounded-full bg-stone-100 px-2 py-1">
+                        {tech}
+                    </span>
+                ))}
+            </div>
             <div className="mb-3 flex flex-wrap gap-2">
                 {post.tags.map((tag) => (
                     <span
