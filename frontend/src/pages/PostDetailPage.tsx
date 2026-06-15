@@ -3,7 +3,7 @@
 import {useState, useEffect} from "react";
 import type {FormEvent} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {fetchLatestAnalysis, runAnalysis} from "../api/analysis";
+import {fetchAnalysisStatus, fetchLatestAnalysis, startAnalysisJob} from "../api/analysis";
 import {createComment, fetchComments, toggleCommentLike} from "../api/comments";
 import {fetchPostById, votePost} from "../api/posts";
 import AnalysisReport from "../components/analysis/AnalysisReport";
@@ -16,6 +16,13 @@ type PageMessage = {
     text: string;
     kind: "success" | "error" | "info";
 };
+
+const ANALYSIS_POLL_INTERVAL_MS = 2500;
+const ANALYSIS_POLL_MAX_ATTEMPTS = 120;
+
+function sleep(ms: number) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
 
 function PostDetailPage() {
     const {id} = useParams();
@@ -111,21 +118,34 @@ function PostDetailPage() {
         setPost({...post, analysisStatus: "running"});
 
         try {
-            const result = await runAnalysis(post.id);
-            setAnalysis(result);
+            const started = await startAnalysisJob(post.id);
+            setPost((prev) => (prev ? {...prev, analysisStatus: started.status} : prev));
 
-            const [refreshedPost, latest] = await Promise.all([
-                fetchPostById(post.id),
-                fetchLatestAnalysis(post.id),
-            ]);
+            let finalStatus = started.status;
+            for (let attempt = 0; attempt < ANALYSIS_POLL_MAX_ATTEMPTS; attempt += 1) {
+                if (finalStatus !== "running") break;
+                await sleep(ANALYSIS_POLL_INTERVAL_MS);
+                const next = await fetchAnalysisStatus(post.id);
+                finalStatus = next.status;
+                setPost((prev) => (prev ? {...prev, analysisStatus: next.status} : prev));
+            }
+
+            if (finalStatus === "running") {
+                throw new Error("AI 분석이 예상보다 오래 걸리고 있습니다. 잠시 후 다시 확인해주세요.");
+            }
+
+            const [refreshedPost, latest] = await Promise.all([fetchPostById(post.id), fetchLatestAnalysis(post.id)]);
             setPost(refreshedPost);
-            setAnalysis(latest ?? result);
+            setAnalysis(latest);
+            if (!latest) {
+                throw new Error("AI 분석 작업은 종료되었지만 저장된 리포트를 찾지 못했습니다.");
+            }
             setMessage({
                 text:
-                    result.status === "completed"
+                    latest.status === "completed"
                         ? "AI 분석이 완료되었습니다."
                         : "AI 분석 결과가 저장되었습니다.",
-                kind: result.status === "failed" || result.status === "refused" ? "info" : "success",
+                kind: latest.status === "failed" || latest.status === "refused" ? "info" : "success",
             });
         } catch (err) {
             const text = err instanceof Error ? err.message : "AI 분석에 실패했습니다.";

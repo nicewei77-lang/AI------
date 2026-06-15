@@ -6,10 +6,21 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 ReportStatus = Literal["completed", "need_more_info", "failed", "refused"]
-EvidenceKind = Literal["post_body", "mcp_site", "deploy_status", "github_readme", "inferred", "rag"]
+EvidenceKind = Literal[
+    "post_body",
+    "mcp_site",
+    "deploy_status",
+    "github_readme",
+    "site_context",
+    "screenshot",
+    "lighthouse",
+    "inferred",
+    "rag",
+]
 ConfidenceKind = Literal["confirmed", "inferred"]
 Severity = Literal["low", "medium", "high"]
 Priority = Literal["P0", "P1", "P2"]
+RagRankingMode = Literal["cosine", "weighted"]
 
 
 class ProjectLensBaseModel(BaseModel):
@@ -19,6 +30,18 @@ class ProjectLensBaseModel(BaseModel):
 class ServiceUnderstanding(ProjectLensBaseModel):
     one_line_summary: str = Field(description="A short Korean summary suitable for a card title.")
     detailed_summary: str
+    site_structure_summary: str = Field(
+        default="",
+        description="Visible website/page structure from evidence: title, h1, main text, links, navigation, or an honest note when thin.",
+    )
+    service_essence: str = Field(
+        default="",
+        description="The core service/product essence inferred from confirmed evidence plus explicit uncertainty.",
+    )
+    key_insight: str = Field(
+        default="",
+        description="The most useful product/portfolio insight for the builder, grounded in evidence.",
+    )
     target_users: list[str] = Field(default_factory=list)
     core_features: list[str] = Field(default_factory=list)
     confirmed_facts: list[str] = Field(default_factory=list)
@@ -58,8 +81,22 @@ class Diagnosis(ProjectLensBaseModel):
 
 class McpSource(ProjectLensBaseModel):
     tool_name: str
-    evidence_kind: Literal["mcp_site", "deploy_status", "github_readme"]
-    based_on: Literal["mcp_site", "deploy_status", "github_readme"]
+    evidence_kind: Literal[
+        "mcp_site",
+        "deploy_status",
+        "github_readme",
+        "site_context",
+        "screenshot",
+        "lighthouse",
+    ]
+    based_on: Literal[
+        "mcp_site",
+        "deploy_status",
+        "github_readme",
+        "site_context",
+        "screenshot",
+        "lighthouse",
+    ]
     success: bool
     summary: str
     url: str | None = None
@@ -68,10 +105,21 @@ class McpSource(ProjectLensBaseModel):
     error_message: str | None = None
 
 
+class RagScoreBreakdown(ProjectLensBaseModel):
+    semantic: float = 0.0
+    tag_overlap: float = 0.0
+    vote: float = 0.0
+    recency: float = 0.0
+    same_type: float = 0.0
+
+
 class RagSource(ProjectLensBaseModel):
     title: str
     source_id: int | None = None
     similarity: float | None = None
+    ranking_mode: RagRankingMode = "cosine"
+    match_reasons: list[str] = Field(default_factory=list)
+    score_breakdown: RagScoreBreakdown | None = None
     evidence_kind: Literal["rag"] = "rag"
     based_on: Literal["rag"] = "rag"
     summary: str | None = None
@@ -89,8 +137,28 @@ class ReportStatusBlock(ProjectLensBaseModel):
     error: str | None = None
 
 
+class PortfolioDraft(ProjectLensBaseModel):
+    headline: str = ""
+    problem: str = ""
+    solution: str = ""
+    impact: str = ""
+    tech_highlights: list[str] = Field(default_factory=list)
+    proof_points: list[str] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+
+
+class PresentationDraft(ProjectLensBaseModel):
+    opening: str = ""
+    key_points: list[str] = Field(default_factory=list)
+    demo_flow: list[str] = Field(default_factory=list)
+    risks_or_next_steps: list[str] = Field(default_factory=list)
+    closing: str = ""
+
+
 class ProjectAnalysisReport(ProjectLensBaseModel):
     service_understanding: ServiceUnderstanding
     diagnosis: Diagnosis
     evidence: EvidenceBlock
     status: ReportStatusBlock
+    portfolio: PortfolioDraft = Field(default_factory=PortfolioDraft)
+    presentation: PresentationDraft = Field(default_factory=PresentationDraft)

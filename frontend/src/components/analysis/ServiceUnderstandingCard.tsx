@@ -21,6 +21,19 @@ function FactList({title, items}: {title: string; items: string[]}) {
     );
 }
 
+function InsightBlock({title, value}: {title: string; value: string}) {
+    if (!value.trim()) return null;
+
+    return (
+        <div className="rounded border border-stone-200 bg-stone-50 p-3">
+            <h4 className="mb-1 text-xs font-bold uppercase tracking-wide text-stone-500">
+                {title}
+            </h4>
+            <p className="break-words text-sm leading-6 text-stone-700">{value}</p>
+        </div>
+    );
+}
+
 function ServiceUnderstandingCard({service}: ServiceUnderstandingCardProps) {
     return (
         <section className="rounded border border-stone-200 bg-white p-4">
@@ -36,6 +49,12 @@ function ServiceUnderstandingCard({service}: ServiceUnderstandingCardProps) {
             <p className="mb-4 whitespace-pre-wrap break-words text-sm leading-6 text-stone-700">
                 {service.detailed_summary}
             </p>
+
+            <div className="mb-4 grid gap-3">
+                <InsightBlock title="사이트 구조" value={service.site_structure_summary} />
+                <InsightBlock title="서비스 본질" value={service.service_essence} />
+                <InsightBlock title="핵심 인사이트" value={service.key_insight} />
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
                 <FactList title="타깃 사용자" items={service.target_users} />

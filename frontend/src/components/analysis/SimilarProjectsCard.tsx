@@ -27,6 +27,7 @@ function SimilarProjectsCard({sources}: SimilarProjectsCardProps) {
                             typeof source.similarity === "number"
                                 ? `${Math.round(source.similarity * 100)}%`
                                 : null;
+                        const rankingMode = source.ranking_mode ?? "cosine";
                         return (
                             <li
                                 key={`${source.source_id ?? source.title}-${source.title}`}
@@ -41,11 +42,26 @@ function SimilarProjectsCard({sources}: SimilarProjectsCardProps) {
                                             {similarity}
                                         </span>
                                     ) : null}
+                                    <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-600">
+                                        {rankingMode === "weighted" ? "가중 정렬" : "cosine"}
+                                    </span>
                                 </div>
                                 {source.summary ? (
                                     <p className="break-words text-sm leading-6 text-stone-700">
                                         {source.summary}
                                     </p>
+                                ) : null}
+                                {(source.match_reasons ?? []).length > 0 ? (
+                                    <ul className="mt-2 flex flex-wrap gap-2">
+                                        {(source.match_reasons ?? []).map((reason) => (
+                                            <li
+                                                key={reason}
+                                                className="rounded-full bg-stone-50 px-2 py-1 text-xs font-medium text-stone-600"
+                                            >
+                                                {reason}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : null}
                             </li>
                         );

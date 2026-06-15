@@ -1,0 +1,8 @@
+{
+  "name": "projectlens-mcp-server",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "lighthouse": "^13.0.1"
+  }
+}

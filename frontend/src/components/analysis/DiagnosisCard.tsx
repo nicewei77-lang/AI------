@@ -9,6 +9,9 @@ const EVIDENCE_LABELS: Record<EvidenceKind, string> = {
     mcp_site: "사이트",
     deploy_status: "배포 확인",
     github_readme: "GitHub README",
+    site_context: "사이트 컨텍스트",
+    screenshot: "화면 캡처",
+    lighthouse: "Lighthouse",
     inferred: "추정",
     rag: "RAG",
 };

@@ -437,8 +437,10 @@ AI Orchestrator / Agent Runner
     │     └── ProjectLens MCP Server
     │           ├── fetch_site_overview
     │           ├── check_deploy_status
-    │           ├── M4: fetch_github_readme
-    │           └── Q: screenshot / lighthouse / robots
+    │           ├── fetch_github_readme
+    │           ├── fetch_site_context
+    │           ├── capture_screenshot
+    │           └── run_lighthouse_summary
     └── OpenAI Agent
           ├── function tools
           └── Structured Output
@@ -654,18 +656,21 @@ P0에서는 tool surface를 작게 유지한다. 노출 도구는 아래 2개뿐
 - 배포 URL이 실제로 접속 가능한지 확인
 - 발표/포트폴리오 전 기본 점검
 
-### 9.4 M4 승격 MCP Tool + 이후 확장 후보
+### 9.4 M4 승격 MCP Tool + Q6~Q10 확장 Tool
 
 M4에서 과제 조건을 강화하기 위해 먼저 승격할 도구:
 
 1. `fetch_github_readme` — README 기반 기술 설명 보완 + 명확한 외부 서비스 API 연동 + API key 전략 표면화
 
-M4 이후 추가 후보:
+Q6~Q10에서 local/private MCP로 승격한 도구:
 
-2. `extract_page_text` — `fetch_site_overview`가 부족할 때 상세 본문/섹션 추출
-3. `capture_screenshot` — Playwright 기반 스크린샷
-4. `analyze_lighthouse` — 성능/SEO/접근성 기본 점수
-5. `crawl_internal_links` — 내부 링크 제한 탐색
+2. `fetch_site_context` — same-origin depth-1, 최대 5페이지의 bounded 내부 컨텍스트
+3. `capture_screenshot` — Playwright 기반 첫 화면 캡처 metadata/visible text evidence
+4. `run_lighthouse_summary` — 성능/SEO/접근성 점수와 key audit 요약
+
+아직 후보로 남긴 도구:
+
+5. `extract_page_text` — `fetch_site_overview`가 부족할 때 상세 본문/섹션 추출
 6. `extract_cta_texts` — 버튼/CTA 문구 추출
 7. `find_broken_links` — 깨진 링크 검사
 8. `fetch_openapi_schema` — Swagger/OpenAPI 문서 확인
@@ -714,7 +719,7 @@ M4 이후 추가 후보:
 
 사이트 URL을 직접 접속하는 기능은 SSRF 위험이 있다. 반드시 다음 제한을 둔다.
 
-- M1/P0에서 Agent에 노출되는 MCP 도구는 `fetch_site_overview`, `check_deploy_status`만 허용한다. M4부터 `fetch_github_readme`를 allowlist에 추가한다.
+- Agent에 노출되는 MCP 도구는 allowlist로만 허용한다. 현재 allowlist는 `fetch_site_overview`, `check_deploy_status`, `fetch_github_readme`, `fetch_site_context`, `capture_screenshot`, `run_lighthouse_summary`다.
 - `http://localhost`, `127.0.0.1`, 사설 IP 대역 차단
 - metadata IP 차단: `169.254.169.254`
 - 내부망 IP 차단
@@ -1133,7 +1138,7 @@ CREATE TABLE IF NOT EXISTS analysis_jobs (
 );
 ```
 
-MVP P0에서는 `analysis_jobs`를 만들지 않고 동기 처리로 시작한다. 단, 실제 시드 분석에서 15초를 자주 넘거나 MCP tool call이 2개 이상으로 늘어나면 background/polling 구조로 승격한다. 이때만 `analysis_jobs`를 추가한다.
+MVP P0에서는 `analysis_jobs`를 만들지 않고 동기 처리로 시작했다. Q6~Q10 이후 실 eval에서 15초 초과가 반복되어 Q11에서 in-process background/polling 구조로 승격했다. 별도 `analysis_jobs` 테이블은 아직 만들지 않고 `posts.analysis_status`와 latest report 조회로 상태를 표현한다.
 
 ---
 
@@ -1181,7 +1186,7 @@ POST /posts/{post_id}/analysis/regenerate   # Q단계
 }
 ```
 
-동기 MVP 응답 예시:
+동기 smoke/debug 응답 예시:
 
 ```json
 {
@@ -1191,7 +1196,7 @@ POST /posts/{post_id}/analysis/regenerate   # Q단계
 }
 ```
 
-비동기 승격 후에는 `{ "jobId": 12, "status": "running" }`을 반환하고 프론트가 polling한다. MVP P0에서는 이 구조를 만들지 않는다.
+Q11 async 경로는 `POST /posts/{id}/analysis/jobs`에서 `{ "postId": 12, "status": "running" }`을 반환하고 프론트가 `/analysis/status`를 polling한다. 별도 `analysis_jobs` 테이블은 아직 만들지 않는다.
 
 ### 13.3 활용 도구 관련
 
@@ -1397,15 +1402,15 @@ P1 과제 완성 기준:
 
 ### 16.2 MVP에서 빼도 되는 것
 
-- Playwright 스크린샷 분석
-- Lighthouse 연동
+- raw screenshot/이미지 분석
+- Lighthouse raw report 저장
 - GitHub Issue 자동 생성
 - Figma 분석
 - Slack/Notion 연동
 - 복잡한 멀티 Agent 구조
 - 실시간 분석 progress stream
 - 웹 전체 크롤링
-- 시작부터 async job + polling
+- 별도 `analysis_jobs` 테이블/외부 큐
 - `fetch_github_readme`를 넘는 GitHub 전체 분석/Issue/CI 자동화
 - 전체 리포트 재생성/카드별 재생성
 
@@ -1444,7 +1449,7 @@ P1 과제 완성 기준:
 - `check_deploy_status` 구현
 - URL 안전 검사 구현
 - prompt injection 방어: 외부 텍스트는 지시문이 아니라 evidence로 정제
-- tool allowlist: P0에서는 위 2개 tool만 노출
+- tool allowlist: 현재는 사이트 overview/status, GitHub README, site context, screenshot, Lighthouse summary만 노출
 - Backend에서 MCP 서버 호출 테스트
 
 ### P3. Agent MVP
@@ -1481,7 +1486,7 @@ P1 과제 완성 기준:
 - 비슷한 게시물 카드 표시
 - RAG 검색 결과를 Agent 입력에 포함
 - Agents SDK `function_tool`로 MCP 도구 노출
-- Agent가 `check_deploy_status`, `fetch_site_overview`, `fetch_github_readme`를 선택 호출
+- Agent가 allowlist MCP 도구를 선택 호출
 - tool call evidence를 `ai_reports`와 연결된 `mcp_evidences`에 저장
 - `GITHUB_TOKEN` 선택 사용과 로그 마스킹 검증
 
@@ -1614,9 +1619,9 @@ Q2~Q4 결과물 개선 루프용 고정 테스트 사이트:
 
 처리:
 
-- MVP에서는 loading 표시 후 완료 시 리포트 표시
-- 실제 시드 분석에서 15초를 자주 넘으면 background/polling 구조로 승격
-- 승격 후에만 `analysis_jobs` 테이블과 프론트 polling을 구현
+- Q11부터 `POST /posts/{id}/analysis/jobs`가 즉시 `running`을 반환하고 프론트가 `GET /posts/{id}/analysis/status`를 polling한다.
+- 완료 후 `GET /posts/{id}/analysis/latest`로 구조화 리포트를 표시한다.
+- 별도 `analysis_jobs` 테이블과 외부 큐는 반복 실행/운영 안정성 문제가 실제로 필요해질 때만 추가한다.
 
 ---
 
@@ -1703,6 +1708,9 @@ MVP 성공 기준:
 [ ] fetch_site_overview 구현
 [ ] check_deploy_status 구현
 [ ] fetch_github_readme 구현
+[ ] fetch_site_context 구현
+[ ] capture_screenshot 구현
+[ ] run_lighthouse_summary 구현
 [ ] URL 안전 검사 구현
 [ ] MCP tool allowlist + prompt injection 방어 구현
 [ ] OpenAI Agent 설정

@@ -139,3 +139,15 @@ class AnalysisLatestOut(AnalysisRunOut):
     usage: dict | None = None
 
     model_config = ConfigDict(populate_by_name=True)
+
+
+class AnalysisJobOut(BaseModel):
+    """비동기 AI 분석 작업 상태 응답."""
+
+    post_id: int = Field(alias="postId")
+    status: AnalysisStatus
+    latest_report_id: int | None = Field(default=None, alias="latestReportId")
+    latest_report_status: ReportStatus | None = Field(default=None, alias="latestReportStatus")
+    message: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)

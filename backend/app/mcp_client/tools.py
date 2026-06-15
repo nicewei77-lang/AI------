@@ -8,11 +8,17 @@ from agents.mcp import create_static_tool_filter
 FETCH_SITE_OVERVIEW: Final = "fetch_site_overview"
 CHECK_DEPLOY_STATUS: Final = "check_deploy_status"
 FETCH_GITHUB_README: Final = "fetch_github_readme"
+FETCH_SITE_CONTEXT: Final = "fetch_site_context"
+CAPTURE_SCREENSHOT: Final = "capture_screenshot"
+RUN_LIGHTHOUSE_SUMMARY: Final = "run_lighthouse_summary"
 
-ALLOWED_MCP_TOOLS: Final[tuple[str, str, str]] = (
+ALLOWED_MCP_TOOLS: Final[tuple[str, ...]] = (
     FETCH_SITE_OVERVIEW,
     CHECK_DEPLOY_STATUS,
     FETCH_GITHUB_README,
+    FETCH_SITE_CONTEXT,
+    CAPTURE_SCREENSHOT,
+    RUN_LIGHTHOUSE_SUMMARY,
 )
 
 MCP_EVIDENCE_NOTICE: Final = (

@@ -19,7 +19,12 @@ from app.ai.runner import (
 from app.ai.schemas import ProjectAnalysisReport, ReportStatus
 from app.config import settings
 from app.mcp_client.client import record_mcp_evidence
-from app.mcp_client.tools import CHECK_DEPLOY_STATUS, FETCH_GITHUB_README, FETCH_SITE_OVERVIEW
+from app.mcp_client.tools import (
+    CHECK_DEPLOY_STATUS,
+    FETCH_GITHUB_README,
+    FETCH_SITE_CONTEXT,
+    FETCH_SITE_OVERVIEW,
+)
 from app.models import AiReport, Post
 from app.rag.indexer import index_ai_report_embedding, index_post_embedding
 from app.rag.retriever import retrieve_similar_projects
@@ -45,6 +50,14 @@ class PersistedAnalysis:
     usage: dict[str, Any] | None
     error: dict[str, Any] | None
     created_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class AnalysisJobState:
+    post_id: int
+    status: str
+    latest_report_id: int | None
+    latest_report_status: str | None
 
 
 async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnalysis:
@@ -117,13 +130,7 @@ async def get_latest_analysis_for_post(db: AsyncSession, post_id: int) -> Persis
     if post is None:
         raise AnalysisPostNotFoundError(post_id)
 
-    stmt = (
-        select(AiReport)
-        .where(AiReport.post_id == post_id)
-        .order_by(AiReport.created_at.desc(), AiReport.id.desc())
-        .limit(1)
-    )
-    ai_report = (await db.execute(stmt)).scalar_one_or_none()
+    ai_report = await _load_latest_ai_report(db, post_id)
     if ai_report is None:
         raise AnalysisReportNotFoundError(post_id)
 
@@ -142,11 +149,55 @@ async def get_latest_analysis_for_post(db: AsyncSession, post_id: int) -> Persis
     )
 
 
+async def start_analysis_job_for_post(db: AsyncSession, post_id: int) -> AnalysisJobState:
+    post = await _load_post(db, post_id)
+    if post is None:
+        raise AnalysisPostNotFoundError(post_id)
+
+    post.analysis_status = "running"
+    await db.commit()
+    return await get_analysis_job_status_for_post(db, post_id)
+
+
+async def get_analysis_job_status_for_post(db: AsyncSession, post_id: int) -> AnalysisJobState:
+    post = await _load_post(db, post_id)
+    if post is None:
+        raise AnalysisPostNotFoundError(post_id)
+
+    ai_report = await _load_latest_ai_report(db, post_id)
+    return AnalysisJobState(
+        post_id=post.id,
+        status=post.analysis_status,
+        latest_report_id=ai_report.id if ai_report else None,
+        latest_report_status=ai_report.status if ai_report else None,
+    )
+
+
+async def mark_analysis_job_failed(db: AsyncSession, post_id: int, message: str) -> None:
+    post = await _load_post(db, post_id)
+    if post is None:
+        raise AnalysisPostNotFoundError(post_id)
+
+    post.analysis_status = "failed"
+    post.ai_summary = message
+    await db.commit()
+
+
 async def _load_post(db: AsyncSession, post_id: int) -> Post | None:
     stmt = (
         select(Post)
         .where(Post.id == post_id)
         .options(selectinload(Post.author), selectinload(Post.tags))
+    )
+    return (await db.execute(stmt)).scalar_one_or_none()
+
+
+async def _load_latest_ai_report(db: AsyncSession, post_id: int) -> AiReport | None:
+    stmt = (
+        select(AiReport)
+        .where(AiReport.post_id == post_id)
+        .order_by(AiReport.created_at.desc(), AiReport.id.desc())
+        .limit(1)
     )
     return (await db.execute(stmt)).scalar_one_or_none()
 
@@ -264,6 +315,29 @@ def _force_failed_if_external_evidence_unusable(
 ) -> ProjectAnalysisRun:
     if run.report.status.status != "completed":
         return run
+    if _service_url_failed(post, mcp_evidence):
+        message = (
+            "사이트에 접속할 수 없어 URL 기반 분석은 실패했습니다. "
+            "프로젝트 설명을 조금 더 자세히 입력하거나 접속 가능한 배포 URL을 다시 제출해주세요."
+        )
+        report = build_failed_report(
+            message,
+            mcp_evidence=mcp_evidence,
+            rag_sources=run.report.evidence.rag_sources,
+        )
+        return ProjectAnalysisRun(
+            report=report,
+            model=run.model,
+            reasoning_effort=run.reasoning_effort,
+            response_id=run.response_id,
+            trace_id=run.trace_id,
+            usage=run.usage,
+            error=run.error
+            or {
+                "type": "service_url_unreachable",
+                "message": message,
+            },
+        )
     if _has_sufficient_written_context(post):
         return run
     expected_tools = _expected_external_tools(post)
@@ -271,8 +345,8 @@ def _force_failed_if_external_evidence_unusable(
         return run
 
     relevant_evidence = [item for item in mcp_evidence if item.tool_name in expected_tools]
-    has_successful_evidence = any(_mcp_item_has_usable_result(item) for item in relevant_evidence)
-    if has_successful_evidence:
+    has_textual_evidence = any(_mcp_item_has_usable_text_result(item) for item in relevant_evidence)
+    if has_textual_evidence:
         return run
 
     message = (
@@ -307,18 +381,67 @@ def _has_sufficient_written_context(post: Post) -> bool:
 def _expected_external_tools(post: Post) -> set[str]:
     tools: set[str] = set()
     if (post.service_url or "").strip():
-        tools.update({CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW})
+        tools.update({CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW, FETCH_SITE_CONTEXT})
     if (post.github_url or "").strip():
         tools.add(FETCH_GITHUB_README)
     return tools
 
 
-def _mcp_item_has_usable_result(item: CollectedMcpEvidence) -> bool:
+def _service_url_failed(post: Post, mcp_evidence: list[CollectedMcpEvidence]) -> bool:
+    if not (post.service_url or "").strip():
+        return False
+    deploy_checks = [item for item in mcp_evidence if item.tool_name == CHECK_DEPLOY_STATUS]
+    if not deploy_checks:
+        return False
+    return all(not _mcp_deploy_check_reachable(item) for item in deploy_checks)
+
+
+def _mcp_deploy_check_reachable(item: CollectedMcpEvidence) -> bool:
     if not item.success:
         return False
     if item.tool_name == CHECK_DEPLOY_STATUS and isinstance(item.result, dict):
         return bool(item.result.get("is_reachable"))
-    return True
+    return False
+
+
+def _mcp_item_has_usable_text_result(item: CollectedMcpEvidence) -> bool:
+    if not item.success or not isinstance(item.result, dict):
+        return False
+    if item.tool_name == FETCH_SITE_OVERVIEW:
+        return _combined_text_length(
+            item.result,
+            ("title", "description", "h1", "main_text"),
+        ) >= 80
+    if item.tool_name == FETCH_GITHUB_README:
+        return _combined_text_length(
+            item.result,
+            ("description", "readme", "language", "topics"),
+        ) >= 80
+    if item.tool_name == FETCH_SITE_CONTEXT:
+        pages = item.result.get("pages")
+        if not isinstance(pages, list):
+            return False
+        total = 0
+        for page in pages:
+            if not isinstance(page, dict):
+                continue
+            total += _combined_text_length(
+                page,
+                ("title", "description", "h1", "main_text"),
+            )
+        return total >= 80
+    return False
+
+
+def _combined_text_length(payload: dict[str, Any], keys: tuple[str, ...]) -> int:
+    parts: list[str] = []
+    for key in keys:
+        value = payload.get(key)
+        if isinstance(value, list):
+            parts.extend(str(item) for item in value)
+        elif value is not None:
+            parts.append(str(value))
+    return len(" ".join(part.strip() for part in parts if part.strip()))
 
 
 def _report_from_db(ai_report: AiReport) -> ProjectAnalysisReport:

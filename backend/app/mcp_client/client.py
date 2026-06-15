@@ -15,7 +15,8 @@ from app.mcp_client.tools import ensure_allowed_tool, projectlens_tool_filter
 from app.models import McpEvidence
 
 
-SENSITIVE_KEY_HINTS = ("key", "token", "secret", "password", "authorization", "cookie")
+SENSITIVE_KEY_EXACT = {"key", "api_key", "apikey", "access_key", "secret_key"}
+SENSITIVE_KEY_HINTS = ("token", "secret", "password", "authorization", "cookie", "credential")
 MAX_LOG_STRING_LENGTH = 12_000
 
 
@@ -37,6 +38,11 @@ def _mcp_env() -> dict[str, str]:
         "MCP_TIMEOUT_SECONDS": str(settings.mcp_request_timeout_seconds),
         "MCP_BODY_SIZE_LIMIT_BYTES": str(settings.mcp_body_size_limit_bytes),
         "MCP_MAIN_TEXT_LIMIT_CHARS": str(settings.mcp_main_text_limit_chars),
+        "MCP_SITE_CONTEXT_MAX_PAGES": str(settings.mcp_site_context_max_pages),
+        "MCP_SITE_CONTEXT_TEXT_LIMIT_CHARS": str(settings.mcp_site_context_text_limit_chars),
+        "MCP_SITE_CONTEXT_TIMEOUT_SECONDS": str(settings.mcp_site_context_timeout_seconds),
+        "MCP_SCREENSHOT_TIMEOUT_SECONDS": str(settings.mcp_screenshot_timeout_seconds),
+        "MCP_LIGHTHOUSE_TIMEOUT_SECONDS": str(settings.mcp_lighthouse_timeout_seconds),
         "MCP_GITHUB_README_LIMIT_CHARS": str(settings.mcp_github_readme_limit_chars),
         "MCP_MAX_LINKS": str(settings.mcp_max_links),
         "MCP_MAX_REDIRECTS": str(settings.mcp_max_redirects),
@@ -52,6 +58,12 @@ def _mcp_env() -> dict[str, str]:
 
 def create_projectlens_mcp_server() -> MCPServerStdio:
     command = settings.mcp_server_command or sys.executable
+    session_timeout = max(
+        settings.mcp_request_timeout_seconds,
+        settings.mcp_site_context_timeout_seconds,
+        settings.mcp_screenshot_timeout_seconds,
+        settings.mcp_lighthouse_timeout_seconds,
+    )
     return MCPServerStdio(
         params={
             "command": command,
@@ -61,7 +73,7 @@ def create_projectlens_mcp_server() -> MCPServerStdio:
         },
         name="projectlens-local-private-mcp",
         cache_tools_list=True,
-        client_session_timeout_seconds=settings.mcp_request_timeout_seconds + 2,
+        client_session_timeout_seconds=session_timeout + 2,
         tool_filter=projectlens_tool_filter(),
         require_approval="never",
         use_structured_content=True,
@@ -75,8 +87,8 @@ def get_projectlens_mcp_servers() -> list[MCPServerStdio]:
 
 
 def _is_sensitive_key(key: str) -> bool:
-    lowered = key.lower()
-    return any(hint in lowered for hint in SENSITIVE_KEY_HINTS)
+    lowered = key.lower().replace("-", "_")
+    return lowered in SENSITIVE_KEY_EXACT or any(hint in lowered for hint in SENSITIVE_KEY_HINTS)
 
 
 def _redact_url(value: str) -> str:

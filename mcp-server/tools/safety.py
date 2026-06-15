@@ -15,6 +15,7 @@ DEFAULT_TIMEOUT_SECONDS = 5.0
 DEFAULT_BODY_SIZE_LIMIT_BYTES = 1_500_000
 DEFAULT_MAX_REDIRECTS = 5
 DEFAULT_USER_AGENT = "ProjectLens-MCP/0.1 (+local-private-site-evidence)"
+Origin = tuple[str, str, int]
 
 REDIRECT_STATUS_CODES = {301, 302, 303, 307, 308}
 LOCALHOST_NAMES = {"localhost"}
@@ -44,6 +45,20 @@ def _port_for_url(parsed: Any) -> int:
     if parsed.scheme == "https":
         return 443
     return 80
+
+
+def origin_for_url(url: str) -> Origin:
+    parsed = urlsplit(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise SafetyError("URL must include an http(s) origin.")
+    return (parsed.scheme, _hostname_for_checks(parsed.hostname), _port_for_url(parsed))
+
+
+def is_same_origin(url: str, origin: Origin) -> bool:
+    try:
+        return origin_for_url(url) == origin
+    except (SafetyError, ValueError):
+        return False
 
 
 def _hostname_for_checks(hostname: str) -> str:
@@ -158,10 +173,13 @@ async def fetch_with_safety(
     user_agent: str = DEFAULT_USER_AGENT,
     read_body: bool = True,
     transport: httpx.AsyncBaseTransport | None = None,
+    allowed_origin: Origin | None = None,
 ) -> FetchResult:
     """Fetch one URL with ProjectLens SSRF protection and bounded body reads."""
 
     requested_url = await validate_public_url(url)
+    if allowed_origin is not None and not is_same_origin(requested_url, allowed_origin):
+        raise SafetyError("URL is outside the allowed origin.")
     current_url = requested_url
     started = time.perf_counter()
 
@@ -175,16 +193,22 @@ async def fetch_with_safety(
     ) as client:
         for _redirect_count in range(max_redirects + 1):
             await validate_public_url(current_url)
+            if allowed_origin is not None and not is_same_origin(current_url, allowed_origin):
+                raise SafetyError("URL is outside the allowed origin.")
             async with client.stream("GET", current_url) as response:
                 status_code = response.status_code
                 location = response.headers.get("location")
                 if status_code in REDIRECT_STATUS_CODES and location:
                     next_url = urljoin(str(response.url), location)
                     current_url = await validate_public_url(next_url)
+                    if allowed_origin is not None and not is_same_origin(current_url, allowed_origin):
+                        raise SafetyError("Redirected URL is outside the allowed origin.")
                     continue
 
                 content = await _read_limited(response, max_bytes) if read_body else b""
                 final_url = await validate_public_url(str(response.url))
+                if allowed_origin is not None and not is_same_origin(final_url, allowed_origin):
+                    raise SafetyError("Final URL is outside the allowed origin.")
                 elapsed_ms = int((time.perf_counter() - started) * 1000)
                 return FetchResult(
                     requested_url=requested_url,

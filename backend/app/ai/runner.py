@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 from agents import Runner, trace
-from agents.exceptions import ModelRefusalError
+from agents.exceptions import ModelBehaviorError, ModelRefusalError
 from agents.tracing import gen_trace_id
 
 from app.ai.agents.project_analysis_agent import create_project_analysis_agent
@@ -15,6 +15,8 @@ from app.ai.schemas import (
     Diagnosis,
     EvidenceBlock,
     McpSource,
+    PortfolioDraft,
+    PresentationDraft,
     ProjectAnalysisReport,
     ReportStatus,
     ReportStatusBlock,
@@ -26,10 +28,18 @@ from app.ai.schemas import (
 )
 from app.ai.tools import call_projectlens_mcp_tool, get_project_analysis_tools
 from app.config import settings
-from app.mcp_client.tools import CHECK_DEPLOY_STATUS, FETCH_GITHUB_README, FETCH_SITE_OVERVIEW
+from app.mcp_client.tools import (
+    CAPTURE_SCREENSHOT,
+    CHECK_DEPLOY_STATUS,
+    FETCH_GITHUB_README,
+    FETCH_SITE_CONTEXT,
+    FETCH_SITE_OVERVIEW,
+    RUN_LIGHTHOUSE_SUMMARY,
+)
 
 
 MAX_INPUT_TEXT_CHARS = 12_000
+STRUCTURED_OUTPUT_MAX_ATTEMPTS = 2
 
 
 class AnalysisRunnerError(RuntimeError):
@@ -102,32 +112,79 @@ async def run_project_analysis(
         reasoning_effort=effort,
         tools=get_project_analysis_tools(),
     )
+    validation_errors: list[str] = []
+    result = None
+    report: ProjectAnalysisReport | None = None
     try:
         with trace(
             "ProjectLens M4 analysis",
             trace_id=trace_id,
             metadata={"post_id": str(input_payload.get("post", {}).get("id", ""))},
         ):
-            result = await Runner.run(
-                agent,
-                _json_dumps(input_payload),
-                context=active_tool_context,
-                max_turns=settings.agent_max_turns,
-            )
-    except ModelRefusalError as exc:
-        return ProjectAnalysisRun(
-            report=build_refused_report(str(exc.refusal)),
-            model=model_name,
-            reasoning_effort=effort,
-            response_id=None,
-            trace_id=trace_id,
-            usage=None,
-            error={"type": "model_refusal", "message": str(exc.refusal)},
-        )
+            for attempt in range(STRUCTURED_OUTPUT_MAX_ATTEMPTS):
+                try:
+                    result = await Runner.run(
+                        agent,
+                        _json_dumps(
+                            _retry_input_payload(input_payload, validation_errors[-1])
+                            if validation_errors
+                            else input_payload
+                        ),
+                        context=active_tool_context,
+                        max_turns=settings.agent_max_turns,
+                    )
+                    report = result.final_output_as(
+                        ProjectAnalysisReport,
+                        raise_if_incorrect_type=True,
+                    )
+                    break
+                except ModelRefusalError as exc:
+                    return ProjectAnalysisRun(
+                        report=build_refused_report(str(exc.refusal)),
+                        model=model_name,
+                        reasoning_effort=effort,
+                        response_id=None,
+                        trace_id=trace_id,
+                        usage=None,
+                        error={"type": "model_refusal", "message": str(exc.refusal)},
+                    )
+                except (ModelBehaviorError, TypeError) as exc:
+                    validation_errors.append(str(exc))
+                    if attempt + 1 < STRUCTURED_OUTPUT_MAX_ATTEMPTS:
+                        continue
+                    error_message = "Structured Output validation failed after one retry."
+                    return ProjectAnalysisRun(
+                        report=build_failed_report(
+                            error_message,
+                            mcp_evidence=active_tool_context.mcp_evidence,
+                            rag_sources=rag_sources or [],
+                        ),
+                        model=model_name,
+                        reasoning_effort=effort,
+                        response_id=(
+                            getattr(result, "last_response_id", None)
+                            if result
+                            else None
+                        ),
+                        trace_id=trace_id,
+                        usage=(
+                            _collect_usage(getattr(result, "raw_responses", []))
+                            if result
+                            else None
+                        ),
+                        error={
+                            "type": "structured_output_validation",
+                            "message": error_message,
+                            "attempts": len(validation_errors),
+                            "errors": validation_errors,
+                        },
+                    )
     except Exception as exc:
         raise AnalysisRunnerError(str(exc)) from exc
 
-    report = result.final_output_as(ProjectAnalysisReport, raise_if_incorrect_type=True)
+    if report is None or result is None:
+        raise AnalysisRunnerError("analysis runner ended without a structured report")
+
     report = _merge_report_evidence(
         report,
         mcp_evidence=active_tool_context.mcp_evidence,
@@ -285,6 +342,9 @@ def _mock_completed_report(
                 f"{title}는 게시글 설명과 배포 URL 근거를 바탕으로 분석된 프로젝트입니다. "
                 "이 리포트는 OPENAI_API_KEY가 없는 로컬 검증용 mock 결과입니다."
             ),
+            site_structure_summary="mock 경로에서는 실제 사이트 구조를 수집하지 않고 MCP 호출 계약만 확인합니다.",
+            service_essence="게시글 설명 기준으로는 배포된 프로젝트를 AI 리포트 카드로 점검하는 사례입니다.",
+            key_insight="실제 품질 평가는 사이트 구조 근거와 모델 출력이 함께 있을 때만 판단할 수 있습니다.",
             target_users=_list_or_default(post.get("target_user"), ["초기 사용자"]),
             core_features=["프로젝트 소개", "배포된 서비스 확인"],
             confirmed_facts=[f"게시글 제목: {title}"],
@@ -322,6 +382,25 @@ def _mock_completed_report(
         ),
         evidence=EvidenceBlock(mcp_sources=mcp_sources, rag_sources=rag_sources),
         status=ReportStatusBlock(status="completed"),
+        portfolio=PortfolioDraft(
+            headline=f"{title}: AI 리뷰 가능한 프로젝트 포트폴리오",
+            problem="프로젝트의 목적, 사용자, 배포 근거를 한 화면에서 설명해야 합니다.",
+            solution=summary,
+            impact="ProjectLens 리포트와 유사 프로젝트 근거를 함께 보여주면 회고와 발표 준비 시간이 줄어듭니다.",
+            tech_highlights=_list_or_default(post.get("tech_stack"), ["ProjectLens"]),
+            proof_points=[f"게시글 제목: {title}", "MCP/RAG 근거를 카드 UI에서 확인할 수 있습니다."],
+            limitations=["이 문장은 OPENAI_API_KEY가 없는 로컬 mock 결과이므로 실제 모델 품질 평가는 아닙니다."],
+        ),
+        presentation=PresentationDraft(
+            opening=f"{title}를 ProjectLens로 분석한 결과를 공유하겠습니다.",
+            key_points=[
+                "서비스 이해, 강점, 보완점을 구조화 카드로 나누었습니다.",
+                "확인된 사실과 AI 추정을 분리해 과장을 줄였습니다.",
+            ],
+            demo_flow=["프로젝트 게시글 확인", "AI 분석 실행", "진단 카드와 유사 프로젝트 카드 확인"],
+            risks_or_next_steps=["실제 모델 경로와 충분한 사용자 데이터를 더 검증해야 합니다."],
+            closing="다음 단계는 실제 사용자 업로드와 리포트 품질 비교입니다.",
+        ),
     )
 
 
@@ -339,12 +418,32 @@ def _rag_source_to_input(item: RagSource) -> dict[str, Any]:
     return item.model_dump(mode="json")
 
 
+def _retry_input_payload(input_payload: dict[str, Any], validation_error: str) -> dict[str, Any]:
+    return {
+        **input_payload,
+        "structured_output_retry": {
+            "reason": (
+                "The previous model output could not be parsed as ProjectAnalysisReport. "
+                "Retry once with valid JSON that exactly matches the schema. Do not add "
+                "extra fields."
+            ),
+            "previous_error": validation_error,
+        },
+    }
+
+
 def _mcp_evidence_to_report_source(item: CollectedMcpEvidence) -> McpSource:
     result = item.result if isinstance(item.result, dict) else {}
     if item.tool_name == CHECK_DEPLOY_STATUS:
         evidence_kind = "deploy_status"
     elif item.tool_name == FETCH_GITHUB_README:
         evidence_kind = "github_readme"
+    elif item.tool_name == FETCH_SITE_CONTEXT:
+        evidence_kind = "site_context"
+    elif item.tool_name == CAPTURE_SCREENSHOT:
+        evidence_kind = "screenshot"
+    elif item.tool_name == RUN_LIGHTHOUSE_SUMMARY:
+        evidence_kind = "lighthouse"
     else:
         evidence_kind = "mcp_site"
     return McpSource(
@@ -390,6 +489,37 @@ def _summarize_mcp_result(item: CollectedMcpEvidence) -> str:
         if stars is not None:
             parts.append(f"stars={stars}")
         return " / ".join(parts)
+    if item.tool_name == FETCH_SITE_CONTEXT:
+        pages = result.get("pages") if isinstance(result.get("pages"), list) else []
+        titles = []
+        for page in pages[:3]:
+            if isinstance(page, dict):
+                title = page.get("title") or page.get("h1") or page.get("url")
+                if title:
+                    titles.append(str(title))
+        title_text = ", ".join(titles) if titles else "대표 제목 없음"
+        return f"{len(pages)}개 내부 페이지 수집: {title_text}"
+    if item.tool_name == CAPTURE_SCREENSHOT:
+        viewport = result.get("viewport") if isinstance(result.get("viewport"), dict) else {}
+        viewport_text = (
+            f"{viewport.get('width')}x{viewport.get('height')}"
+            if viewport.get("width") and viewport.get("height")
+            else "unknown"
+        )
+        visible_text = str(result.get("visible_text_sample") or "").strip()
+        if len(visible_text) > 100:
+            visible_text = visible_text[:99].rstrip() + "..."
+        return f"화면 캡처 완료: viewport={viewport_text}, visible_text={visible_text or '없음'}"
+    if item.tool_name == RUN_LIGHTHOUSE_SUMMARY:
+        scores = result.get("scores") if isinstance(result.get("scores"), dict) else {}
+        return (
+            "Lighthouse: "
+            f"perf/accessibility/best/seo = "
+            f"{_format_score(scores.get('performance'))}/"
+            f"{_format_score(scores.get('accessibility'))}/"
+            f"{_format_score(scores.get('best_practices'))}/"
+            f"{_format_score(scores.get('seo'))}"
+        )
     return "MCP 도구 결과"
 
 
@@ -413,6 +543,24 @@ async def _collect_mock_tool_evidence(
             {"url": service_url},
             expected_url=context.service_url,
         )
+        await call_projectlens_mcp_tool(
+            context,
+            FETCH_SITE_CONTEXT,
+            {"url": service_url},
+            expected_url=context.service_url,
+        )
+        await call_projectlens_mcp_tool(
+            context,
+            CAPTURE_SCREENSHOT,
+            {"url": service_url},
+            expected_url=context.service_url,
+        )
+        await call_projectlens_mcp_tool(
+            context,
+            RUN_LIGHTHOUSE_SUMMARY,
+            {"url": service_url},
+            expected_url=context.service_url,
+        )
     if github_url:
         await call_projectlens_mcp_tool(
             context,
@@ -428,14 +576,12 @@ def _merge_report_evidence(
     mcp_evidence: list[CollectedMcpEvidence],
     rag_sources: list[RagSource],
 ) -> ProjectAnalysisReport:
-    existing_mcp_keys = {
-        (source.tool_name, source.url, source.final_url, source.summary)
-        for source in report.evidence.mcp_sources
-    }
-    mcp_sources = list(report.evidence.mcp_sources)
+    mcp_sources = [_mcp_evidence_to_report_source(item) for item in mcp_evidence]
+    existing_mcp_keys = {_mcp_source_identity(source) for source in mcp_sources}
     for item in mcp_evidence:
-        source = _mcp_evidence_to_report_source(item)
-        key = (source.tool_name, source.url, source.final_url, source.summary)
+        existing_mcp_keys.add(_mcp_source_identity(_mcp_evidence_to_report_source(item)))
+    for source in report.evidence.mcp_sources:
+        key = _mcp_source_identity(source)
         if key not in existing_mcp_keys:
             mcp_sources.append(source)
             existing_mcp_keys.add(key)
@@ -457,18 +603,17 @@ def _merge_report_evidence(
     )
 
 
+def _mcp_source_identity(source: McpSource) -> tuple[str, str | None]:
+    return (source.tool_name, source.final_url or source.url)
+
+
 def _collect_usage(raw_responses: list[Any]) -> dict[str, Any] | None:
     usage_items = []
     for response in raw_responses:
         usage = getattr(response, "usage", None)
         if usage is None:
             continue
-        if hasattr(usage, "model_dump"):
-            usage_items.append(usage.model_dump(mode="json"))
-        elif hasattr(usage, "__dict__"):
-            usage_items.append(dict(usage.__dict__))
-        else:
-            usage_items.append(str(usage))
+        usage_items.append(_trim_value(usage))
     if not usage_items:
         return None
     return usage_items[-1] if len(usage_items) == 1 else {"responses": usage_items}
@@ -479,6 +624,8 @@ def _json_dumps(value: Any) -> str:
 
 
 def _trim_value(value: Any) -> Any:
+    if hasattr(value, "model_dump"):
+        return _trim_value(value.model_dump(mode="json"))
     if isinstance(value, dict):
         return {str(key): _trim_value(item) for key, item in value.items()}
     if isinstance(value, list):
@@ -489,6 +636,8 @@ def _trim_value(value: Any) -> Any:
         return value if len(value) <= MAX_INPUT_TEXT_CHARS else value[:MAX_INPUT_TEXT_CHARS].rstrip() + "...[truncated]"
     if hasattr(value, "__dataclass_fields__"):
         return _trim_value(asdict(value))
+    if hasattr(value, "__dict__"):
+        return _trim_value(dict(value.__dict__))
     return value
 
 
@@ -514,3 +663,9 @@ def _first_int(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _format_score(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return str(round(float(value), 2))
+    return "n/a"

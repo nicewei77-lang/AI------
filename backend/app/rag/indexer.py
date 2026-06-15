@@ -116,6 +116,9 @@ def build_report_embedding_text(report: ProjectAnalysisReport) -> str:
     fields = [
         _line("service_summary", service.one_line_summary),
         _line("detailed_summary", service.detailed_summary),
+        _line("site_structure", service.site_structure_summary),
+        _line("service_essence", service.service_essence),
+        _line("key_insight", service.key_insight),
         _line("core_features", _join(service.core_features)),
         _line("confirmed_facts", _join(service.confirmed_facts)),
         _line("inferred_facts", _join(service.inferred_facts)),
@@ -138,4 +141,3 @@ def _line(label: str, value: Any) -> str:
 
 def _join(values: Any) -> str:
     return "; ".join(str(value).strip() for value in values if str(value).strip())
-

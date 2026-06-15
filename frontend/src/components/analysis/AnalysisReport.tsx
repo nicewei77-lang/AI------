@@ -7,6 +7,7 @@ import type {
 } from "../../types/analysis";
 import AnalysisStatusBadge from "./AnalysisStatusBadge";
 import DiagnosisCard from "./DiagnosisCard";
+import PortfolioPresentationCard from "./PortfolioPresentationCard";
 import ServiceUnderstandingCard from "./ServiceUnderstandingCard";
 import SimilarProjectsCard from "./SimilarProjectsCard";
 
@@ -40,6 +41,19 @@ const REPORT_STATUS_COPY: Record<ReportStatus, {title: string; body: string}> = 
 
 function hasLatestMetadata(analysis: AnalysisResponse): analysis is AnalysisLatestResponse {
     return "createdAt" in analysis;
+}
+
+const MCP_TOOL_LABELS: Record<string, string> = {
+    fetch_site_overview: "사이트 개요",
+    check_deploy_status: "배포 상태",
+    fetch_github_readme: "GitHub README",
+    fetch_site_context: "사이트 컨텍스트",
+    capture_screenshot: "화면 캡처",
+    run_lighthouse_summary: "Lighthouse",
+};
+
+function mcpToolLabel(toolName: string) {
+    return MCP_TOOL_LABELS[toolName] ?? toolName;
 }
 
 function RunButton({disabled, isRunning, onRun}: {disabled: boolean; isRunning: boolean; onRun: () => void}) {
@@ -143,7 +157,7 @@ function EvidenceSource({source}: {source: McpSource}) {
     return (
         <li className="py-3">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-                <strong className="break-words text-sm text-stone-950">{source.tool_name}</strong>
+                <strong className="break-words text-sm text-stone-950">{mcpToolLabel(source.tool_name)}</strong>
                 <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                         source.success
@@ -250,8 +264,9 @@ function AnalysisReport({
             {!isLoading && !analysis ? (
                 <section className="rounded border border-stone-200 bg-white p-4">
                     <p className="text-sm leading-6 text-stone-600">
-                        아직 저장된 AI 진단 리포트가 없습니다. 배포 URL과 프로젝트 설명을 기준으로
-                        첫 분석을 실행할 수 있습니다.
+                        {isRunning
+                            ? "AI 진단 리포트를 생성하는 중입니다. 완료되면 이 영역에 결과가 표시됩니다."
+                            : "아직 저장된 AI 진단 리포트가 없습니다. 배포 URL과 프로젝트 설명을 기준으로 첫 분석을 실행할 수 있습니다."}
                     </p>
                 </section>
             ) : null}
@@ -261,6 +276,10 @@ function AnalysisReport({
                     <StatusCard analysis={analysis} />
                     <ServiceUnderstandingCard service={analysis.report.service_understanding} />
                     <DiagnosisCard diagnosis={analysis.report.diagnosis} />
+                    <PortfolioPresentationCard
+                        portfolio={analysis.report.portfolio}
+                        presentation={analysis.report.presentation}
+                    />
                     <SimilarProjectsCard sources={analysis.report.evidence.rag_sources} />
                     <EvidenceCard analysis={analysis} />
                 </>
