@@ -10,6 +10,7 @@ const EVIDENCE_LABELS: Record<EvidenceKind, string> = {
     deploy_status: "배포 확인",
     github_readme: "GitHub README",
     site_context: "사이트 컨텍스트",
+    rendered_site: "브라우저 렌더링",
     screenshot: "화면 캡처",
     lighthouse: "Lighthouse",
     inferred: "추정",

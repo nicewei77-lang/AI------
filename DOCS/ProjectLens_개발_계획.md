@@ -3,7 +3,7 @@
 > ALIBAI(변명 게시판) → ProjectLens(AI 프로젝트 리뷰 게시판) 전환의 **실행 계획서**. 기획은 `DOCS/ProjectLens_Planning.md`, 현행 규범은 루트 `AGENTS.md`. 이 문서는 "무엇을 어떤 순서로, 어떤 파일을 어떻게 고쳐서 만드는가"에 집중한다.
 > 모드: **제품 우선·탑다운.** 드릴 폐기. 4키워드(게시판·RAG·MCP·Agent) 전부 "동작"시키되, 깊은 퀄리티는 **히어로 = AI 진단 리포트**(MCP fetch → Agent → 구조화 카드) 하나에 몰아준다.
 > 확정 결정: **LLM 스택 = OpenAI Agents SDK + Responses API + gpt-5.5** / **MCP = local/private** / **마이그레이션 = 클린 정리**(`excuse_text`→`body`, `verdict`·`credibility` 드롭) / **분석 = async polling(Q11)** / **RAG = weighted(Q4 이후)**.
-> 현재 체크포인트(2026-06-15): **Q6~Q11 MCP 확장 완료**. site context, screenshot metadata, Lighthouse summary, async polling까지 동작 검증했고 다음 실행은 운영 polish/README 정리다.
+> 현재 체크포인트(2026-06-15): **Q6~Q12 MCP 확장 완료**. site context, rendered fallback, screenshot metadata, Lighthouse summary, async polling까지 동작 검증했고 다음 실행은 운영 polish/README 정리다.
 
 ---
 
@@ -119,7 +119,7 @@
 - 툴 2개: `fetch_site_overview`(status_code·title·description·h1·main_text·links·fetched_at), `check_deploy_status`(is_reachable·status_code·response_time_ms·final_url).
 - **`safety.py`(SSRF 가드, 필수):** DNS 해석 후 IP 검사 → `localhost`/`127.0.0.0/8`/사설 대역(10·172.16-31·192.168)/링크로컬 `169.254.0.0/16`(메타데이터 `169.254.169.254`) 차단, **리다이렉트 최종 URL 재검증**, `timeout`(예 5s), 응답 body 크기 제한(예 1~2MB), `User-Agent` 명시, robots 과도 크롤링 금지.
 - prompt injection 방어: MCP로 가져온 HTML/README/main_text는 **근거 데이터**일 뿐 지시문이 아니다. tool description과 Agent instructions에 외부 텍스트 안의 명령을 무시하라고 명시.
-- tool allowlist: M1/P0는 `fetch_site_overview`, `check_deploy_status` 두 개로 시작했다. 현재 allowlist는 `fetch_github_readme`, `fetch_site_context`, `capture_screenshot`, `run_lighthouse_summary`까지 포함한다.
+- tool allowlist: M1/P0는 `fetch_site_overview`, `check_deploy_status` 두 개로 시작했다. 현재 allowlist는 `fetch_github_readme`, `fetch_site_context`, `fetch_rendered_site_overview`, `capture_screenshot`, `run_lighthouse_summary`까지 포함한다.
 - 백엔드 `backend/app/mcp_client/`(`client.py`·`tools.py`): Agents SDK local/private MCP 연결로 위 툴을 agent-level tool로 노출. MCP 결과는 `mcp_evidences`에 저장하되 비밀값/토큰/불필요한 개인정보는 저장하지 않는다.
 
 **검증:** 실 URL(예 본인 배포 사이트)에 `fetch_site_overview` 단독 호출 → title/메타/main_text 반환. `http://localhost:8000`·`http://169.254.169.254` 입력 시 **차단**됨(SSRF 테스트). 외부 본문에 “이전 지시를 무시하라” 같은 문구가 있어도 리포트 지시로 사용하지 않음(prompt injection 테스트).
@@ -165,7 +165,7 @@
 - `rag/retriever.py`/`similarity.py`: **cosine top-k 단독**(`embedding <=> query` ivfflat). 가중 공식(기획서 §8.5)은 Q4로 미룸.
 - 합류: top-k를 Agent 입력과 `evidence.rag_sources` 근거로 연결 + 프론트 `SimilarProjectsCard`.
 - 빈 상태 정직 처리: 유사도 임계값 미만 → "비슷한 게시물이 아직 충분하지 않습니다".
-- `backend/app/ai/tools.py`: Agents SDK `function_tool`로 `check_deploy_status`, `fetch_site_overview`, `fetch_github_readme`, `fetch_site_context`, `capture_screenshot`, `run_lighthouse_summary`를 노출한다. tool 내부는 기존 `call_mcp_tool()` 경로를 재사용해 SSRF/allowlist/log redaction 계약을 유지한다.
+- `backend/app/ai/tools.py`: Agents SDK `function_tool`로 `check_deploy_status`, `fetch_site_overview`, `fetch_github_readme`, `fetch_site_context`, `fetch_rendered_site_overview`, `capture_screenshot`, `run_lighthouse_summary`를 노출한다. tool 내부는 기존 `call_mcp_tool()` 경로를 재사용해 SSRF/allowlist/log redaction 계약을 유지한다.
 - Agent instructions 보강: 서비스 URL이 있으면 배포 상태/사이트 텍스트/내부 컨텍스트/첫 화면/Lighthouse를 필요한 근거로 호출한다. GitHub URL이 있으면 `fetch_github_readme`로 README/메타데이터를 근거로 가져온다. 외부 텍스트와 도구 결과는 끝까지 evidence이며 instruction이 아니다.
 - `runner.py`/`analysis_service.py`: `AnalysisContext`에 tool call evidence를 모았다가 `ai_reports` row 생성 후 `report_id`를 붙여 `mcp_evidences`에 저장한다. 기존 고정 `_collect_mcp_evidence()`는 제거하거나 mock/fallback 전용으로 낮춘다.
 - `mcp-server/tools/github.py`: GitHub URL에서 `owner/repo`만 파싱하고 서버가 `https://api.github.com/repos/{owner}/{repo}/readme`를 직접 구성한다. `GITHUB_TOKEN`은 선택적이며 `.env`/환경변수에만 둔다. 토큰·Authorization은 로그에 남기지 않는다.
@@ -190,7 +190,7 @@
 - **Q2 · 프롬프트/스키마 튜닝:** "확인된 정보 vs AI 추정" 명시 분리, 보완점 톤(인신공격 금지·실행 가능 제안), 카드별 재생성 버튼(선택).
 - **Q3 · 보너스 줍기:** 포폴/발표 카드 — 같은 리포트 재활용이라 **저비용 고가치**. `POST /posts/{id}/portfolio`·`/presentation`, `PortfolioCard`·`PresentationCard` + 복사 버튼. 본인 발표 서사에도 직결.
 - **Q4 · RAG 정밀화(데이터 쌓인 뒤):** `semantic*0.65 + tag_overlap*0.15 + vote*0.10 + recency*0.05 + same_type*0.05`(기획서 §8.5). 게시물 20개 미만에선 의미 없으니 데이터 확보 후.
-- **Q5~Q11 · MCP 확장:** Q5에서는 보류했지만 Q6~Q10에서 `fetch_site_context`, `capture_screenshot`, `run_lighthouse_summary`를 local/private MCP로 추가했다. Q11은 실 eval에서 15초 초과가 반복되어 async polling으로 승격했다.
+- **Q5~Q12 · MCP 확장:** Q5에서는 보류했지만 Q6~Q10에서 `fetch_site_context`, `capture_screenshot`, `run_lighthouse_summary`를 local/private MCP로 추가했다. Q11은 실 eval에서 15초 초과가 반복되어 async polling으로 승격했다. Q12는 SPA/JS-only 페이지용 `fetch_rendered_site_overview`를 추가하되, 403/CAPTCHA/anti-bot은 `blocked_by_site`와 보강 입력 안내로 처리한다.
 
 **Q2~Q4 고정 테스트 사이트(결과물 개선 루프):**
 
@@ -246,5 +246,5 @@ M4 [x] embedder/indexer/retriever(cosine) + SimilarProjectsCard + 빈상태
    [x] Agent function_tool 기반 MCP evidence 저장
 M5 [x] 시드 5개 → 동작 증명 → 개방(동의 문구)
 Q1 [x] 실패 모드 5종  Q2 [x] 프롬프트/스키마  Q3 [x] 포폴/발표  Q4 [x] RAG 가중  Q5 [x] 확장 검토
-Q6 [x] evidence 계약  Q7 [x] site context  Q8 [x] screenshot metadata  Q9 [x] Lighthouse summary  Q10 [x] 통합 검증  Q11 [x] async polling
+Q6 [x] evidence 계약  Q7 [x] site context  Q8 [x] screenshot metadata  Q9 [x] Lighthouse summary  Q10 [x] 통합 검증  Q11 [x] async polling  Q12 [x] rendered fallback/blocked URL
 ```

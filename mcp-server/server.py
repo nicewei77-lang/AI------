@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 
 from tools.github import fetch_github_readme as run_fetch_github_readme
 from tools.lighthouse import run_lighthouse_summary as run_lighthouse_summary_tool
+from tools.rendered_site import fetch_rendered_site_overview as run_fetch_rendered_site_overview
 from tools.screenshot import capture_screenshot as run_capture_screenshot
 from tools.site import check_deploy_status as run_check_deploy_status
 from tools.site import fetch_site_overview as run_fetch_site_overview
@@ -83,6 +84,21 @@ async def fetch_github_readme(github_url: str) -> dict[str, Any]:
 )
 async def fetch_site_context(url: str) -> dict[str, Any]:
     return await run_fetch_site_context(url)
+
+
+@mcp.tool(
+    name="fetch_rendered_site_overview",
+    description=(
+        "Render the submitted public service URL in Chromium and return bounded "
+        "text evidence only: status_code, title, description, h1, visible_text, "
+        "links, and blocked_by_site/block_reason. This is a JavaScript-rendered "
+        "fallback for public pages, not an anti-bot bypass. Browser requests are "
+        "SSRF-guarded and the final URL is revalidated."
+    ),
+    structured_output=True,
+)
+async def fetch_rendered_site_overview(url: str) -> dict[str, Any]:
+    return await run_fetch_rendered_site_overview(url)
 
 
 @mcp.tool(

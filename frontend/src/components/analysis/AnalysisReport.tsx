@@ -48,6 +48,7 @@ const MCP_TOOL_LABELS: Record<string, string> = {
     check_deploy_status: "배포 상태",
     fetch_github_readme: "GitHub README",
     fetch_site_context: "사이트 컨텍스트",
+    fetch_rendered_site_overview: "브라우저 렌더링",
     capture_screenshot: "화면 캡처",
     run_lighthouse_summary: "Lighthouse",
 };
@@ -154,6 +155,10 @@ function StatusCard({analysis}: {analysis: AnalysisResponse}) {
 }
 
 function EvidenceSource({source}: {source: McpSource}) {
+    const renderedSiteBlocked = source.tool_name === "fetch_rendered_site_overview"
+        && source.success
+        && ((source.status_code ?? 0) >= 400 || source.summary.includes("차단"));
+
     return (
         <li className="py-3">
             <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -174,6 +179,11 @@ function EvidenceSource({source}: {source: McpSource}) {
                 ) : null}
             </div>
             <p className="break-words text-sm leading-6 text-stone-700">{source.summary}</p>
+            {renderedSiteBlocked ? (
+                <p className="mt-2 break-words rounded border border-amber-100 bg-amber-50 p-2 text-xs text-amber-800">
+                    사이트가 자동 수집을 제한했습니다. GitHub URL, 더 긴 설명, 또는 직접 제출한 화면/텍스트 근거가 필요합니다.
+                </p>
+            ) : null}
             {source.url || source.final_url ? (
                 <p className="mt-1 break-all text-xs text-stone-500">
                     {source.final_url ?? source.url}

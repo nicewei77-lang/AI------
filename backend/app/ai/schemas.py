@@ -12,6 +12,7 @@ EvidenceKind = Literal[
     "deploy_status",
     "github_readme",
     "site_context",
+    "rendered_site",
     "screenshot",
     "lighthouse",
     "inferred",
@@ -86,6 +87,7 @@ class McpSource(ProjectLensBaseModel):
         "deploy_status",
         "github_readme",
         "site_context",
+        "rendered_site",
         "screenshot",
         "lighthouse",
     ]
@@ -94,6 +96,7 @@ class McpSource(ProjectLensBaseModel):
         "deploy_status",
         "github_readme",
         "site_context",
+        "rendered_site",
         "screenshot",
         "lighthouse",
     ]

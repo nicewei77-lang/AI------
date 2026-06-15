@@ -8,6 +8,7 @@ export type EvidenceKind =
     | "deploy_status"
     | "github_readme"
     | "site_context"
+    | "rendered_site"
     | "screenshot"
     | "lighthouse"
     | "inferred"
@@ -62,8 +63,8 @@ export interface Diagnosis {
 
 export interface McpSource {
     tool_name: string;
-    evidence_kind: "mcp_site" | "deploy_status" | "github_readme" | "site_context" | "screenshot" | "lighthouse";
-    based_on: "mcp_site" | "deploy_status" | "github_readme" | "site_context" | "screenshot" | "lighthouse";
+    evidence_kind: "mcp_site" | "deploy_status" | "github_readme" | "site_context" | "rendered_site" | "screenshot" | "lighthouse";
+    based_on: "mcp_site" | "deploy_status" | "github_readme" | "site_context" | "rendered_site" | "screenshot" | "lighthouse";
     success: boolean;
     summary: string;
     url?: string | null;

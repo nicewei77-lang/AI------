@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     mcp_site_context_max_pages: int = 5
     mcp_site_context_text_limit_chars: int = 12_000
     mcp_site_context_timeout_seconds: float = 15.0
+    mcp_rendered_timeout_seconds: float = 12.0
+    mcp_rendered_text_limit_chars: int = 4_000
     mcp_screenshot_timeout_seconds: float = 10.0
     mcp_lighthouse_timeout_seconds: float = 25.0
     mcp_github_readme_limit_chars: int = 6_000

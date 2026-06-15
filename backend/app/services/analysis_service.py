@@ -14,14 +14,17 @@ from app.ai.runner import (
     build_failed_report,
     build_need_more_info_report,
     build_runner_input,
+    merge_report_evidence,
     run_project_analysis,
 )
+from app.ai.tools import call_projectlens_mcp_tool
 from app.ai.schemas import ProjectAnalysisReport, ReportStatus
 from app.config import settings
 from app.mcp_client.client import record_mcp_evidence
 from app.mcp_client.tools import (
     CHECK_DEPLOY_STATUS,
     FETCH_GITHUB_README,
+    FETCH_RENDERED_SITE_OVERVIEW,
     FETCH_SITE_CONTEXT,
     FETCH_SITE_OVERVIEW,
 )
@@ -105,6 +108,25 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
             tool_context=tool_context,
             rag_sources=rag_sources,
         )
+        rendered_fallback_collected = await _collect_rendered_site_fallback_if_needed(
+            post,
+            run,
+            tool_context,
+        )
+        if rendered_fallback_collected:
+            run = ProjectAnalysisRun(
+                report=merge_report_evidence(
+                    run.report,
+                    mcp_evidence=tool_context.mcp_evidence,
+                    rag_sources=rag_sources,
+                ),
+                model=run.model,
+                reasoning_effort=run.reasoning_effort,
+                response_id=run.response_id,
+                trace_id=run.trace_id,
+                usage=run.usage,
+                error=run.error,
+            )
         run = _force_failed_if_external_evidence_unusable(post, run, tool_context.mcp_evidence)
     except Exception as exc:
         error = _error_payload("analysis_error", exc)
@@ -308,6 +330,37 @@ def _post_snapshot(post: Post) -> dict[str, Any]:
     }
 
 
+async def _collect_rendered_site_fallback_if_needed(
+    post: Post,
+    run: ProjectAnalysisRun,
+    tool_context: AnalysisToolContext,
+) -> bool:
+    if run.report.status.status != "completed":
+        return False
+    if not (post.service_url or "").strip():
+        return False
+    if any(item.tool_name == FETCH_RENDERED_SITE_OVERVIEW for item in tool_context.mcp_evidence):
+        return False
+    if not _service_url_reachable(post, tool_context.mcp_evidence):
+        return False
+
+    site_text_tools = {FETCH_SITE_OVERVIEW, FETCH_SITE_CONTEXT}
+    site_text_items = [
+        item for item in tool_context.mcp_evidence
+        if item.tool_name in site_text_tools
+    ]
+    if any(_mcp_item_has_usable_text_result(item) for item in site_text_items):
+        return False
+
+    await call_projectlens_mcp_tool(
+        tool_context,
+        FETCH_RENDERED_SITE_OVERVIEW,
+        {"url": post.service_url},
+        expected_url=tool_context.service_url,
+    )
+    return True
+
+
 def _force_failed_if_external_evidence_unusable(
     post: Post,
     run: ProjectAnalysisRun,
@@ -349,6 +402,33 @@ def _force_failed_if_external_evidence_unusable(
     if has_textual_evidence:
         return run
 
+    if _external_site_blocked(post, mcp_evidence):
+        missing_fields = ["github_url", "detailed_description"]
+        questions = [
+            "사이트가 자동 수집을 차단했습니다. 공개 GitHub 저장소나 README URL을 추가해 주세요.",
+            "또는 서비스 화면/기능/사용자 흐름을 200자 이상으로 자세히 적어 주세요.",
+            "공식 API나 허가된 데이터 경로가 있다면 그 링크도 함께 제출해 주세요.",
+        ]
+        report = build_need_more_info_report(
+            missing_fields,
+            questions,
+            mcp_evidence=mcp_evidence,
+            rag_sources=run.report.evidence.rag_sources,
+        )
+        return ProjectAnalysisRun(
+            report=report,
+            model=run.model,
+            reasoning_effort=run.reasoning_effort,
+            response_id=run.response_id,
+            trace_id=run.trace_id,
+            usage=run.usage,
+            error=run.error
+            or {
+                "type": "blocked_by_site",
+                "message": "Submitted site blocks automated evidence collection.",
+            },
+        )
+
     message = (
         "제출된 URL/GitHub에서 분석 가능한 외부 근거를 가져오지 못했습니다. "
         "접속 가능한 배포 URL, 공개 GitHub 저장소, 또는 더 긴 프로젝트 설명이 필요합니다."
@@ -381,7 +461,12 @@ def _has_sufficient_written_context(post: Post) -> bool:
 def _expected_external_tools(post: Post) -> set[str]:
     tools: set[str] = set()
     if (post.service_url or "").strip():
-        tools.update({CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW, FETCH_SITE_CONTEXT})
+        tools.update({
+            CHECK_DEPLOY_STATUS,
+            FETCH_SITE_OVERVIEW,
+            FETCH_SITE_CONTEXT,
+            FETCH_RENDERED_SITE_OVERVIEW,
+        })
     if (post.github_url or "").strip():
         tools.add(FETCH_GITHUB_README)
     return tools
@@ -394,6 +479,13 @@ def _service_url_failed(post: Post, mcp_evidence: list[CollectedMcpEvidence]) ->
     if not deploy_checks:
         return False
     return all(not _mcp_deploy_check_reachable(item) for item in deploy_checks)
+
+
+def _service_url_reachable(post: Post, mcp_evidence: list[CollectedMcpEvidence]) -> bool:
+    if not (post.service_url or "").strip():
+        return False
+    deploy_checks = [item for item in mcp_evidence if item.tool_name == CHECK_DEPLOY_STATUS]
+    return any(_mcp_deploy_check_reachable(item) for item in deploy_checks)
 
 
 def _mcp_deploy_check_reachable(item: CollectedMcpEvidence) -> bool:
@@ -430,6 +522,24 @@ def _mcp_item_has_usable_text_result(item: CollectedMcpEvidence) -> bool:
                 ("title", "description", "h1", "main_text"),
             )
         return total >= 80
+    if item.tool_name == FETCH_RENDERED_SITE_OVERVIEW:
+        if bool(item.result.get("blocked_by_site")):
+            return False
+        return _combined_text_length(
+            item.result,
+            ("title", "description", "h1", "visible_text"),
+        ) >= 80
+    return False
+
+
+def _external_site_blocked(post: Post, mcp_evidence: list[CollectedMcpEvidence]) -> bool:
+    if not (post.service_url or "").strip():
+        return False
+    for item in mcp_evidence:
+        if item.tool_name != FETCH_RENDERED_SITE_OVERVIEW:
+            continue
+        if item.success and isinstance(item.result, dict) and item.result.get("blocked_by_site"):
+            return True
     return False
 
 

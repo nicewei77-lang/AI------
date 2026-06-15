@@ -41,6 +41,8 @@ def _mcp_env() -> dict[str, str]:
         "MCP_SITE_CONTEXT_MAX_PAGES": str(settings.mcp_site_context_max_pages),
         "MCP_SITE_CONTEXT_TEXT_LIMIT_CHARS": str(settings.mcp_site_context_text_limit_chars),
         "MCP_SITE_CONTEXT_TIMEOUT_SECONDS": str(settings.mcp_site_context_timeout_seconds),
+        "MCP_RENDERED_TIMEOUT_SECONDS": str(settings.mcp_rendered_timeout_seconds),
+        "MCP_RENDERED_TEXT_LIMIT_CHARS": str(settings.mcp_rendered_text_limit_chars),
         "MCP_SCREENSHOT_TIMEOUT_SECONDS": str(settings.mcp_screenshot_timeout_seconds),
         "MCP_LIGHTHOUSE_TIMEOUT_SECONDS": str(settings.mcp_lighthouse_timeout_seconds),
         "MCP_GITHUB_README_LIMIT_CHARS": str(settings.mcp_github_readme_limit_chars),
@@ -61,6 +63,7 @@ def create_projectlens_mcp_server() -> MCPServerStdio:
     session_timeout = max(
         settings.mcp_request_timeout_seconds,
         settings.mcp_site_context_timeout_seconds,
+        settings.mcp_rendered_timeout_seconds,
         settings.mcp_screenshot_timeout_seconds,
         settings.mcp_lighthouse_timeout_seconds,
     )

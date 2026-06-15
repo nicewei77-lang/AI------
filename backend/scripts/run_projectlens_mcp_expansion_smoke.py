@@ -28,6 +28,7 @@ from app.config import settings
 from app.db import SessionLocal
 from app.mcp_client.tools import (
     CAPTURE_SCREENSHOT,
+    FETCH_RENDERED_SITE_OVERVIEW,
     FETCH_SITE_CONTEXT,
     RUN_LIGHTHOUSE_SUMMARY,
 )
@@ -37,6 +38,7 @@ from app.schemas import PostCreate
 from app.services import analysis_service
 from app.services import posts as posts_service
 from tools.lighthouse import run_lighthouse_summary
+from tools.rendered_site import detect_block_reason, fetch_rendered_site_overview
 from tools.screenshot import capture_screenshot
 from tools.site_context import fetch_site_context
 
@@ -211,6 +213,14 @@ async def main() -> None:
 async def run_direct_tool_checks() -> dict[str, Any]:
     context = await fetch_site_context("https://example.com/")
     context_ssrf = await fetch_site_context("http://127.0.0.1:8000")
+    rendered = await fetch_rendered_site_overview("https://example.com/")
+    rendered_ssrf = await fetch_rendered_site_overview("http://127.0.0.1:8000")
+    challenge_reason = detect_block_reason(
+        status_code=403,
+        title="etsy.com",
+        h1="",
+        visible_text="Please enable JS and disable any ad blocker",
+    )
     screenshot = await capture_screenshot("https://example.com/")
     screenshot_ssrf = await capture_screenshot("http://127.0.0.1:8000")
     lighthouse = await run_lighthouse_summary("https://example.com/")
@@ -226,6 +236,9 @@ async def run_direct_tool_checks() -> dict[str, Any]:
         "results": {
             "fetch_site_context": context,
             "fetch_site_context_ssrf": context_ssrf,
+            "fetch_rendered_site_overview": _compact_direct_tool_result(rendered),
+            "fetch_rendered_site_overview_ssrf": rendered_ssrf,
+            "blocked_fixture_reason": challenge_reason,
             "capture_screenshot": _compact_direct_tool_result(screenshot),
             "capture_screenshot_ssrf": screenshot_ssrf,
             "run_lighthouse_summary": _compact_direct_tool_result(lighthouse),
@@ -235,6 +248,10 @@ async def run_direct_tool_checks() -> dict[str, Any]:
             context.get("success") is True
             and 1 <= int(context.get("page_count") or 0) <= 5
             and context_ssrf.get("success") is False
+            and rendered.get("success") is True
+            and rendered.get("blocked_by_site") is False
+            and rendered_ssrf.get("success") is False
+            and challenge_reason is not None
             and screenshot_has_no_bytes
             and screenshot_ssrf.get("success") is False
             and lighthouse_has_no_raw_report
@@ -251,6 +268,8 @@ def _compact_direct_tool_result(result: dict[str, Any]) -> dict[str, Any]:
     compact = dict(result)
     if "visible_text_sample" in compact:
         compact["visible_text_sample"] = str(compact["visible_text_sample"])[:120]
+    if "visible_text" in compact:
+        compact["visible_text"] = str(compact["visible_text"])[:120]
     return compact
 
 
@@ -335,9 +354,14 @@ async def run_analysis_case(session: AsyncSession, author_id: int, smoke: SmokeP
     }
     new_tool_rows_present = all(
         (success_by_tool.get(tool, 0) + failure_by_tool.get(tool, 0)) >= 1
-        for tool in (FETCH_SITE_CONTEXT, CAPTURE_SCREENSHOT, RUN_LIGHTHOUSE_SUMMARY)
+        for tool in (
+            FETCH_SITE_CONTEXT,
+            FETCH_RENDERED_SITE_OVERVIEW,
+            CAPTURE_SCREENSHOT,
+            RUN_LIGHTHOUSE_SUMMARY,
+        )
     )
-    new_tool_sources_present = {"site_context", "screenshot", "lighthouse"}.issubset(mcp_source_kinds)
+    new_tool_sources_present = {"site_context", "rendered_site", "screenshot", "lighthouse"}.issubset(mcp_source_kinds)
     successful_lighthouse_summary_persisted = _successful_lighthouse_summary_persisted(evidence_rows)
     return {
         "post_id": post.id,

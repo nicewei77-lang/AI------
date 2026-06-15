@@ -32,6 +32,7 @@ from app.mcp_client.tools import (
     CAPTURE_SCREENSHOT,
     CHECK_DEPLOY_STATUS,
     FETCH_GITHUB_README,
+    FETCH_RENDERED_SITE_OVERVIEW,
     FETCH_SITE_CONTEXT,
     FETCH_SITE_OVERVIEW,
     RUN_LIGHTHOUSE_SUMMARY,
@@ -201,7 +202,13 @@ async def run_project_analysis(
     )
 
 
-def build_need_more_info_report(missing_fields: list[str], questions: list[str]) -> ProjectAnalysisReport:
+def build_need_more_info_report(
+    missing_fields: list[str],
+    questions: list[str],
+    *,
+    mcp_evidence: list[CollectedMcpEvidence] | None = None,
+    rag_sources: list[RagSource] | None = None,
+) -> ProjectAnalysisReport:
     return ProjectAnalysisReport(
         service_understanding=ServiceUnderstanding(
             one_line_summary="분석에 필요한 프로젝트 정보가 부족합니다.",
@@ -213,7 +220,13 @@ def build_need_more_info_report(missing_fields: list[str], questions: list[str])
             auto_tags=[],
         ),
         diagnosis=Diagnosis(strengths=[], weaknesses=[], improvement_plan=[]),
-        evidence=EvidenceBlock(mcp_sources=[], rag_sources=[]),
+        evidence=EvidenceBlock(
+            mcp_sources=[
+                _mcp_evidence_to_report_source(item)
+                for item in (mcp_evidence or [])
+            ],
+            rag_sources=rag_sources or [],
+        ),
         status=ReportStatusBlock(
             status="need_more_info",
             missing_fields=missing_fields,
@@ -440,6 +453,8 @@ def _mcp_evidence_to_report_source(item: CollectedMcpEvidence) -> McpSource:
         evidence_kind = "github_readme"
     elif item.tool_name == FETCH_SITE_CONTEXT:
         evidence_kind = "site_context"
+    elif item.tool_name == FETCH_RENDERED_SITE_OVERVIEW:
+        evidence_kind = "rendered_site"
     elif item.tool_name == CAPTURE_SCREENSHOT:
         evidence_kind = "screenshot"
     elif item.tool_name == RUN_LIGHTHOUSE_SUMMARY:
@@ -499,6 +514,16 @@ def _summarize_mcp_result(item: CollectedMcpEvidence) -> str:
                     titles.append(str(title))
         title_text = ", ".join(titles) if titles else "대표 제목 없음"
         return f"{len(pages)}개 내부 페이지 수집: {title_text}"
+    if item.tool_name == FETCH_RENDERED_SITE_OVERVIEW:
+        title = result.get("title") or result.get("h1") or "렌더링된 사이트"
+        status_code = result.get("status_code")
+        if result.get("blocked_by_site"):
+            reason = result.get("block_reason") or "blocked"
+            return f"브라우저 렌더링 차단 감지: status_code={status_code}, reason={reason}, title={title}"
+        visible_text = str(result.get("visible_text") or "").strip()
+        if len(visible_text) > 100:
+            visible_text = visible_text[:99].rstrip() + "..."
+        return f"브라우저 렌더링 텍스트 수집: {title}, visible_text={visible_text or '없음'}"
     if item.tool_name == CAPTURE_SCREENSHOT:
         viewport = result.get("viewport") if isinstance(result.get("viewport"), dict) else {}
         viewport_text = (
@@ -546,6 +571,12 @@ async def _collect_mock_tool_evidence(
         await call_projectlens_mcp_tool(
             context,
             FETCH_SITE_CONTEXT,
+            {"url": service_url},
+            expected_url=context.service_url,
+        )
+        await call_projectlens_mcp_tool(
+            context,
+            FETCH_RENDERED_SITE_OVERVIEW,
             {"url": service_url},
             expected_url=context.service_url,
         )
@@ -600,6 +631,19 @@ def _merge_report_evidence(
                 rag_sources=merged_rag_sources,
             )
         }
+    )
+
+
+def merge_report_evidence(
+    report: ProjectAnalysisReport,
+    *,
+    mcp_evidence: list[CollectedMcpEvidence],
+    rag_sources: list[RagSource],
+) -> ProjectAnalysisReport:
+    return _merge_report_evidence(
+        report,
+        mcp_evidence=mcp_evidence,
+        rag_sources=rag_sources,
     )
 
 

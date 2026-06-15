@@ -438,13 +438,14 @@ def q5_decision() -> dict[str, Any]:
         ],
         "q6_q10_expansion_tools": [
             "fetch_site_context",
+            "fetch_rendered_site_overview",
             "capture_screenshot",
             "run_lighthouse_summary",
         ],
         "still_deferred": ["robots", "broken links"],
         "reason": (
             "Q5 deferred new MCP tools inside the earlier MVP cut. Q6-Q10 now adds bounded same-origin context, "
-            "metadata-only screenshots, and summarized Lighthouse evidence with graceful failure behavior."
+            "rendered text fallback, metadata-only screenshots, and summarized Lighthouse evidence with graceful failure behavior."
         ),
         "security_contract": (
             "Keep local/private MCP, SSRF guard, redirect final URL revalidation, timeout, body/readme limits, "

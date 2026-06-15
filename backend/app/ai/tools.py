@@ -10,6 +10,7 @@ from app.mcp_client.tools import (
     CAPTURE_SCREENSHOT,
     CHECK_DEPLOY_STATUS,
     FETCH_GITHUB_README,
+    FETCH_RENDERED_SITE_OVERVIEW,
     FETCH_SITE_CONTEXT,
     FETCH_SITE_OVERVIEW,
     RUN_LIGHTHOUSE_SUMMARY,
@@ -21,6 +22,7 @@ def get_project_analysis_tools():
         check_deploy_status,
         fetch_site_overview,
         fetch_site_context,
+        fetch_rendered_site_overview,
         capture_screenshot,
         run_lighthouse_summary,
         fetch_github_readme,
@@ -84,6 +86,27 @@ async def fetch_site_context(
     return await call_projectlens_mcp_tool(
         wrapper.context,
         FETCH_SITE_CONTEXT,
+        {"url": url},
+        expected_url=wrapper.context.service_url,
+    )
+
+
+@function_tool(
+    name_override=FETCH_RENDERED_SITE_OVERVIEW,
+    description_override=(
+        "Render the submitted public service URL in Chromium and return bounded "
+        "text evidence when normal HTTP fetch evidence is too thin. Use only the "
+        "URL from the ProjectLens post. This tool must not be used to bypass "
+        "CAPTCHA, login, anti-bot protections, or site blocks."
+    ),
+)
+async def fetch_rendered_site_overview(
+    wrapper: RunContextWrapper[AnalysisToolContext],
+    url: str,
+) -> dict[str, Any]:
+    return await call_projectlens_mcp_tool(
+        wrapper.context,
+        FETCH_RENDERED_SITE_OVERVIEW,
         {"url": url},
         expected_url=wrapper.context.service_url,
     )
