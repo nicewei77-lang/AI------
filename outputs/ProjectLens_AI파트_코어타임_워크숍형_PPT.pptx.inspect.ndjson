@@ -1,0 +1,474 @@
+{"kind":"deck","id":"pr/61811g","name":"Deck"}
+{"kind":"layout","layoutId":"4ea61a4e-8d4a-4df7-ab88-f750bc44ad1f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"deb6fd56-230b-4197-85e5-b49f2eb1c5e1","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/j8e22j","slide":1,"title":"ProjectLens AI core-time","textShapes":11}
+{"kind":"textbox","id":"sh/twra5gbq","slide":1,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[72,64,540,28]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":1,"text":"AI 활용 필수 요구\n이해하기","textPreview":"AI 활용 필수 요구 | 이해하기","textChars":16,"textLines":2,"bbox":[72,132,620,150]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":1,"text":"RAG, MCP, Agent를 과제 구현 관점으로 연결하기","textPreview":"RAG, MCP, Agent를 과제 구현 관점으로 연결하기","textChars":32,"textLines":1,"bbox":[76,312,700,44]}
+{"kind":"shape","id":"sh/4nap4r65","slide":1,"bbox":[72,430,590,120]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":1,"text":"오늘의 한 문장","textPreview":"오늘의 한 문장","textChars":8,"textLines":1,"bbox":[94,448,546,34]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":1,"text":"RAG는 검색, MCP는 연결, Agent는 루프다.","textPreview":"RAG는 검색, MCP는 연결, Agent는 루프다.","textChars":29,"textLines":1,"bbox":[96,492,542,46]}
+{"kind":"shape","id":"sh/b2hwfyxo","slide":1,"bbox":[700,172,150,72]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":1,"text":"RAG\n검색","textPreview":"RAG | 검색","textChars":6,"textLines":2,"bbox":[710,179,130,62]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":1,"bbox":[972,172,150,72]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":1,"text":"MCP\n연결","textPreview":"MCP | 연결","textChars":6,"textLines":2,"bbox":[982,179,130,62]}
+{"kind":"shape","id":"sh/4r65wjud","slide":1,"bbox":[836,336,150,72]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":1,"text":"Agent\n루프","textPreview":"Agent | 루프","textChars":8,"textLines":2,"bbox":[846,343,130,62]}
+{"kind":"textbox","id":"sh/mlkjm1cf","slide":1,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[855,234,60,44]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":1,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[950,234,60,44]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":1,"text":"발표 중심은 서비스 소개가 아니라\nAI 필수 요구의 구현 판단 기준입니다.","textPreview":"발표 중심은 서비스 소개가 아니라 | AI 필수 요구의 구현 판단 기준입니다.","textChars":41,"textLines":2,"bbox":[746,498,404,74]}
+{"kind":"notes","id":"nt/j8e22j","slide":1,"text":""}
+{"kind":"slide","id":"sl/yfzphk","slide":2,"title":"ProjectLens AI core-time","textShapes":9}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":2,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":2,"text":"과제 요구 전체 지도","textPreview":"과제 요구 전체 지도","textChars":11,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":2,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":2,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/94fu18jq","slide":2,"bbox":[100,390,1080,160]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":2,"text":"게시판 기본 요구","textPreview":"게시판 기본 요구","textChars":9,"textLines":1,"bbox":[122,408,1036,34]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":2,"text":"CRUD\n인증\n댓글\n검색/태그\n페이지네이션","textPreview":"CRUD | 인증 | 댓글 | 검색/태그 | 페이지네이션","textChars":23,"textLines":5,"bbox":[124,452,1032,86]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":2,"bbox":[170,170,940,170]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":2,"text":"AI 필수 요구","textPreview":"AI 필수 요구","textChars":8,"textLines":1,"bbox":[192,188,896,34]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":2,"text":"RAG: 내 데이터 검색\nMCP: 외부 시스템 연결\nAgent: 도구 선택 루프","textPreview":"RAG: 내 데이터 검색 | MCP: 외부 시스템 연결 | Agent: 도구 선택 루프","textChars":44,"textLines":3,"bbox":[194,232,892,96]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":2,"text":"기본 웹 서비스 위에 AI 실행 구조가 올라간다","textPreview":"기본 웹 서비스 위에 AI 실행 구조가 올라간다","textChars":26,"textLines":1,"bbox":[208,580,870,44]}
+{"kind":"notes","id":"nt/yfzphk","slide":2,"text":""}
+{"kind":"slide","id":"sl/tcwi7w","slide":3,"title":"ProjectLens AI core-time","textShapes":14}
+{"kind":"textbox","id":"sh/j2t83itg","slide":3,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":3,"text":"세 기술의 관계","textPreview":"세 기술의 관계","textChars":8,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":3,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":3,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/8bat47y1","slide":3,"bbox":[82,210,300,170]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":3,"text":"RAG","textPreview":"RAG","textChars":3,"textLines":1,"bbox":[104,228,256,34]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":3,"text":"내부 데이터에서 의미적으로 가까운 근거를 찾는다.","textPreview":"내부 데이터에서 의미적으로 가까운 근거를 찾는다.","textChars":27,"textLines":1,"bbox":[106,272,252,96]}
+{"kind":"shape","id":"sh/ji5snelo","slide":3,"bbox":[898,210,300,170]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":3,"text":"MCP","textPreview":"MCP","textChars":3,"textLines":1,"bbox":[920,228,256,34]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":3,"text":"외부 서비스와 도구를 AI가 호출 가능한 형태로 연결한다.","textPreview":"외부 서비스와 도구를 AI가 호출 가능한 형태로 연결한다.","textChars":32,"textLines":1,"bbox":[922,272,252,96]}
+{"kind":"shape","id":"sh/d0z61032","slide":3,"bbox":[450,162,380,230]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":3,"text":"Agent","textPreview":"Agent","textChars":5,"textLines":1,"bbox":[472,180,336,34]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":3,"text":"RAG와 MCP를 언제 쓸지 판단하고 결과를 보고 다시 판단한다.","textPreview":"RAG와 MCP를 언제 쓸지 판단하고 결과를 보고 다시 판단한다.","textChars":36,"textLines":1,"bbox":[474,224,332,156]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":3,"text":"Structured Output -> DB -> UI","textPreview":"Structured Output -> DB -> UI","textChars":29,"textLines":1,"bbox":[430,460,420,58]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[382,246,60,44]}
+{"kind":"textbox","id":"sh/knih4byh","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[838,246,60,44]}
+{"kind":"textbox","id":"sh/val87ed8","slide":3,"text":"세 기술은 병렬 기능이 아니라 하나의 루프 안에서 협력한다.","textPreview":"세 기술은 병렬 기능이 아니라 하나의 루프 안에서 협력한다.","textChars":33,"textLines":1,"bbox":[160,568,960,40]}
+{"kind":"notes","id":"nt/tcwi7w","slide":3,"text":""}
+{"kind":"slide","id":"sl/zeqoee","slide":4,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":4,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":4,"text":"RAG 개념: 학습이 아니라 검색","textPreview":"RAG 개념: 학습이 아니라 검색","textChars":18,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/ed8v6psf","slide":4,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":4,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":4,"bbox":[72,154,560,318]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":4,"text":"핵심 설명","textPreview":"핵심 설명","textChars":5,"textLines":1,"bbox":[94,172,516,34]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":4,"text":"모델 파라미터를 바꾸는 학습이 아니다.\n외부 저장소에서 관련 문서를 검색해 현재 질문의 context로 넣는다.\n좋은 답변은 좋은 retrieval 품질에서 시작한다.","textPreview":"모델 파라미터를 바꾸는 학습이 아니다. | 외부 저장소에서 관련 문서를 검색해 현재 질문의 context로 넣는다. | 좋은 답변은 좋은 retrieval 품질에서 시작한다.","textChars":93,"textLines":3,"bbox":[96,216,512,244]}
+{"kind":"shape","id":"sh/72x4nap4","slide":4,"bbox":[672,154,536,188]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":4,"text":"발표에서 외울 문장","textPreview":"발표에서 외울 문장","textChars":10,"textLines":1,"bbox":[694,172,492,34]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":4,"text":"RAG는 AI에게 데이터를 새로 학습시키는 것이 아니라, 필요한 순간에 검색해서 읽게 하는 방식입니다.","textPreview":"RAG는 AI에게 데이터를 새로 학습시키는 것이 아니라, 필요한 순간에 검색해서 읽게 하는 방식입니다.","textChars":57,"textLines":1,"bbox":[696,216,488,114]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":4,"bbox":[672,386,536,128]}
+{"kind":"textbox","id":"sh/obm58z25","slide":4,"text":"Notion 이미지 자리","textPreview":"Notion 이미지 자리","textChars":13,"textLines":1,"bbox":[704,414,300,30]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":4,"text":"indexing -> retrieval -> generation","textPreview":"indexing -> retrieval -> generation","textChars":35,"textLines":1,"bbox":[704,456,440,36]}
+{"kind":"notes","id":"nt/zeqoee","slide":4,"text":""}
+{"kind":"slide","id":"sl/bjpl55","slide":5,"title":"ProjectLens AI core-time","textShapes":16}
+{"kind":"textbox","id":"sh/czed8v6p","slide":5,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":5,"text":"RAG 구현 흐름","textPreview":"RAG 구현 흐름","textChars":9,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/5sneloj2","slide":5,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/cbulwval","slide":5,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/nqxs72x4","slide":5,"bbox":[64,172,216,88]}
+{"kind":"textbox","id":"sh/u54zidon","slide":5,"text":"문서/DB 수집","textPreview":"문서/DB 수집","textChars":8,"textLines":1,"bbox":[74,196,196,44]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[274,194,30,44]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":5,"bbox":[298,172,216,88]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":5,"text":"chunk 분리","textPreview":"chunk 분리","textChars":8,"textLines":1,"bbox":[308,196,196,44]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[508,194,30,44]}
+{"kind":"shape","id":"sh/83itgfml","slide":5,"bbox":[532,172,216,88]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":5,"text":"embedding 저장","textPreview":"embedding 저장","textChars":12,"textLines":1,"bbox":[542,196,196,44]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[742,194,30,44]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":5,"bbox":[766,172,216,88]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":5,"text":"의미 검색","textPreview":"의미 검색","textChars":5,"textLines":1,"bbox":[776,196,196,44]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[976,194,30,44]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":5,"bbox":[1000,172,216,88]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":5,"text":"context 주입","textPreview":"context 주입","textChars":10,"textLines":1,"bbox":[1010,196,196,44]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":5,"text":"질문과 문서를 같은 embedding 체계로 변환한다.\nvector DB에서 top-k와 threshold로 근거를 고른다.\n검색 결과는 출처와 점수를 함께 남긴다.","textPreview":"질문과 문서를 같은 embedding 체계로 변환한다. | vector DB에서 top-k와 threshold로 근거를 고른다. | 검색 결과는 출처와 점수를 함께 남긴다.","textChars":92,"textLines":3,"bbox":[130,330,980,190]}
+{"kind":"shape","id":"sh/eloj2t83","slide":5,"bbox":[180,546,920,72]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":5,"text":"구현 감각","textPreview":"구현 감각","textChars":5,"textLines":1,"bbox":[202,564,876,34]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":5,"text":"검색 또는 도구 호출 결과는 최종 답변이 아니라 Agent가 판단할 근거입니다.","textPreview":"검색 또는 도구 호출 결과는 최종 답변이 아니라 Agent가 판단할 근거입니다.","textChars":44,"textLines":1,"bbox":[204,608,872,-2]}
+{"kind":"notes","id":"nt/bjpl55","slide":5,"text":""}
+{"kind":"slide","id":"sl/mk45yx","slide":6,"title":"ProjectLens AI core-time","textShapes":8}
+{"kind":"textbox","id":"sh/032lszqt","slide":6,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":6,"text":"RAG 구현 판단과 피할 방식","textPreview":"RAG 구현 판단과 피할 방식","textChars":16,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/p0bi9s36","slide":6,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/0fepkzup","slide":6,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/bulwval8","slide":6,"bbox":[72,150,545,456]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":6,"text":"결정할 것","textPreview":"결정할 것","textChars":5,"textLines":1,"bbox":[94,168,501,34]}
+{"kind":"textbox","id":"sh/t47y1kre","slide":6,"text":"데이터 소스와 저장 단위\nchunk 크기와 overlap\nembedding 모델\nvector DB\ntop-k / threshold / metadata","textPreview":"데이터 소스와 저장 단위 | chunk 크기와 overlap | embedding 모델 | vector DB | top-k / threshold / metadata","textChars":83,"textLines":5,"bbox":[96,212,497,382]}
+{"kind":"shape","id":"sh/0je9cvix","slide":6,"bbox":[663,150,545,456]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":6,"text":"피할 방식","textPreview":"피할 방식","textChars":5,"textLines":1,"bbox":[685,168,501,34]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":6,"text":"모든 문서를 프롬프트에 붙이기\nSQL LIKE만 쓰고 의미 검색이라고 설명하기\n낮은 관련도도 억지로 사용하기\nsource와 score를 숨기기","textPreview":"모든 문서를 프롬프트에 붙이기 | SQL LIKE만 쓰고 의미 검색이라고 설명하기 | 낮은 관련도도 억지로 사용하기 | source와 score를 숨기기","textChars":79,"textLines":4,"bbox":[687,212,497,382]}
+{"kind":"notes","id":"nt/mk45yx","slide":6,"text":""}
+{"kind":"slide","id":"sl/xekho0","slide":7,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/bulwval8","slide":7,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/0fepkzup","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/p0bi9s36","slide":7,"text":"RAG 코드 읽기","textPreview":"RAG 코드 읽기","textChars":9,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/ixczed8v","slide":7,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":7,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/032lszqt","slide":7,"bbox":[72,150,540,82]}
+{"kind":"textbox","id":"sh/tovahoza","slide":7,"text":"익숙한 검색","textPreview":"익숙한 검색","textChars":6,"textLines":1,"bbox":[94,168,496,34]}
+{"kind":"shape","id":"sh/il0rqd4v","slide":7,"bbox":[96,212,492,8]}
+{"kind":"shape","id":"sh/b6xkf6dc","slide":7,"bbox":[72,238,540,188]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":7,"text":"SELECT * FROM posts\nWHERE title LIKE '%환불%';","textPreview":"SELECT * FROM posts | WHERE title LIKE '%환불%';","textChars":44,"textLines":2,"bbox":[92,256,500,158]}
+{"kind":"shape","id":"sh/ahoza1gv","slide":7,"bbox":[668,150,540,82]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":7,"text":"RAG 검색","textPreview":"RAG 검색","textChars":6,"textLines":1,"bbox":[690,168,496,34]}
+{"kind":"shape","id":"sh/sneloj2t","slide":7,"bbox":[692,212,492,8]}
+{"kind":"shape","id":"sh/3ex0nuxc","slide":7,"bbox":[668,238,540,188]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":7,"text":"distance = Embedding.embedding.cosine_distance(query_vector)\nstmt = stmt.order_by(distance).limit(limit)","textPreview":"distance = Embedding.embedding.cosine_distance(query_vector) | stmt = stmt.order_by(distance).limit(limit)","textChars":104,"textLines":2,"bbox":[688,256,500,158]}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":7,"bbox":[170,484,940,100]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":7,"text":"읽는 법","textPreview":"읽는 법","textChars":4,"textLines":1,"bbox":[192,502,896,34]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":7,"text":"둘 다 DB에서 찾지만, LIKE는 문자열 일치이고 RAG는 embedding vector의 의미적 거리 검색입니다.","textPreview":"둘 다 DB에서 찾지만, LIKE는 문자열 일치이고 RAG는 embedding vector의 의미적 거리 검색입니다.","textChars":65,"textLines":1,"bbox":[194,546,892,26]}
+{"kind":"notes","id":"nt/xekho0","slide":7,"text":""}
+{"kind":"slide","id":"sl/t2izdk","slide":8,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":8,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/0z61032l","slide":8,"text":"MCP 개념: AI용 연결 규격","textPreview":"MCP 개념: AI용 연결 규격","textChars":17,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/72x4nap4","slide":8,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":8,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":8,"bbox":[72,154,560,318]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":8,"text":"핵심 설명","textPreview":"핵심 설명","textChars":5,"textLines":1,"bbox":[94,172,516,34]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":8,"text":"MCP는 API를 없애는 기술이 아니다.\n외부 API, DB, 파일, 서비스를 AI가 쓰기 좋은 tool 형태로 감싼다.\nHost와 Client가 통제하고 Server가 실제 외부 작업을 실행한다.","textPreview":"MCP는 API를 없애는 기술이 아니다. | 외부 API, DB, 파일, 서비스를 AI가 쓰기 좋은 tool 형태로 감싼다. | Host와 Client가 통제하고 Server가 실제 외부 작업을 실행한다.","textChars":110,"textLines":3,"bbox":[96,216,512,244]}
+{"kind":"shape","id":"sh/ed8v6psf","slide":8,"bbox":[672,154,536,188]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":8,"text":"발표에서 외울 문장","textPreview":"발표에서 외울 문장","textChars":10,"textLines":1,"bbox":[694,172,492,34]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":8,"text":"MCP는 AI 앱과 외부 도구를 연결하는 공통 포트, 즉 AI 앱의 USB-C처럼 이해하면 쉽습니다.","textPreview":"MCP는 AI 앱과 외부 도구를 연결하는 공통 포트, 즉 AI 앱의 USB-C처럼 이해하면 쉽습니다.","textChars":56,"textLines":1,"bbox":[696,216,488,114]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":8,"bbox":[672,386,536,128]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":8,"text":"Notion 이미지 자리","textPreview":"Notion 이미지 자리","textChars":13,"textLines":1,"bbox":[704,414,300,30]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":8,"text":"USB-C 비유 / Host-Client-Server","textPreview":"USB-C 비유 / Host-Client-Server","textChars":29,"textLines":1,"bbox":[704,456,440,36]}
+{"kind":"notes","id":"nt/t2izdk","slide":8,"text":""}
+{"kind":"slide","id":"sl/lh3c1d","slide":9,"title":"ProjectLens AI core-time","textShapes":16}
+{"kind":"textbox","id":"sh/fyxobm58","slide":9,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":9,"text":"MCP 구조: Host / Client / Server","textPreview":"MCP 구조: Host / Client / Server","textChars":30,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":9,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":9,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/8v6psfil","slide":9,"bbox":[64,172,216,88]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":9,"text":"LLM\n판단","textPreview":"LLM | 판단","textChars":6,"textLines":2,"bbox":[74,196,196,44]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[274,194,30,44]}
+{"kind":"shape","id":"sh/je9cvixc","slide":9,"bbox":[298,172,216,88]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":9,"text":"Host\n권한/context","textPreview":"Host | 권한/context","textChars":15,"textLines":2,"bbox":[308,196,196,44]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[508,194,30,44]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":9,"bbox":[532,172,216,88]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":9,"text":"Client\nJSON-RPC","textPreview":"Client | JSON-RPC","textChars":15,"textLines":2,"bbox":[542,196,196,44]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[742,194,30,44]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":9,"bbox":[766,172,216,88]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":9,"text":"Server\ntool 실행","textPreview":"Server | tool 실행","textChars":14,"textLines":2,"bbox":[776,196,196,44]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[976,194,30,44]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":9,"bbox":[1000,172,216,88]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":9,"text":"외부 서비스","textPreview":"외부 서비스","textChars":6,"textLines":1,"bbox":[1010,196,196,44]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":9,"text":"LLM은 tool_name과 arguments를 만들지만 직접 실행하지 않는다.\nMCP Server 내부에서는 여전히 REST API, DB, 파일 시스템을 호출할 수 있다.\n외부 결과는 instruction이 아니라 evidence로 취급한다.","textPreview":"LLM은 tool_name과 arguments를 만들지만 직접 실행하지 않는다. | MCP Server 내부에서는 여전히 REST API, DB, 파일 시스템을 호출할 수 있다. | 외부 결과는 instruction이 아니라 evidence로 취...","textChars":137,"textLines":3,"bbox":[130,330,980,190]}
+{"kind":"shape","id":"sh/zupwb2hw","slide":9,"bbox":[180,546,920,72]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":9,"text":"구현 감각","textPreview":"구현 감각","textChars":5,"textLines":1,"bbox":[202,564,876,34]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":9,"text":"검색 또는 도구 호출 결과는 최종 답변이 아니라 Agent가 판단할 근거입니다.","textPreview":"검색 또는 도구 호출 결과는 최종 답변이 아니라 Agent가 판단할 근거입니다.","textChars":44,"textLines":1,"bbox":[204,608,872,-2]}
+{"kind":"notes","id":"nt/lh3c1d","slide":9,"text":""}
+{"kind":"slide","id":"sl/hkl7w1","slide":10,"title":"ProjectLens AI core-time","textShapes":8}
+{"kind":"textbox","id":"sh/u9knih4b","slide":10,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/1032lszq","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":10,"text":"MCP 구현 판단과 피할 방식","textPreview":"MCP 구현 판단과 피할 방식","textChars":16,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":10,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":10,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/1orytsvu","slide":10,"bbox":[72,150,545,456]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":10,"text":"결정할 것","textPreview":"결정할 것","textChars":5,"textLines":1,"bbox":[94,168,501,34]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":10,"text":"MCP Server 기능\ntool schema 입력/출력\nJSON-RPC 호출 흐름\n외부 서비스 1개 이상\n권한, allowlist, 보안","textPreview":"MCP Server 기능 | tool schema 입력/출력 | JSON-RPC 호출 흐름 | 외부 서비스 1개 이상 | 권한, allowlist, 보안","textChars":77,"textLines":5,"bbox":[96,212,497,382]}
+{"kind":"shape","id":"sh/upwb2hwf","slide":10,"bbox":[663,150,545,456]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":10,"text":"피할 방식","textPreview":"피할 방식","textChars":5,"textLines":1,"bbox":[685,168,501,34]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":10,"text":"그냥 API 호출 후 MCP라고 부르기\ncall_api 같은 범용 tool 하나만 두기\nAPI key를 tool output에 포함하기\n외부 텍스트를 instruction처럼 따르기","textPreview":"그냥 API 호출 후 MCP라고 부르기 | call_api 같은 범용 tool 하나만 두기 | API key를 tool output에 포함하기 | 외부 텍스트를 instruction처럼 따르기","textChars":101,"textLines":4,"bbox":[687,212,497,382]}
+{"kind":"notes","id":"nt/hkl7w1","slide":10,"text":""}
+{"kind":"slide","id":"sl/8fafxz","slide":11,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":11,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":11,"text":"MCP 코드 읽기","textPreview":"MCP 코드 읽기","textChars":9,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/u9knih4b","slide":11,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/judg7ads","slide":11,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":11,"bbox":[72,150,540,82]}
+{"kind":"textbox","id":"sh/1032lszq","slide":11,"text":"익숙한 REST wrapper","textPreview":"익숙한 REST wrapper","textChars":16,"textLines":1,"bbox":[94,168,496,34]}
+{"kind":"shape","id":"sh/udg7adsj","slide":11,"bbox":[96,212,492,8]}
+{"kind":"shape","id":"sh/nyd0z610","slide":11,"bbox":[72,238,540,188]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":11,"text":"@router.get('/github/readme')\nasync def readme(github_url: str):\n    return await fetch_github_readme(github_url)","textPreview":"@router.get('/github/readme') | async def readme(github_url: str): |     return await fetch_github_readme(github_url)","textChars":113,"textLines":3,"bbox":[92,256,500,158]}
+{"kind":"shape","id":"sh/2lszqtcj","slide":11,"bbox":[668,150,540,82]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":11,"text":"MCP tool","textPreview":"MCP tool","textChars":8,"textLines":1,"bbox":[690,168,496,34]}
+{"kind":"shape","id":"sh/knih4byh","slide":11,"bbox":[692,212,492,8]}
+{"kind":"shape","id":"sh/vu9knih4","slide":11,"bbox":[668,238,540,188]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":11,"text":"@mcp.tool()\nasync def fetch_github_readme(github_url: str) -> dict[str, Any]:\n    return await fetch_github_readme_tool(github_url)","textPreview":"@mcp.tool() | async def fetch_github_readme(github_url: str) -> dict[str, Any]: |     return await fetch_github_readme_tool(github_url)","textChars":131,"textLines":3,"bbox":[688,256,500,158]}
+{"kind":"shape","id":"sh/d0z61032","slide":11,"bbox":[170,484,940,100]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":11,"text":"읽는 법","textPreview":"읽는 법","textChars":4,"textLines":1,"bbox":[192,502,896,34]}
+{"kind":"textbox","id":"sh/vixczed8","slide":11,"text":"둘 다 외부 서비스를 호출하지만, MCP tool은 Agent/Host가 tool 목록과 schema를 보고 호출할 수 있습니다.","textPreview":"둘 다 외부 서비스를 호출하지만, MCP tool은 Agent/Host가 tool 목록과 schema를 보고 호출할 수 있습니다.","textChars":72,"textLines":1,"bbox":[194,546,892,26]}
+{"kind":"notes","id":"nt/8fafxz","slide":11,"text":""}
+{"kind":"slide","id":"sl/5dpt72","slide":12,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":12,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":12,"text":"Agent 개념: 단일 호출이 아니라 루프","textPreview":"Agent 개념: 단일 호출이 아니라 루프","textChars":23,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/bat47y1k","slide":12,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":12,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":12,"bbox":[72,154,560,318]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":12,"text":"핵심 설명","textPreview":"핵심 설명","textChars":5,"textLines":1,"bbox":[94,172,516,34]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":12,"text":"Agent는 프롬프트 한 번으로 답변 받는 것이 아니다.\n목표, 모델, 도구, 상태, 실행 구조를 묶은 시스템이다.\n핵심 작동 방식은 생각 -> 행동 -> 관찰 -> 다시 판단이다.","textPreview":"Agent는 프롬프트 한 번으로 답변 받는 것이 아니다. | 목표, 모델, 도구, 상태, 실행 구조를 묶은 시스템이다. | 핵심 작동 방식은 생각 -> 행동 -> 관찰 -> 다시 판단이다.","textChars":101,"textLines":3,"bbox":[96,216,512,244]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":12,"bbox":[672,154,536,188]}
+{"kind":"textbox","id":"sh/0z61032l","slide":12,"text":"발표에서 외울 문장","textPreview":"발표에서 외울 문장","textChars":10,"textLines":1,"bbox":[694,172,492,34]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":12,"text":"Agent의 핵심은 tool 실행 결과를 관찰하고 다시 판단하는 루프입니다.","textPreview":"Agent의 핵심은 tool 실행 결과를 관찰하고 다시 판단하는 루프입니다.","textChars":42,"textLines":1,"bbox":[696,216,488,114]}
+{"kind":"shape","id":"sh/itgfmlkj","slide":12,"bbox":[672,386,536,128]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":12,"text":"Notion 이미지 자리","textPreview":"Notion 이미지 자리","textChars":13,"textLines":1,"bbox":[704,414,300,30]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":12,"text":"Model + Tools + Orchestration Layer","textPreview":"Model + Tools + Orchestration Layer","textChars":35,"textLines":1,"bbox":[704,456,440,36]}
+{"kind":"notes","id":"nt/5dpt72","slide":12,"text":""}
+{"kind":"slide","id":"sl/lvmdr1","slide":13,"title":"ProjectLens AI core-time","textShapes":15}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":13,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":13,"text":"Agent 루프 핵심 다이어그램","textPreview":"Agent 루프 핵심 다이어그램","textChars":17,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/l87ed8ba","slide":13,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":13,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/32lszqtc","slide":13,"bbox":[64,168,216,88]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":13,"text":"상태 생성","textPreview":"상태 생성","textChars":5,"textLines":1,"bbox":[74,192,196,44]}
+{"kind":"textbox","id":"sh/lwval87e","slide":13,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[274,190,30,44]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":13,"bbox":[298,168,216,88]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":13,"text":"Agent 판단","textPreview":"Agent 판단","textChars":8,"textLines":1,"bbox":[308,192,196,44]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":13,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[508,190,30,44]}
+{"kind":"shape","id":"sh/knih4byh","slide":13,"bbox":[532,168,216,88]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":13,"text":"도구 호출","textPreview":"도구 호출","textChars":5,"textLines":1,"bbox":[542,192,196,44]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":13,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[742,190,30,44]}
+{"kind":"shape","id":"sh/vu9knih4","slide":13,"bbox":[766,168,216,88]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":13,"text":"실행","textPreview":"실행","textChars":2,"textLines":1,"bbox":[776,192,196,44]}
+{"kind":"textbox","id":"sh/d0z61032","slide":13,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[976,190,30,44]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":13,"bbox":[1000,168,216,88]}
+{"kind":"textbox","id":"sh/vixczed8","slide":13,"text":"관찰 결과","textPreview":"관찰 결과","textChars":5,"textLines":1,"bbox":[1010,192,196,44]}
+{"kind":"shape","id":"sh/neloj2t8","slide":13,"bbox":[320,344,640,112]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":13,"text":"Observation -> Agent 판단으로 되돌아가는 화살표가 핵심","textPreview":"Observation -> Agent 판단으로 되돌아가는 화살표가 핵심","textChars":39,"textLines":1,"bbox":[350,378,580,42]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":13,"text":"단일 LLM 호출은 한 번 답하고 끝나지만,\nAgent는 도구 실행 결과를 보고 다시 판단합니다.","textPreview":"단일 LLM 호출은 한 번 답하고 끝나지만, | Agent는 도구 실행 결과를 보고 다시 판단합니다.","textChars":54,"textLines":2,"bbox":[254,510,772,76]}
+{"kind":"notes","id":"nt/lvmdr1","slide":13,"text":""}
+{"kind":"slide","id":"sl/cbujgt","slide":14,"title":"ProjectLens AI core-time","textShapes":8}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":14,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":14,"text":"Agent 구현 판단과 피할 방식","textPreview":"Agent 구현 판단과 피할 방식","textChars":18,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/8bat47y1","slide":14,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":14,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":14,"bbox":[72,150,545,456]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":14,"text":"결정할 것","textPreview":"결정할 것","textChars":5,"textLines":1,"bbox":[94,168,501,34]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":14,"text":"function calling\nstate와 memory 범위\nmax turns / timeout / retry\nfailed / need_more_info / refused\nStructured Outputs","textPreview":"function calling | state와 memory 범위 | max turns / timeout / retry | failed / need_more_info / refused | Structured Outputs","textChars":114,"textLines":5,"bbox":[96,212,497,382]}
+{"kind":"shape","id":"sh/1kre1w7m","slide":14,"bbox":[663,150,545,456]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":14,"text":"피할 방식","textPreview":"피할 방식","textChars":5,"textLines":1,"bbox":[685,168,501,34]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":14,"text":"LLM 호출 한 번으로 Agent라고 부르기\n상태를 저장하지 않기\n모든 tool을 무조건 호출하기\n자유 텍스트만 반환하기","textPreview":"LLM 호출 한 번으로 Agent라고 부르기 | 상태를 저장하지 않기 | 모든 tool을 무조건 호출하기 | 자유 텍스트만 반환하기","textChars":67,"textLines":4,"bbox":[687,212,497,382]}
+{"kind":"notes","id":"nt/cbujgt","slide":14,"text":""}
+{"kind":"slide","id":"sl/umqhoa","slide":15,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/fepkzupw","slide":15,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":15,"text":"Agent 코드 읽기","textPreview":"Agent 코드 읽기","textChars":11,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":15,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":15,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/4r65wjud","slide":15,"bbox":[72,150,540,82]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":15,"text":"일반 service orchestration","textPreview":"일반 service orchestration","textChars":24,"textLines":1,"bbox":[94,168,496,34]}
+{"kind":"shape","id":"sh/m94fu18j","slide":15,"bbox":[96,212,492,8]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":15,"bbox":[72,238,540,188]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":15,"text":"post = await load_post(post_id)\nevidence = await fetch_evidence(post)\nreport = build_report(post, evidence)\nawait save_report(report)","textPreview":"post = await load_post(post_id) | evidence = await fetch_evidence(post) | report = build_report(post, evidence) | await save_report(report)","textChars":133,"textLines":4,"bbox":[92,256,500,158]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":15,"bbox":[668,150,540,82]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":15,"text":"Agent 구조","textPreview":"Agent 구조","textChars":8,"textLines":1,"bbox":[690,168,496,34]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":15,"bbox":[692,212,492,8]}
+{"kind":"shape","id":"sh/nih4byhg","slide":15,"bbox":[668,238,540,188]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":15,"text":"Agent(\n  instructions=PROJECT_ANALYSIS_INSTRUCTIONS,\n  tools=analysis_tools,\n  model=settings.agent_model,\n  output_type=ProjectAnalysisReport,\n)","textPreview":"Agent( |   instructions=PROJECT_ANALYSIS_INSTRUCTIONS, |   tools=analysis_tools, |   model=settings.agent_model, |   output_type=ProjectA...","textChars":145,"textLines":6,"bbox":[688,256,500,158]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":15,"bbox":[170,484,940,100]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":15,"text":"읽는 법","textPreview":"읽는 법","textChars":4,"textLines":1,"bbox":[192,502,896,34]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":15,"text":"일반 service는 순서를 고정하지만, Agent는 tool 사용 여부와 arguments를 모델이 제안하고 backend가 실행을 통제합니다.","textPreview":"일반 service는 순서를 고정하지만, Agent는 tool 사용 여부와 arguments를 모델이 제안하고 backend가 실행을 통제합니다.","textChars":81,"textLines":1,"bbox":[194,546,892,26]}
+{"kind":"notes","id":"nt/umqhoa","slide":15,"text":""}
+{"kind":"slide","id":"sl/lul60n","slide":16,"title":"ProjectLens AI core-time","textShapes":25}
+{"kind":"textbox","id":"sh/val87ed8","slide":16,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":16,"text":"통합 흐름: RAG와 MCP는 Agent 루프 안에 있다","textPreview":"통합 흐름: RAG와 MCP는 Agent 루프 안에 있다","textChars":31,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":16,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/vixczed8","slide":16,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":16,"bbox":[64,160,274,88]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":16,"text":"사용자 요청","textPreview":"사용자 요청","textChars":6,"textLines":1,"bbox":[74,184,254,44]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[332,182,30,44]}
+{"kind":"shape","id":"sh/vu9knih4","slide":16,"bbox":[356,160,274,88]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":16,"text":"상태 생성","textPreview":"상태 생성","textChars":5,"textLines":1,"bbox":[366,184,254,44]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[624,182,30,44]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":16,"bbox":[648,160,274,88]}
+{"kind":"textbox","id":"sh/sji5snel","slide":16,"text":"RAG 검색","textPreview":"RAG 검색","textChars":6,"textLines":1,"bbox":[658,184,254,44]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[916,182,30,44]}
+{"kind":"shape","id":"sh/a5gbq1or","slide":16,"bbox":[940,160,274,88]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":16,"text":"Agent 판단","textPreview":"Agent 판단","textChars":8,"textLines":1,"bbox":[950,184,254,44]}
+{"kind":"shape","id":"sh/s72x4nap","slide":16,"bbox":[64,315,274,88]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":16,"text":"tool call","textPreview":"tool call","textChars":9,"textLines":1,"bbox":[74,339,254,44]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[332,337,30,44]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":16,"bbox":[356,315,274,88]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":16,"text":"MCP 호출","textPreview":"MCP 호출","textChars":6,"textLines":1,"bbox":[366,339,254,44]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[624,337,30,44]}
+{"kind":"shape","id":"sh/9cvixcze","slide":16,"bbox":[648,315,274,88]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":16,"text":"observation","textPreview":"observation","textChars":11,"textLines":1,"bbox":[658,339,254,44]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[916,337,30,44]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":16,"bbox":[940,315,274,88]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":16,"text":"재판단","textPreview":"재판단","textChars":3,"textLines":1,"bbox":[950,339,254,44]}
+{"kind":"shape","id":"sh/y1kre1w7","slide":16,"bbox":[64,470,274,88]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":16,"text":"Structured Output","textPreview":"Structured Output","textChars":17,"textLines":1,"bbox":[74,494,254,44]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[332,492,30,44]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":16,"bbox":[356,470,274,88]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":16,"text":"DB 저장","textPreview":"DB 저장","textChars":5,"textLines":1,"bbox":[366,494,254,44]}
+{"kind":"textbox","id":"sh/61032lsz","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[624,492,30,44]}
+{"kind":"shape","id":"sh/d4vmtwra","slide":16,"bbox":[648,470,274,88]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":16,"text":"Frontend polling","textPreview":"Frontend polling","textChars":16,"textLines":1,"bbox":[658,494,254,44]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":16,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[916,492,30,44]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":16,"bbox":[940,470,274,88]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":16,"text":"카드 UI","textPreview":"카드 UI","textChars":5,"textLines":1,"bbox":[950,494,254,44]}
+{"kind":"notes","id":"nt/lul60n","slide":16,"text":""}
+{"kind":"slide","id":"sl/2vxjh0","slide":17,"title":"ProjectLens AI core-time","textShapes":8}
+{"kind":"textbox","id":"sh/svu9knih","slide":17,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":17,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":17,"text":"ProjectLens 예시 라벨","textPreview":"ProjectLens 예시 라벨","textChars":17,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":17,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":17,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/zidonyd0","slide":17,"bbox":[84,150,360,430]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":17,"text":"일반 흐름","textPreview":"일반 흐름","textChars":5,"textLines":1,"bbox":[106,168,316,34]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":17,"text":"사용자 요청\n상태 생성\nRAG 검색\nMCP 호출\n최종 output\nDB/UI","textPreview":"사용자 요청 | 상태 생성 | RAG 검색 | MCP 호출 | 최종 output | DB/UI","textChars":42,"textLines":6,"bbox":[108,212,312,356]}
+{"kind":"shape","id":"sh/s72x4nap","slide":17,"bbox":[500,150,660,430]}
+{"kind":"textbox","id":"sh/idonyd0z","slide":17,"text":"ProjectLens 예시","textPreview":"ProjectLens 예시","textChars":14,"textLines":1,"bbox":[522,168,616,34]}
+{"kind":"textbox","id":"sh/byhgn29g","slide":17,"text":"게시글 상세의 AI 분석 버튼\nposts.analysis_status + analysis job\nembedding 기반 유사 프로젝트 검색\nlocal/private MCP Server\nPydantic Structured Outputs\nai_reports / mcp_evidences / 분석 카드","textPreview":"게시글 상세의 AI 분석 버튼 | posts.analysis_status + analysis job | embedding 기반 유사 프로젝트 검색 | local/private MCP Server | Pydantic Structured Output...","textChars":165,"textLines":6,"bbox":[524,212,612,356]}
+{"kind":"notes","id":"nt/2vxjh0","slide":17,"text":""}
+{"kind":"slide","id":"sl/3ga17y","slide":18,"title":"ProjectLens AI core-time","textShapes":10}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":18,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/0z61032l","slide":18,"text":"Frontend 코드 읽기: polling","textPreview":"Frontend 코드 읽기: polling","textChars":23,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/72x4nap4","slide":18,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":18,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":18,"bbox":[72,150,540,82]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":18,"text":"일반 API 렌더링","textPreview":"일반 API 렌더링","textChars":10,"textLines":1,"bbox":[94,168,496,34]}
+{"kind":"shape","id":"sh/7y1kre1w","slide":18,"bbox":[96,212,492,8]}
+{"kind":"shape","id":"sh/ed8v6psf","slide":18,"bbox":[72,238,540,188]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":18,"text":"const data = await fetchPost(postId);\nsetPost(data);","textPreview":"const data = await fetchPost(postId); | setPost(data);","textChars":52,"textLines":2,"bbox":[92,256,500,158]}
+{"kind":"shape","id":"sh/xczed8v6","slide":18,"bbox":[668,150,540,82]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":18,"text":"AI 분석 polling","textPreview":"AI 분석 polling","textChars":13,"textLines":1,"bbox":[690,168,496,34]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":18,"bbox":[692,212,492,8]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":18,"bbox":[668,238,540,188]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":18,"text":"const job = await startAnalysisJob(postId);\npollAnalysisStatus(postId);","textPreview":"const job = await startAnalysisJob(postId); | pollAnalysisStatus(postId);","textChars":71,"textLines":2,"bbox":[688,256,500,158]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":18,"bbox":[170,484,940,100]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":18,"text":"읽는 법","textPreview":"읽는 법","textChars":4,"textLines":1,"bbox":[192,502,896,34]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":18,"text":"AI 분석은 오래 걸릴 수 있어 running -> completed/failed 상태를 polling하고, 결과는 카드 UI가 읽을 수 있는 구조화 데이터입니다.","textPreview":"AI 분석은 오래 걸릴 수 있어 running -> completed/failed 상태를 polling하고, 결과는 카드 UI가 읽을 수 있는 구조화 데이터입니다.","textChars":91,"textLines":1,"bbox":[194,546,892,26]}
+{"kind":"notes","id":"nt/3ga17y","slide":18,"text":""}
+{"kind":"slide","id":"sl/tooalv","slide":19,"title":"ProjectLens AI core-time","textShapes":16}
+{"kind":"textbox","id":"sh/bm58z25k","slide":19,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":19,"text":"RAG 개선 과정","textPreview":"RAG 개선 과정","textChars":9,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/mp0bi9s3","slide":19,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":19,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/4vmtwra5","slide":19,"bbox":[88,154,330,66]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":19,"text":"검색 결과가 엉뚱함","textPreview":"검색 결과가 엉뚱함","textChars":10,"textLines":1,"bbox":[110,172,286,30]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,166,52,44]}
+{"kind":"shape","id":"sh/b2hwfyxo","slide":19,"bbox":[492,154,690,66]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":19,"text":"chunk, metadata, embedding 입력 텍스트 조정","textPreview":"chunk, metadata, embedding 입력 텍스트 조정","textChars":36,"textLines":1,"bbox":[516,171,642,32]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":19,"bbox":[88,240,330,66]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":19,"text":"관련 없는 문서가 섞임","textPreview":"관련 없는 문서가 섞임","textChars":12,"textLines":1,"bbox":[110,258,286,30]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,252,52,44]}
+{"kind":"shape","id":"sh/fepkzupw","slide":19,"bbox":[492,240,690,66]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":19,"text":"top-k와 similarity threshold 조정","textPreview":"top-k와 similarity threshold 조정","textChars":30,"textLines":1,"bbox":[516,257,642,32]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":19,"bbox":[88,326,330,66]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":19,"text":"근거가 빈약함","textPreview":"근거가 빈약함","textChars":7,"textLines":1,"bbox":[110,344,286,30]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,338,52,44]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":19,"bbox":[492,326,690,66]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":19,"text":"source title, URL, 작성일, score 표시","textPreview":"source title, URL, 작성일, score 표시","textChars":32,"textLines":1,"bbox":[516,343,642,32]}
+{"kind":"shape","id":"sh/judg7ads","slide":19,"bbox":[88,412,330,66]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":19,"text":"데이터가 충분함","textPreview":"데이터가 충분함","textChars":8,"textLines":1,"bbox":[110,430,286,30]}
+{"kind":"textbox","id":"sh/1032lszq","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,424,52,44]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":19,"bbox":[492,412,690,66]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":19,"text":"semantic score 외 태그/최신성/유형 ranking signal 추가","textPreview":"semantic score 외 태그/최신성/유형 ranking signal 추가","textChars":44,"textLines":1,"bbox":[516,429,642,32]}
+{"kind":"notes","id":"nt/tooalv","slide":19,"text":""}
+{"kind":"slide","id":"sl/cdqd7b","slide":20,"title":"ProjectLens AI core-time","textShapes":19}
+{"kind":"textbox","id":"sh/je9cvixc","slide":20,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":20,"text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":20,"text":"Agent 루프 개선 과정","textPreview":"Agent 루프 개선 과정","textChars":14,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/q1orytsv","slide":20,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":20,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/87ed8bat","slide":20,"bbox":[88,154,330,66]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":20,"text":"tool을 잘못 고름","textPreview":"tool을 잘못 고름","textChars":11,"textLines":1,"bbox":[110,172,286,30]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":20,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,166,52,44]}
+{"kind":"shape","id":"sh/fyxobm58","slide":20,"bbox":[492,154,690,66]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":20,"text":"tool name, description, input schema 개선","textPreview":"tool name, description, input schema 개선","textChars":39,"textLines":1,"bbox":[516,171,642,32]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":20,"bbox":[88,240,330,66]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":20,"text":"같은 tool 반복","textPreview":"같은 tool 반복","textChars":10,"textLines":1,"bbox":[110,258,286,30]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":20,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,252,52,44]}
+{"kind":"shape","id":"sh/7adsji5s","slide":20,"bbox":[492,240,690,66]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":20,"text":"max turns, retry limit, 중복 호출 방지","textPreview":"max turns, retry limit, 중복 호출 방지","textChars":32,"textLines":1,"bbox":[516,257,642,32]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":20,"bbox":[88,326,330,66]}
+{"kind":"textbox","id":"sh/wval87ed","slide":20,"text":"실패 이유 불명확","textPreview":"실패 이유 불명확","textChars":9,"textLines":1,"bbox":[110,344,286,30]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":20,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,338,52,44]}
+{"kind":"shape","id":"sh/eloj2t83","slide":20,"bbox":[492,326,690,66]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":20,"text":"tool error와 status 저장","textPreview":"tool error와 status 저장","textChars":21,"textLines":1,"bbox":[516,343,642,32]}
+{"kind":"shape","id":"sh/bat47y1k","slide":20,"bbox":[88,412,330,66]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":20,"text":"응답 형식 흔들림","textPreview":"응답 형식 흔들림","textChars":9,"textLines":1,"bbox":[110,430,286,30]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":20,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,424,52,44]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":20,"bbox":[492,412,690,66]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":20,"text":"structured output schema 강제","textPreview":"structured output schema 강제","textChars":27,"textLines":1,"bbox":[516,429,642,32]}
+{"kind":"shape","id":"sh/47y1kre1","slide":20,"bbox":[88,498,330,66]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":20,"text":"분석이 오래 걸림","textPreview":"분석이 오래 걸림","textChars":9,"textLines":1,"bbox":[110,516,286,30]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":20,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[430,510,52,44]}
+{"kind":"shape","id":"sh/bq1oryts","slide":20,"bbox":[492,498,690,66]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":20,"text":"async job과 frontend polling 분리","textPreview":"async job과 frontend polling 분리","textChars":30,"textLines":1,"bbox":[516,515,642,32]}
+{"kind":"notes","id":"nt/cdqd7b","slide":20,"text":""}
+{"kind":"slide","id":"sl/8o6ji1","slide":21,"title":"ProjectLens AI core-time","textShapes":11}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":21,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":21,"text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":21,"text":"OpenAI API 호출 제한과 비용","textPreview":"OpenAI API 호출 제한과 비용","textChars":20,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":21,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":21,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":21,"bbox":[72,150,355,240]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":21,"text":"호출 제한","textPreview":"호출 제한","textChars":5,"textLines":1,"bbox":[94,168,311,34]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":21,"text":"RPM: 분당 요청 수\nTPM: 분당 token 수\nusage limits: 조직의 월별 사용 한도","textPreview":"RPM: 분당 요청 수 | TPM: 분당 token 수 | usage limits: 조직의 월별 사용 한도","textChars":55,"textLines":3,"bbox":[96,212,307,166]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":21,"bbox":[462,150,355,240]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":21,"text":"비용 발생","textPreview":"비용 발생","textChars":5,"textLines":1,"bbox":[484,168,311,34]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":21,"text":"API 가격은 입력/출력 token에 영향\nChatGPT 구독과 API 과금은 별도\nAgent tool loop는 호출과 token을 빠르게 늘림","textPreview":"API 가격은 입력/출력 token에 영향 | ChatGPT 구독과 API 과금은 별도 | Agent tool loop는 호출과 token을 빠르게 늘림","textChars":81,"textLines":3,"bbox":[486,212,307,166]}
+{"kind":"shape","id":"sh/1orytsvu","slide":21,"bbox":[852,150,355,240]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":21,"text":"자동결제 주의","textPreview":"자동결제 주의","textChars":7,"textLines":1,"bbox":[874,168,311,34]}
+{"kind":"textbox","id":"sh/judg7ads","slide":21,"text":"usage dashboard 확인\nmonthly budget 설정\nprepaid credit 확인\nauto recharge와 monthly recharge limit 확인","textPreview":"usage dashboard 확인 | monthly budget 설정 | prepaid credit 확인 | auto recharge와 monthly recharge limit 확인","textChars":95,"textLines":4,"bbox":[876,212,307,166]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":21,"text":"Agent 루프는 기능 루프이면서 비용 루프이기도 합니다.","textPreview":"Agent 루프는 기능 루프이면서 비용 루프이기도 합니다.","textChars":32,"textLines":1,"bbox":[134,480,1010,48]}
+{"kind":"notes","id":"nt/8o6ji1","slide":21,"text":""}
+{"kind":"slide","id":"sl/61hj2c","slide":22,"title":"ProjectLens AI core-time","textShapes":11}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":22,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":22,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":22,"text":"크레딧과 자동결제 주의","textPreview":"크레딧과 자동결제 주의","textChars":12,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":22,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":22,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":22,"bbox":[72,150,350,260]}
+{"kind":"textbox","id":"sh/obm58z25","slide":22,"text":"실습 전 확인","textPreview":"실습 전 확인","textChars":7,"textLines":1,"bbox":[94,168,306,34]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":22,"text":"usage dashboard\nremaining credits\nmonthly budget\nrate limit 상태","textPreview":"usage dashboard | remaining credits | monthly budget | rate limit 상태","textChars":62,"textLines":4,"bbox":[96,212,302,186]}
+{"kind":"shape","id":"sh/a9w3m94f","slide":22,"bbox":[466,150,350,260]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":22,"text":"prepaid credit","textPreview":"prepaid credit","textChars":14,"textLines":1,"bbox":[488,168,306,34]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":22,"text":"작은 금액으로 시작\ncredit 만료/환불 조건 확인\n팀원 실습 전 잔액 확인","textPreview":"작은 금액으로 시작 | credit 만료/환불 조건 확인 | 팀원 실습 전 잔액 확인","textChars":43,"textLines":3,"bbox":[490,212,302,186]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":22,"bbox":[860,150,350,260]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":22,"text":"auto recharge","textPreview":"auto recharge","textChars":13,"textLines":1,"bbox":[882,168,306,34]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":22,"text":"setup 중 기본 활성화 여부 확인\n원치 않으면 끄기\nmonthly recharge limit 작게 설정","textPreview":"setup 중 기본 활성화 여부 확인 | 원치 않으면 끄기 | monthly recharge limit 작게 설정","textChars":59,"textLines":3,"bbox":[884,212,302,186]}
+{"kind":"shape","id":"sh/18jqh0fe","slide":22,"bbox":[154,486,972,84]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":22,"text":"자동결제를 막고 싶다면 auto recharge를 끄거나 monthly recharge limit을 작게 설정합니다.","textPreview":"자동결제를 막고 싶다면 auto recharge를 끄거나 monthly recharge limit을 작게 설정합니다.","textChars":65,"textLines":1,"bbox":[190,512,900,34]}
+{"kind":"notes","id":"nt/61hj2c","slide":22,"text":""}
+{"kind":"slide","id":"sl/3v7aku","slide":23,"title":"ProjectLens AI core-time","textShapes":12}
+{"kind":"textbox","id":"sh/dsji5sne","slide":23,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/61032lsz","slide":23,"text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":23,"text":"보안 원칙: 외부 결과는 evidence only","textPreview":"보안 원칙: 외부 결과는 evidence only","textChars":27,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/oj2t83it","slide":23,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":23,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":23,"bbox":[88,154,500,142]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":23,"text":"Evidence only","textPreview":"Evidence only","textChars":13,"textLines":1,"bbox":[110,172,456,34]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":23,"text":"외부 사이트, README, MCP 결과는 지시문이 아니라 근거 데이터입니다.","textPreview":"외부 사이트, README, MCP 결과는 지시문이 아니라 근거 데이터입니다.","textChars":43,"textLines":1,"bbox":[112,216,452,68]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":23,"bbox":[692,154,500,142]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":23,"text":"Prompt injection 방어","textPreview":"Prompt injection 방어","textChars":19,"textLines":1,"bbox":[714,172,456,34]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":23,"text":"외부 텍스트 안의 명령이나 prompt injection 문구를 따르지 않습니다.","textPreview":"외부 텍스트 안의 명령이나 prompt injection 문구를 따르지 않습니다.","textChars":45,"textLines":1,"bbox":[716,216,452,68]}
+{"kind":"shape","id":"sh/bq1oryts","slide":23,"bbox":[88,348,500,142]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":23,"text":"비밀값 보호","textPreview":"비밀값 보호","textChars":6,"textLines":1,"bbox":[110,366,456,34]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":23,"text":"API key와 토큰은 .env나 secret manager에 두고 tool output에 노출하지 않습니다.","textPreview":"API key와 토큰은 .env나 secret manager에 두고 tool output에 노출하지 않습니다.","textChars":61,"textLines":1,"bbox":[112,410,452,68]}
+{"kind":"shape","id":"sh/4nap4r65","slide":23,"bbox":[692,348,500,142]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":23,"text":"URL fetch 방어","textPreview":"URL fetch 방어","textChars":12,"textLines":1,"bbox":[714,366,456,34]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":23,"text":"SSRF, timeout, body limit, redirect 재검증 같은 경계를 둡니다.","textPreview":"SSRF, timeout, body limit, redirect 재검증 같은 경계를 둡니다.","textChars":51,"textLines":1,"bbox":[716,410,452,68]}
+{"kind":"notes","id":"nt/3v7aku","slide":23,"text":""}
+{"kind":"slide","id":"sl/08hzuq","slide":24,"title":"ProjectLens AI core-time","textShapes":8}
+{"kind":"textbox","id":"sh/ulwval87","slide":24,"text":"ProjectLens AI core-time","textPreview":"ProjectLens AI core-time","textChars":24,"textLines":1,"bbox":[64,26,620,22]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":24,"text":"24","textPreview":"24","textChars":2,"textLines":1,"bbox":[1170,24,48,26]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":24,"text":"외울 문장과 Q&A","textPreview":"외울 문장과 Q&A","textChars":10,"textLines":1,"bbox":[64,56,940,58]}
+{"kind":"shape","id":"sh/ji5snelo","slide":24,"bbox":[64,119,1152,2]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":24,"text":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textPreview":"기준: ProjectLens AI 파트 코어타임 설명초안 / OpenAI 공식 문서 / Notion 개념 자료","textChars":61,"textLines":1,"bbox":[64,684,1000,24]}
+{"kind":"shape","id":"sh/1kre1w7m","slide":24,"bbox":[72,150,610,410]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":24,"text":"외울 문장","textPreview":"외울 문장","textChars":5,"textLines":1,"bbox":[94,168,566,34]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":24,"text":"RAG는 학습이 아니라 검색이다.\nMCP는 API를 AI가 쓰기 쉽게 감싸는 표준 연결 방식이다.\nAgent는 단일 호출이 아니라 생각 -> 행동 -> 관찰 루프다.\n모델은 판단하고 backend는 실행과 권한을 통제한다.\n외부 결과는 지시문이 아니라 근거 데이터다.","textPreview":"RAG는 학습이 아니라 검색이다. | MCP는 API를 AI가 쓰기 쉽게 감싸는 표준 연결 방식이다. | Agent는 단일 호출이 아니라 생각 -> 행동 -> 관찰 루프다. | 모델은 판단하고 backend는 실행과 권한을 통제한다. | 외부 결...","textChars":149,"textLines":5,"bbox":[96,212,562,336]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":24,"bbox":[724,150,484,410]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":24,"text":"예상 Q&A","textPreview":"예상 Q&A","textChars":6,"textLines":1,"bbox":[746,168,440,34]}
+{"kind":"textbox","id":"sh/9knih4by","slide":24,"text":"RAG가 학습인가요? -> 아니요, 검색 결과를 context에 넣는 것입니다.\nMCP와 API 차이는? -> AI가 tool schema를 보고 호출하는 표준 계층입니다.\nLangGraph가 필수인가요? -> 핵심은 state와 loop가 보이는 구조입니다.\n비용은 어디서 늘어나나요? -> Agent 루프, tool 호출, 긴 evidence, retry입니다.","textPreview":"RAG가 학습인가요? -> 아니요, 검색 결과를 context에 넣는 것입니다. | MCP와 API 차이는? -> AI가 tool schema를 보고 호출하는 표준 계층입니다. | LangGraph가 필수인가요? -> 핵심은 state와 loop...","textChars":204,"textLines":4,"bbox":[748,212,436,336]}
+{"kind":"notes","id":"nt/08hzuq","slide":24,"text":""}

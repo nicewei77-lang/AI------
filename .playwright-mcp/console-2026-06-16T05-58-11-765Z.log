@@ -1,0 +1,52 @@
+[     697ms] [INFO] Resource Sentinel initialized... @ https://app.notion.com/p/ProjectLens-DB-API-3809aadb1c868139be07c84790e92b95?source=copy_link:0
+[    1374ms] [INFO] 2026-06-16T05:58:13.139Z [info] PageLoader: loserAborted {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1433ms] [INFO] 2026-06-16T05:58:13.198Z [info] FeatureFlagTransactionQueue: preferIndexedDB {team: no-team-specified} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1495ms] [WARNING]   WARN  [Statsig] Creating multiple Statsig clients with the same SDK key can lead to unexpected behavior. Multi-instance support requires different SDK keys. @ https://app.notion.com/_assets/49284-4718db36d8f5ee74.js:0
+[    1531ms] [INFO] 2026-06-16T05:58:13.295Z [info] appHelpers: shouldShowError {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1538ms] [INFO] 2026-06-16T05:58:13.302Z [info] appHelpers: shouldShowError {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1567ms] [LOG] %c
+	nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+	nnnn                         nnnn
+	nnnnnnn                          nnnn
+	nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+	nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+	nnnnnnnn                           nnn
+	nnnnnnnn    nnnnnnnn     nnnnnnn   nnn
+	nnnnnnnn      nnnnnnn      nnn     nnn
+	nnnnnnnn      nnnnnnnn     nnn     nnn
+	nnnnnnnn      nnnnnnnnnn   nnn     nnn
+	nnnnnnnn      nnn nnnnnnn  nnn     nnn
+	nnnnnnnn      nnn  nnnnnnnnnnn     nnn
+	nnnnnnnn      nnn   nnnnnnnnnn     nnn
+	nnnnnnnn      nnn     nnnnnnnn     nnn
+	nnnnnnnn      nnn      nnnnnnn     nnn
+	nnnnnnnn    nnnnnnnn    nnnnnn     nnn
+	  nnnnnn                           nnn
+		nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn		We're hiring!
+		  nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn		notion.so/careers
+
+	“yeah, I would probably eat a lemon for one hundred dollars” -- Ivan Zhao (2023-07-14)
+				  font-family: monospace @ https://app.notion.com/_assets/mainApp-2732544305a0ca9f.js:37
+[    1815ms] [INFO] 2026-06-16T05:58:13.579Z [info] syncRecordValuesBatched: recordPointerMissingSpaceId {actor: Object, data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1839ms] [WARNING] Amplitude Logger [Warn]: Event not tracked, no destination plugins on the instance @ https://app.notion.com/_assets/transport-support-1f878d5b73af338b.js:0
+[    1839ms] [INFO] 2026-06-16T05:58:13.604Z [error] eventTrailApiHelpers: trackFailure {error: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    1904ms] [INFO] 2026-06-16T05:58:13.668Z [error] handleRestrictedStateForResponse: callApi {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    2070ms] [WARNING] Ignoring inability to install OPFS sqlite3_vfs: Cannot install OPFS: Missing SharedArrayBuffer and/or Atomics. The server must emit the COOP/COEP response headers to enable those. See https://sqlite.org/wasm/doc/trunk/persistence.md#coop-coep @ https://app.notion.com/_assets/wasm-sqlite-worker-10623063c2e61faf.js:0
+[    2898ms] [INFO] 2026-06-16T05:58:14.663Z [info] sqliteSchemaHelpers: attemptFastForwardMigration {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    2945ms] [INFO] 2026-06-16T05:58:14.710Z [info] sqliteSchemaHelpers: successfulFastForwardMigration {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    3339ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://app.notion.com/api/v3/getPasskeyMigrationStatus:0
+[    3356ms] [INFO] 2026-06-16T05:58:15.120Z [error] handleRestrictedStateForResponse: callApi {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    4019ms] [ERROR] HttpRequestError: Received HTTP 401
+    at d (https://app.notion.com/_assets/ClientFramework-22db22ff73a79ebf.js:7:32713)
+    at async m (https://app.notion.com/_assets/ClientFramework-22db22ff73a79ebf.js:7:34578)
+    at async r (https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:1:142)
+    at async l (https://app.notion.com/_assets/93150-f3653c14106293ff.js:1:9744)
+    at async https://app.notion.com/_assets/19660-2ac62a157fc877cd.js:1:10103 @ https://app.notion.com/_assets/handleHttpFailure-2c714c1615f38eb7.js:0
+[    4020ms] [INFO] 2026-06-16T05:58:15.784Z [error] api: httpTrigger401 {data: Object} @ https://app.notion.com/_assets/app-c9932ca3d8adc9dc.js:6
+[    4118ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://cdn.metadata.io/pixel/config/1127.json:0
+[    4317ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2Fbbfd0704-d6e1-456d-b186-036a682276ac%2Fimage.png/size/w=1060?exp=1781675896&sig=COyeVbZyhuP8SUO0Xe9nxpkubOrjYM_Qwy-21bfjCpg&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-80ea-a997-d5a8f3aa3c8e&table=block&mtd=com:0
+[    4399ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2F79ba4870-2112-46a9-8565-280a6eaa4a0e%2FProjectLens_DB.png/size/w=2000?exp=1781675896&sig=3P3-OdVNmoI2Q_qJC9DDq6rjLC1I37gB18rvy4pOy1U&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-801e-824e-d93bd5c21262&table=block&mtd=com:0
+[    4401ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2Fee5b786b-1b3b-46db-993d-2fa7d14ca87f%2Fimage.png/size/w=960?exp=1781675896&sig=r3vEjK7Kb6yBykgXRpPHtO9LJhkFS4aYLE7oXaGeR7c&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-8026-a028-f60154186dea&table=block&mtd=com:0
+[    4866ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2F79ba4870-2112-46a9-8565-280a6eaa4a0e%2FProjectLens_DB.png/size/w=2000?exp=1781675897&sig=STpe6vqFbSbKOFBDa-z4bU_lSwX-5u2AaQa3mqC_SpY&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-801e-824e-d93bd5c21262&table=block&mtd=com:0
+[    4867ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2Fbbfd0704-d6e1-456d-b186-036a682276ac%2Fimage.png/size/w=1060?exp=1781675897&sig=LsCpO0hLsIe2uvPWDmDdVxY-IJ2hcHGGfXQarxspScA&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-80ea-a997-d5a8f3aa3c8e&table=block&mtd=com:0
+[    4928ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://img.notionusercontent.com/s3/prod-files-secure%2F341a9251-c52d-4e76-8fd4-4f19a3da4479%2Fee5b786b-1b3b-46db-993d-2fa7d14ca87f%2Fimage.png/size/w=960?exp=1781675897&sig=zmURcAYbr7LEKL8lkRJEyMYV3Nhky--qWsiXQNr3qmM&imgBuildSrc=presignImageUrl&id=3819aadb-1c86-8026-a028-f60154186dea&table=block&mtd=com:0
