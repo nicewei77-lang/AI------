@@ -25,14 +25,20 @@ interface RawPost {
     tags: Tag[];
 }
 
+const TRAILING_INTERNAL_MARKERS_PATTERN = /\s*(?:\[(?:Q\d+(?:_Q\d+)*(?:_[A-Z0-9]+)+|mock):[^\]]+\]\s*)+$/i;
+
+function sanitizePostTextForDisplay(text: string) {
+    return text.replace(TRAILING_INTERNAL_MARKERS_PATTERN, "").trimEnd();
+}
+
 // 백엔드 응답 → 프론트 Post 모양으로 변환(경계에서 1번만 맞춰주면 컴포넌트는 그대로 쓴다)
 function toPost(raw: RawPost): Post {
     return {
         id: String(raw.id), // 백엔드 int → 프론트 string
         authorName: raw.authorName,
-        title: raw.title,
+        title: sanitizePostTextForDisplay(raw.title),
         tags: raw.tags ?? [],
-        body: raw.body,
+        body: sanitizePostTextForDisplay(raw.body),
         postType: raw.postType,
         serviceUrl: raw.serviceUrl ?? undefined,
         githubUrl: raw.githubUrl ?? undefined,

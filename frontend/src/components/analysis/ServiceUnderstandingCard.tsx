@@ -39,7 +39,7 @@ function ServiceUnderstandingCard({service}: ServiceUnderstandingCardProps) {
         <section className="rounded border border-stone-200 bg-white p-4">
             <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
-                    <h3 className="text-base font-bold text-stone-950">서비스 이해</h3>
+                    <h3 className="text-base font-bold text-stone-950">서비스 이해와 AI 해석</h3>
                     <p className="mt-1 break-words text-sm font-semibold text-stone-800">
                         {service.one_line_summary}
                     </p>

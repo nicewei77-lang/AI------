@@ -1,0 +1,126 @@
+direction: right
+
+title: "ProjectLens 보고서 생성 에이전트 흐름 - 05 Output + Persistence + Failure Paths"
+
+runner: {
+  label: "Runner Result"
+  style.fill: "#f5f3ff"
+  style.stroke: "#7c3aed"
+
+  final: "result.final_output_as(ProjectAnalysisReport)"
+  response: "response_id\nresult.last_response_id"
+  usage: "usage\n_collect_usage(raw_responses)"
+  trace: "trace_id\ngen_trace_id()"
+}
+
+structured_errors: {
+  label: "Structured Output Failures"
+  style.fill: "#fef2f2"
+  style.stroke: "#dc2626"
+
+  refusal: "ModelRefusalError\nbuild_refused_report()\nstatus=refused"
+  validation: "ModelBehaviorError/TypeError\nSTRUCTURED_OUTPUT_MAX_ATTEMPTS=2\nretry 후 failed"
+  runner_error: "unexpected exception\nAnalysisRunnerError -> build_failed_report()"
+}
+
+normalization: {
+  label: "Evidence Merge + Traceability"
+  style.fill: "#fdf2f8"
+  style.stroke: "#db2777"
+
+  merge: "merge_report_evidence()\nreport.evidence + collected MCP evidence + RAG sources"
+  version: "_with_report_version()\nreport_version=2.0"
+  findings: "_build_evidence_findings()\nMCP/RAG source -> stable finding IDs"
+  refs: "_normalize_evidence_refs()\nimprovement_plan.evidence_refs"
+  translation: "_normalize_portfolio_translation()\nportfolio_sentence / presentation_flow /\nexpected_questions source_finding_ids"
+  confidence: "_infer_analysis_confidence()\n근거 coverage 기반 low/medium/high"
+}
+
+report: {
+  label: "ProjectAnalysisReport"
+  style.fill: "#fff1f2"
+  style.stroke: "#be123c"
+
+  summary: "summary\none_line_review\nstrongest_signals\nmain_risks\npriority_actions"
+  service: "service_understanding\nsite_structure_summary\nservice_essence\nkey_insight\nconfirmed/inferred facts"
+  diagnosis: "diagnosis\nstrengths\nweaknesses\nimprovement_plan"
+  evidence: "evidence\nmcp_sources\nrag_sources\nfindings"
+  portfolio: "portfolio + presentation\nproof_points, limitations,\ndemo_flow"
+  limits: "analysis_confidence\nportfolio_translation\nlimitations\nstatus"
+}
+
+post_checks: {
+  label: "Post-run Evidence Checks"
+  style.fill: "#fafafa"
+  style.stroke: "#737373"
+
+  rendered_needed: "completed + service_url reachable\nsite/context text thin\nrendered tool 아직 없음"
+  rendered_call: "_collect_rendered_site_fallback_if_needed()\nservice가 fetch_rendered_site_overview 직접 호출"
+  unusable: "_force_failed_if_external_evidence_unusable()"
+  unreachable: "deploy check 전부 unreachable\nfailed report로 교체"
+  blocked: "rendered blocked_by_site\nneed_more_info report로 교체"
+  too_thin: "외부 근거 부족 + 본문도 부족\nfailed report로 교체"
+}
+
+persistence: {
+  label: "Persistence"
+  style.fill: "#f1f5f9"
+  style.stroke: "#334155"
+
+  ai_report: "AiReport row\npost_id, status, report_type\nmodel, reasoning_effort\nresponse_id, trace_id, usage\ninput_snapshot, report, error"
+  flush: "db.add(ai_report)\ndb.flush()\nreport_id 확보"
+  mcp_rows: "record_mcp_evidence()\n각 CollectedMcpEvidence -> mcp_evidences row\narguments/result scrubbed"
+  report_embed: "index_ai_report_embedding()\nreport text -> embedding\nsource_type=ai_report"
+  post_status: "post.analysis_status\ncompleted/need_more_info/failed\nrefused -> failed 매핑"
+  summary: "post.ai_summary\n_summary_for_post(report)"
+  commit: "db.commit()\ndb.refresh(ai_report)\nPersistedAnalysis 반환"
+}
+
+frontend: {
+  label: "Frontend Observer"
+  style.fill: "#ffffff"
+  style.stroke: "#94a3b8"
+  style.stroke-dash: 4
+
+  polling: "/analysis/status polling"
+  latest: "/analysis/latest\n저장된 최신 report 조회"
+  out_of_scope: "카드 렌더링 상세는\n이 다이어그램 범위 밖"
+}
+
+runner.final -> normalization.merge
+runner.response -> persistence.ai_report
+runner.usage -> persistence.ai_report
+runner.trace -> persistence.ai_report
+
+structured_errors.refusal -> normalization.merge
+structured_errors.validation -> normalization.merge
+structured_errors.runner_error -> normalization.merge
+
+normalization.merge -> normalization.version -> normalization.findings -> normalization.refs -> normalization.translation -> normalization.confidence
+normalization.confidence -> report.summary
+normalization.confidence -> report.service
+normalization.confidence -> report.diagnosis
+normalization.confidence -> report.evidence
+normalization.confidence -> report.portfolio
+normalization.confidence -> report.limits
+
+report.limits -> post_checks.rendered_needed: "completed report 후 점검"
+post_checks.rendered_needed -> post_checks.rendered_call: "rendered fallback 필요"
+post_checks.rendered_call -> normalization.merge: "MCP evidence 재병합"
+post_checks.rendered_needed -> post_checks.unusable
+post_checks.unusable -> post_checks.unreachable
+post_checks.unusable -> post_checks.blocked
+post_checks.unusable -> post_checks.too_thin
+post_checks.unreachable -> report.limits: "failed"
+post_checks.blocked -> report.limits: "need_more_info"
+post_checks.too_thin -> report.limits: "failed"
+
+report.summary -> persistence.ai_report
+report.service -> persistence.ai_report
+report.diagnosis -> persistence.ai_report
+report.evidence -> persistence.ai_report
+report.portfolio -> persistence.ai_report
+report.limits -> persistence.ai_report
+persistence.ai_report -> persistence.flush -> persistence.mcp_rows -> persistence.report_embed -> persistence.post_status -> persistence.summary -> persistence.commit
+
+persistence.commit -> frontend.polling -> frontend.latest -> frontend.out_of_scope

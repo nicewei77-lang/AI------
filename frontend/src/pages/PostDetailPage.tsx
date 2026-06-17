@@ -41,7 +41,7 @@ function PostDetailPage() {
     const [analysisError, setAnalysisError] = useState<string | null>(null);
 
     function handleBack() {
-        navigate(-1);
+        navigate("/", {replace: true});
     }
 
     const backButton = (
@@ -143,12 +143,12 @@ function PostDetailPage() {
             setMessage({
                 text:
                     latest.status === "completed"
-                        ? "AI 분석이 완료되었습니다."
-                        : "AI 분석 결과가 저장되었습니다.",
+                        ? "AI 프로젝트 리뷰가 완료되었습니다."
+                        : "AI 프로젝트 리뷰 결과가 저장되었습니다.",
                 kind: latest.status === "failed" || latest.status === "refused" ? "info" : "success",
             });
         } catch (err) {
-            const text = err instanceof Error ? err.message : "AI 분석에 실패했습니다.";
+            const text = err instanceof Error ? err.message : "AI 프로젝트 리뷰 요청을 완료하지 못했습니다.";
             setAnalysisError(text);
             setMessage({text, kind: "error"});
             try {
@@ -271,10 +271,10 @@ function PostDetailPage() {
 
     return (
         <main className="min-h-screen bg-stone-50 px-4 py-6 text-stone-950">
-            <div className="mx-auto max-w-3xl space-y-4">
-                {backButton}
+            <div className="mx-auto max-w-7xl space-y-4">
+                <div className="mx-auto max-w-3xl">{backButton}</div>
 
-                <article className="rounded border border-stone-200 bg-white p-5">
+                <article className="mx-auto max-w-3xl rounded border border-stone-200 bg-white p-5">
                     <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
                         <span>@{post.authorName}</span>
                         <span>·</span>
@@ -393,7 +393,7 @@ function PostDetailPage() {
 
                 {message ? (
                     <p
-                        className={`rounded border p-3 text-sm ${
+                        className={`mx-auto max-w-3xl rounded border p-3 text-sm ${
                             message.kind === "success"
                                 ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                                 : message.kind === "error"
@@ -405,7 +405,7 @@ function PostDetailPage() {
                     </p>
                 ) : null}
 
-                <section className="rounded border border-stone-200 bg-white p-5">
+                <section className="mx-auto max-w-3xl rounded border border-stone-200 bg-white p-5">
                     <h2 className="mb-4 text-lg font-bold">댓글</h2>
                     {isLoggedIn ? (
                         <form onSubmit={handleCommentSubmit} className="mb-5 space-y-3">

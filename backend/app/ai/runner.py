@@ -12,12 +12,20 @@ from agents.tracing import gen_trace_id
 from app.ai.agents.project_analysis_agent import create_project_analysis_agent
 from app.ai.context import AnalysisToolContext, CollectedMcpEvidence
 from app.ai.schemas import (
+    AnalysisConfidence,
+    AnalysisLimitations,
     Diagnosis,
+    EvidenceFinding,
     EvidenceBlock,
+    EvidenceLinkedText,
+    ExpectedQuestion,
     McpSource,
     PortfolioDraft,
+    PortfolioTranslation,
     PresentationDraft,
+    PresentationFlowTranslation,
     ProjectAnalysisReport,
+    ReviewSummary,
     ReportStatus,
     ReportStatusBlock,
     ServiceUnderstanding,
@@ -41,6 +49,31 @@ from app.mcp_client.tools import (
 
 MAX_INPUT_TEXT_CHARS = 12_000
 STRUCTURED_OUTPUT_MAX_ATTEMPTS = 2
+PORTFOLIO_PRESENTATION_OUTPUT_ENABLED = False
+EVIDENCE_ID_PREFIXES = {
+    "post_body": "ev_post",
+    "mcp_site": "ev_site",
+    "deploy_status": "ev_deploy",
+    "github_readme": "ev_readme",
+    "site_context": "ev_context",
+    "rendered_site": "ev_rendered",
+    "screenshot": "ev_screenshot",
+    "lighthouse": "ev_lighthouse",
+    "inferred": "ev_inferred",
+    "rag": "ev_rag",
+}
+EVIDENCE_KIND_LABELS = {
+    "post_body": "게시글 본문",
+    "mcp_site": "사이트 개요",
+    "deploy_status": "배포 접근성",
+    "github_readme": "GitHub README/기본 메타데이터",
+    "site_context": "같은 출처 페이지 맥락",
+    "rendered_site": "브라우저 렌더링 표면",
+    "screenshot": "첫 화면 메타데이터",
+    "lighthouse": "Lighthouse summary",
+    "inferred": "AI 해석",
+    "rag": "유사 프로젝트",
+}
 
 
 class AnalysisRunnerError(RuntimeError):
@@ -191,6 +224,7 @@ async def run_project_analysis(
         mcp_evidence=active_tool_context.mcp_evidence,
         rag_sources=rag_sources or [],
     )
+    report = _with_report_version(report)
     return ProjectAnalysisRun(
         report=report,
         model=model_name,
@@ -209,7 +243,13 @@ def build_need_more_info_report(
     mcp_evidence: list[CollectedMcpEvidence] | None = None,
     rag_sources: list[RagSource] | None = None,
 ) -> ProjectAnalysisReport:
-    return ProjectAnalysisReport(
+    return _normalize_report_traceability(ProjectAnalysisReport(
+        summary=ReviewSummary(
+            one_line_review="입력 근거가 부족해 프로젝트 리뷰 범위를 먼저 보강해야 합니다.",
+            strongest_signals=_evidence_signal_summaries(mcp_evidence or [], rag_sources or []),
+            main_risks=["현재 입력만으로는 서비스 목적과 사용자 흐름을 충분히 확인하기 어렵습니다."],
+            priority_actions=questions[:3],
+        ),
         service_understanding=ServiceUnderstanding(
             one_line_summary="분석에 필요한 프로젝트 정보가 부족합니다.",
             detailed_summary="배포 URL이나 프로젝트 설명이 충분하지 않아 진단 리포트를 만들 수 없습니다.",
@@ -232,7 +272,25 @@ def build_need_more_info_report(
             missing_fields=missing_fields,
             questions=questions,
         ),
-    )
+        analysis_confidence=AnalysisConfidence(
+            level="low",
+            reasons=[
+                "프로젝트 설명 또는 공개 화면 근거가 부족합니다.",
+                "추가 입력이 들어오기 전까지 포트폴리오/발표 문장으로 번역하지 않습니다.",
+            ],
+        ),
+        limitations=AnalysisLimitations(
+            seen=_seen_evidence_labels(mcp_evidence or [], rag_sources or []),
+            not_seen=[
+                "충분한 프로젝트 설명 또는 공개 화면 근거",
+                "서비스 핵심 기능을 확인할 수 있는 README/본문",
+            ],
+            disclaimers=[
+                "이 리포트는 서비스 중단 안내가 아니라 근거 부족 상태를 먼저 알려주는 중간 결과입니다.",
+                "추가 근거가 들어오면 같은 파이프라인으로 다시 리뷰할 수 있습니다.",
+            ],
+        ),
+    ))
 
 
 def build_failed_report(
@@ -241,10 +299,19 @@ def build_failed_report(
     mcp_evidence: list[CollectedMcpEvidence] | None = None,
     rag_sources: list[RagSource] | None = None,
 ) -> ProjectAnalysisReport:
-    return ProjectAnalysisReport(
+    return _normalize_report_traceability(ProjectAnalysisReport(
+        summary=ReviewSummary(
+            one_line_review="수집 또는 모델 실행 범위에 한계가 있어 리뷰를 완성하지 못했습니다.",
+            strongest_signals=_evidence_signal_summaries(mcp_evidence or [], rag_sources or []),
+            main_risks=[error_message],
+            priority_actions=[
+                "접속 가능한 배포 URL 또는 공개 GitHub README를 다시 확인합니다.",
+                "프로젝트 목적, 핵심 기능, 주요 화면을 게시글 본문에 보강합니다.",
+            ],
+        ),
         service_understanding=ServiceUnderstanding(
-            one_line_summary="AI 분석을 완료하지 못했습니다.",
-            detailed_summary="사이트 수집 또는 모델 실행 중 오류가 발생했습니다.",
+            one_line_summary="분석 범위 한계가 있어 리포트를 완성하지 못했습니다.",
+            detailed_summary="사이트 수집 또는 모델 실행 중 제한이 있어 확인 가능한 근거 범위만 저장했습니다.",
             target_users=[],
             core_features=[],
             confirmed_facts=[],
@@ -260,14 +327,38 @@ def build_failed_report(
             rag_sources=rag_sources or [],
         ),
         status=ReportStatusBlock(status="failed", error=error_message),
-    )
+        analysis_confidence=AnalysisConfidence(
+            level="low",
+            reasons=[
+                "이번 실행에서 수집 또는 모델 실행 범위에 제한이 있었습니다.",
+                "확인된 근거만 보존하고 미확인 항목은 판단으로 대체하지 않습니다.",
+            ],
+        ),
+        limitations=AnalysisLimitations(
+            seen=_seen_evidence_labels(mcp_evidence or [], rag_sources or []),
+            not_seen=[
+                "완료된 AI 해석 리포트",
+                "충분히 수집된 공개 서비스 화면/README 근거",
+            ],
+            disclaimers=[
+                "이 상태는 프로젝트 가치 판단이 아니라 이번 실행에서 확인하지 못한 분석 범위를 뜻합니다.",
+                "측정되지 않은 항목은 점수나 품질 판단으로 대체하지 않습니다.",
+            ],
+        ),
+    ))
 
 
 def build_refused_report(reason: str) -> ProjectAnalysisReport:
-    return ProjectAnalysisReport(
+    return _normalize_report_traceability(ProjectAnalysisReport(
+        summary=ReviewSummary(
+            one_line_review="안전 정책상 이 입력은 프로젝트 리뷰로 해석하지 않았습니다.",
+            strongest_signals=[],
+            main_risks=["모델이 이 입력을 프로젝트 리뷰 범위로 다루지 않았습니다."],
+            priority_actions=["분석 요청에서 민감하거나 부적절한 내용을 제거하고 다시 제출합니다."],
+        ),
         service_understanding=ServiceUnderstanding(
-            one_line_summary="AI 분석이 거절되었습니다.",
-            detailed_summary="모델 안전 정책에 따라 이 입력에 대한 분석을 제공하지 못했습니다.",
+            one_line_summary="분석 제공 불가 상태입니다.",
+            detailed_summary="모델 안전 정책에 따라 이 입력은 프로젝트 리뷰로 처리되지 않았습니다.",
             target_users=[],
             core_features=[],
             confirmed_facts=[],
@@ -277,7 +368,19 @@ def build_refused_report(reason: str) -> ProjectAnalysisReport:
         diagnosis=Diagnosis(strengths=[], weaknesses=[], improvement_plan=[]),
         evidence=EvidenceBlock(mcp_sources=[], rag_sources=[]),
         status=ReportStatusBlock(status="refused", error=reason),
-    )
+        analysis_confidence=AnalysisConfidence(
+            level="low",
+            reasons=[
+                "모델 안전 정책상 프로젝트 공개 근거를 리뷰하지 않았습니다.",
+                "진단, 액션, 포트폴리오 번역을 생성하지 않습니다.",
+            ],
+        ),
+        limitations=AnalysisLimitations(
+            seen=[],
+            not_seen=["프로젝트 공개 근거에 대한 AI 해석", "포트폴리오/발표용 번역 문장"],
+            disclaimers=["이 상태에서는 프로젝트 품질이나 개선 방향을 추정하지 않습니다."],
+        ),
+    ))
 
 
 async def _run_mock_project_analysis(
@@ -348,7 +451,23 @@ def _mock_completed_report(
         if isinstance(item, dict)
     ]
     mcp_sources = [_mcp_evidence_to_report_source(item) for item in mcp_items]
-    return ProjectAnalysisReport(
+    return _normalize_report_traceability(ProjectAnalysisReport(
+        summary=ReviewSummary(
+            one_line_review=f"{title}는 공개 근거 기반 리뷰 구조를 검증할 수 있는 프로젝트입니다.",
+            strongest_signals=[
+                f"게시글 제목: {title}",
+                "MCP/RAG 근거를 리포트 카드에 분리해 표시할 수 있습니다.",
+            ],
+            main_risks=[
+                "mock 경로는 실제 모델 해석 품질을 증명하지 않습니다.",
+                "사용자 여정과 화면별 기능은 추가 근거가 있어야 판단할 수 있습니다.",
+            ],
+            priority_actions=[
+                "확인된 근거와 AI 해석을 분리해 읽습니다.",
+                "실 OpenAI 경로에서 같은 프로젝트를 다시 검증합니다.",
+                "README/본문에 사용 흐름과 차별점을 보강합니다.",
+            ],
+        ),
         service_understanding=ServiceUnderstanding(
             one_line_summary=summary,
             detailed_summary=(
@@ -390,6 +509,9 @@ def _mock_completed_report(
                     action="유사 프로젝트 카드와 근거 카드를 함께 확인한다.",
                     expected_effect="사용자가 분석 결과와 참고 사례를 빠르게 스캔할 수 있습니다.",
                     based_on="inferred",
+                    impact="medium",
+                    difficulty="low",
+                    evidence_refs=["inferred", "rag"],
                 )
             ],
         ),
@@ -407,14 +529,29 @@ def _mock_completed_report(
         presentation=PresentationDraft(
             opening=f"{title}를 ProjectLens로 분석한 결과를 공유하겠습니다.",
             key_points=[
-                "서비스 이해, 강점, 보완점을 구조화 카드로 나누었습니다.",
+                "서비스 이해, 강점, 리스크를 구조화 카드로 나누었습니다.",
                 "확인된 사실과 AI 추정을 분리해 과장을 줄였습니다.",
             ],
             demo_flow=["프로젝트 게시글 확인", "AI 분석 실행", "진단 카드와 유사 프로젝트 카드 확인"],
             risks_or_next_steps=["실제 모델 경로와 충분한 사용자 데이터를 더 검증해야 합니다."],
             closing="다음 단계는 실제 사용자 업로드와 리포트 품질 비교입니다.",
         ),
-    )
+        analysis_confidence=AnalysisConfidence(
+            level="low",
+            reasons=[
+                "mock 경로는 구조와 도구 호출 계약 검증용입니다.",
+                "실 OpenAI 모델 해석 품질은 quality eval로 별도 확인해야 합니다.",
+            ],
+        ),
+        limitations=AnalysisLimitations(
+            seen=["게시글 제목/설명", "mock MCP 도구 호출 계약", "RAG source 구조"],
+            not_seen=["실 OpenAI 모델의 도구 선택 과정", "실제 공개 화면 품질 판단", "실제 사용자 반응 데이터"],
+            disclaimers=[
+                "mock 결과는 구조와 한계 처리 검증용이며 리포트 품질 완료 근거가 아닙니다.",
+                "소스 내부 구현 검토, 취약점 판정, 성과 단정은 이 리포트 범위 밖입니다.",
+            ],
+        ),
+    ))
 
 
 def _mcp_evidence_to_input(item: CollectedMcpEvidence) -> dict[str, Any]:
@@ -481,7 +618,11 @@ def _mcp_evidence_to_report_source(item: CollectedMcpEvidence) -> McpSource:
 
 def _summarize_mcp_result(item: CollectedMcpEvidence) -> str:
     if not item.success:
-        return item.error_message or "MCP 도구 호출 실패"
+        if item.tool_name == RUN_LIGHTHOUSE_SUMMARY:
+            return item.error_message or "Lighthouse summary 측정 불가"
+        if item.tool_name == FETCH_GITHUB_README:
+            return item.error_message or "GitHub README 근거 부족"
+        return item.error_message or "공개 근거 확인 제한"
     result = item.result if isinstance(item.result, dict) else {}
     if item.tool_name == FETCH_SITE_OVERVIEW:
         title = result.get("title") or result.get("h1") or "사이트 개요"
@@ -538,7 +679,7 @@ def _summarize_mcp_result(item: CollectedMcpEvidence) -> str:
     if item.tool_name == RUN_LIGHTHOUSE_SUMMARY:
         scores = result.get("scores") if isinstance(result.get("scores"), dict) else {}
         return (
-            "Lighthouse: "
+            "Lighthouse summary: "
             f"perf/accessibility/best/seo = "
             f"{_format_score(scores.get('performance'))}/"
             f"{_format_score(scores.get('accessibility'))}/"
@@ -624,14 +765,395 @@ def _merge_report_evidence(
             merged_rag_sources.append(source)
             existing_rag_ids.add(source.source_id)
 
-    return report.model_copy(
+    merged_report = report.model_copy(
         update={
+            "report_version": "2.0",
             "evidence": EvidenceBlock(
                 mcp_sources=mcp_sources,
                 rag_sources=merged_rag_sources,
+                findings=report.evidence.findings,
             )
         }
     )
+    return _normalize_report_traceability(merged_report)
+
+
+def _normalize_report_traceability(report: ProjectAnalysisReport) -> ProjectAnalysisReport:
+    generated_findings = _build_evidence_findings(
+        report.evidence.mcp_sources,
+        report.evidence.rag_sources,
+    )
+    findings = _merge_evidence_findings(report.evidence.findings, generated_findings)
+    report = report.model_copy(
+        update={"evidence": report.evidence.model_copy(update={"findings": findings})}
+    )
+
+    if report.diagnosis.improvement_plan:
+        improvement_plan = [
+            action.model_copy(
+                update={
+                    "evidence_refs": _normalize_evidence_refs(
+                        action.evidence_refs,
+                        action.based_on,
+                        findings,
+                    )
+                }
+            )
+            for action in report.diagnosis.improvement_plan
+        ]
+        report = report.model_copy(
+            update={
+                "diagnosis": report.diagnosis.model_copy(
+                    update={"improvement_plan": improvement_plan}
+                )
+            }
+        )
+
+    if not report.analysis_confidence.reasons:
+        report = report.model_copy(
+            update={
+                "analysis_confidence": _infer_analysis_confidence(report, findings)
+            }
+        )
+
+    if not PORTFOLIO_PRESENTATION_OUTPUT_ENABLED:
+        return _clear_portfolio_presentation_output(report)
+
+    translation = (
+        _normalize_portfolio_translation(report.portfolio_translation, findings)
+        if _has_portfolio_translation(report.portfolio_translation)
+        else _infer_portfolio_translation(report, findings)
+    )
+    return report.model_copy(update={"portfolio_translation": translation})
+
+
+def _clear_portfolio_presentation_output(
+    report: ProjectAnalysisReport,
+) -> ProjectAnalysisReport:
+    return report.model_copy(
+        update={
+            "portfolio": PortfolioDraft(),
+            "presentation": PresentationDraft(),
+            "portfolio_translation": PortfolioTranslation(),
+        }
+    )
+
+
+def _build_evidence_findings(
+    mcp_sources: list[McpSource],
+    rag_sources: list[RagSource],
+) -> list[EvidenceFinding]:
+    counters: dict[str, int] = {}
+    findings: list[EvidenceFinding] = []
+    for source in mcp_sources:
+        finding_id = _next_finding_id(source.evidence_kind, counters)
+        label = _tool_evidence_label(source.tool_name)
+        title = label if source.success else f"{label} 확인 제한"
+        findings.append(
+            EvidenceFinding(
+                id=finding_id,
+                kind=source.evidence_kind,
+                title=title,
+                observed=source.summary,
+                source=source.evidence_kind,
+            )
+        )
+    for source in rag_sources:
+        finding_id = _next_finding_id("rag", counters)
+        observed = source.summary or _join_non_empty(
+            [
+                f"similarity={source.similarity:.3f}" if source.similarity is not None else "",
+                ", ".join(source.match_reasons),
+            ]
+        )
+        findings.append(
+            EvidenceFinding(
+                id=finding_id,
+                kind="rag",
+                title=source.title or "유사 프로젝트 근거",
+                observed=observed or "유사 프로젝트 근거가 제공됨",
+                source="rag",
+            )
+        )
+    return findings
+
+
+def _merge_evidence_findings(
+    existing: list[EvidenceFinding],
+    generated: list[EvidenceFinding],
+) -> list[EvidenceFinding]:
+    merged: list[EvidenceFinding] = []
+    seen_ids: set[str] = set()
+    for finding in [*existing, *generated]:
+        finding_id = finding.id.strip()
+        if not finding_id or finding_id in seen_ids:
+            continue
+        merged.append(
+            finding.model_copy(
+                update={
+                    "id": finding_id,
+                    "source": finding.source or finding.kind,
+                }
+            )
+        )
+        seen_ids.add(finding_id)
+    return merged
+
+
+def _next_finding_id(kind: str, counters: dict[str, int]) -> str:
+    prefix = EVIDENCE_ID_PREFIXES.get(kind, "ev_evidence")
+    counters[prefix] = counters.get(prefix, 0) + 1
+    return f"{prefix}_{counters[prefix]:02d}"
+
+
+def _normalize_evidence_refs(
+    refs: list[str],
+    based_on: str,
+    findings: list[EvidenceFinding],
+) -> list[str]:
+    valid_ids = {finding.id for finding in findings}
+    normalized: list[str] = []
+    for ref in refs:
+        if ref in valid_ids:
+            normalized.append(ref)
+            continue
+        if ref in EVIDENCE_ID_PREFIXES:
+            normalized.extend(_finding_ids_for_kind(ref, findings, limit=1))
+    if not normalized:
+        normalized.extend(_finding_ids_for_kind(based_on, findings, limit=1))
+    if not normalized and findings:
+        normalized.append(findings[0].id)
+    return _dedupe_strings(normalized)
+
+
+def _normalize_source_ids(
+    ids: list[str],
+    findings: list[EvidenceFinding],
+    fallback_ids: list[str],
+) -> list[str]:
+    valid_ids = {finding.id for finding in findings}
+    normalized = [item for item in ids if item in valid_ids]
+    if not normalized:
+        normalized = fallback_ids
+    return _dedupe_strings(normalized)
+
+
+def _normalize_portfolio_translation(
+    translation: PortfolioTranslation,
+    findings: list[EvidenceFinding],
+) -> PortfolioTranslation:
+    fallback_ids = _default_source_finding_ids(findings)
+    portfolio_sentence = translation.portfolio_sentence.model_copy(
+        update={
+            "source_finding_ids": _normalize_source_ids(
+                translation.portfolio_sentence.source_finding_ids,
+                findings,
+                fallback_ids,
+            )
+            if translation.portfolio_sentence.text.strip()
+            else []
+        }
+    )
+    presentation_flow = translation.presentation_flow.model_copy(
+        update={
+            "source_finding_ids": _normalize_source_ids(
+                translation.presentation_flow.source_finding_ids,
+                findings,
+                fallback_ids,
+            )
+            if translation.presentation_flow.steps
+            else []
+        }
+    )
+    expected_questions = [
+        question.model_copy(
+            update={
+                "source_finding_ids": _normalize_source_ids(
+                    question.source_finding_ids,
+                    findings,
+                    fallback_ids,
+                )
+                if question.question.strip()
+                else []
+            }
+        )
+        for question in translation.expected_questions
+    ]
+    return PortfolioTranslation(
+        portfolio_sentence=portfolio_sentence,
+        presentation_flow=presentation_flow,
+        expected_questions=expected_questions,
+    )
+
+
+def _has_portfolio_translation(translation: PortfolioTranslation) -> bool:
+    return (
+        translation.portfolio_sentence.text.strip() != ""
+        or any(step.strip() for step in translation.presentation_flow.steps)
+        or any(question.question.strip() for question in translation.expected_questions)
+    )
+
+
+def _infer_portfolio_translation(
+    report: ProjectAnalysisReport,
+    findings: list[EvidenceFinding],
+) -> PortfolioTranslation:
+    source_ids = _default_source_finding_ids(findings)
+    portfolio_text = _first_non_empty(
+        report.portfolio.headline,
+        report.portfolio.solution,
+        report.summary.one_line_review,
+    )
+    flow_steps = [
+        item
+        for item in report.presentation.demo_flow[:4]
+        if item.strip()
+    ]
+    if not flow_steps:
+        flow_steps = [
+            item
+            for item in report.presentation.key_points[:3]
+            if item.strip()
+        ]
+
+    expected_questions: list[ExpectedQuestion] = []
+    for weakness in report.diagnosis.weaknesses[:2]:
+        ids = _source_finding_ids_for_kinds(
+            [weakness.evidence_kind, weakness.based_on],
+            findings,
+            fallback_ids=source_ids,
+        )
+        expected_questions.append(
+            ExpectedQuestion(
+                question=f"{weakness.title}를 발표에서 어떻게 설명할 수 있나요?",
+                why_this_question=weakness.reason,
+                source_finding_ids=ids,
+            )
+        )
+    if not expected_questions and report.limitations.not_seen:
+        expected_questions.append(
+            ExpectedQuestion(
+                question="이번 리포트에서 확인하지 못한 범위는 무엇인가요?",
+                why_this_question=report.limitations.not_seen[0],
+                source_finding_ids=source_ids,
+            )
+        )
+
+    return PortfolioTranslation(
+        portfolio_sentence=EvidenceLinkedText(
+            text=portfolio_text,
+            source_finding_ids=source_ids if portfolio_text else [],
+        ),
+        presentation_flow=PresentationFlowTranslation(
+            steps=flow_steps,
+            source_finding_ids=source_ids if flow_steps else [],
+        ),
+        expected_questions=expected_questions,
+    )
+
+
+def _infer_analysis_confidence(
+    report: ProjectAnalysisReport,
+    findings: list[EvidenceFinding],
+) -> AnalysisConfidence:
+    if report.status.status != "completed":
+        return AnalysisConfidence(
+            level="low",
+            reasons=[
+                "completed 리포트가 아니라 확인 가능한 근거 범위만 보존했습니다.",
+                "추가 입력 또는 정상 실행 전까지 개선 액션과 번역 문장을 확정하지 않습니다.",
+            ],
+        )
+
+    successful_kinds = [
+        source.evidence_kind
+        for source in report.evidence.mcp_sources
+        if source.success
+    ]
+    failed_count = len([source for source in report.evidence.mcp_sources if not source.success])
+    has_rag = len(report.evidence.rag_sources) > 0
+    concrete_kind_count = len(set(successful_kinds + (["rag"] if has_rag else [])))
+    level = "medium" if findings else "low"
+    if concrete_kind_count >= 4 and failed_count == 0:
+        level = "high"
+
+    reasons: list[str] = []
+    if successful_kinds:
+        labels = [
+            EVIDENCE_KIND_LABELS.get(kind, kind)
+            for kind in _dedupe_strings(successful_kinds)
+        ]
+        reasons.append(f"확인한 공개 근거: {', '.join(labels)}")
+    if has_rag:
+        reasons.append(f"유사 프로젝트 근거 {len(report.evidence.rag_sources)}개를 참고했습니다.")
+    if failed_count:
+        reasons.append(f"측정 또는 수집이 제한된 근거 {failed_count}개가 있습니다.")
+    if report.limitations.not_seen:
+        reasons.append(f"확인하지 못한 범위: {report.limitations.not_seen[0]}")
+    if not reasons:
+        reasons.append("공개 근거가 부족해 낮은 신뢰도로 표시합니다.")
+    return AnalysisConfidence(level=level, reasons=reasons)
+
+
+def _finding_ids_for_kind(
+    kind: str,
+    findings: list[EvidenceFinding],
+    *,
+    limit: int,
+) -> list[str]:
+    return [finding.id for finding in findings if finding.kind == kind][:limit]
+
+
+def _source_finding_ids_for_kinds(
+    kinds: list[str],
+    findings: list[EvidenceFinding],
+    *,
+    fallback_ids: list[str],
+) -> list[str]:
+    ids: list[str] = []
+    for kind in kinds:
+        ids.extend(_finding_ids_for_kind(kind, findings, limit=2))
+    return _dedupe_strings(ids)[:3] or fallback_ids
+
+
+def _default_source_finding_ids(findings: list[EvidenceFinding]) -> list[str]:
+    preferred_order = [
+        "github_readme",
+        "site_context",
+        "rendered_site",
+        "mcp_site",
+        "screenshot",
+        "lighthouse",
+        "deploy_status",
+        "post_body",
+        "rag",
+    ]
+    ids: list[str] = []
+    for kind in preferred_order:
+        ids.extend(_finding_ids_for_kind(kind, findings, limit=1))
+    if not ids:
+        ids = [finding.id for finding in findings[:3]]
+    return _dedupe_strings(ids)[:3]
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+    for value in values:
+        text = value.strip()
+        if text and text not in result:
+            result.append(text)
+    return result
+
+
+def _first_non_empty(*values: str) -> str:
+    for value in values:
+        if value.strip():
+            return value.strip()
+    return ""
+
+
+def _join_non_empty(values: list[str]) -> str:
+    return "; ".join(value.strip() for value in values if value.strip())
 
 
 def merge_report_evidence(
@@ -649,6 +1171,12 @@ def merge_report_evidence(
 
 def _mcp_source_identity(source: McpSource) -> tuple[str, str | None]:
     return (source.tool_name, source.final_url or source.url)
+
+
+def _with_report_version(report: ProjectAnalysisReport) -> ProjectAnalysisReport:
+    if report.report_version == "2.0":
+        return report
+    return report.model_copy(update={"report_version": "2.0"})
 
 
 def _collect_usage(raw_responses: list[Any]) -> dict[str, Any] | None:
@@ -683,6 +1211,49 @@ def _trim_value(value: Any) -> Any:
     if hasattr(value, "__dict__"):
         return _trim_value(dict(value.__dict__))
     return value
+
+
+def _evidence_signal_summaries(
+    mcp_evidence: list[CollectedMcpEvidence],
+    rag_sources: list[RagSource],
+) -> list[str]:
+    signals: list[str] = []
+    for item in mcp_evidence:
+        label = _tool_evidence_label(item.tool_name)
+        state = "확인됨" if item.success else "측정 불가"
+        signals.append(f"{label}: {state}")
+        if len(signals) >= 3:
+            break
+    if rag_sources and len(signals) < 3:
+        signals.append(f"유사 프로젝트 근거 {len(rag_sources)}개")
+    return signals
+
+
+def _seen_evidence_labels(
+    mcp_evidence: list[CollectedMcpEvidence],
+    rag_sources: list[RagSource],
+) -> list[str]:
+    labels: list[str] = []
+    for item in mcp_evidence:
+        label = _tool_evidence_label(item.tool_name)
+        if label not in labels:
+            labels.append(label)
+    if rag_sources:
+        labels.append(f"유사 프로젝트 {len(rag_sources)}개")
+    return labels
+
+
+def _tool_evidence_label(tool_name: str) -> str:
+    labels = {
+        CHECK_DEPLOY_STATUS: "배포 접근성",
+        FETCH_SITE_OVERVIEW: "사이트 개요",
+        FETCH_SITE_CONTEXT: "같은 출처 페이지 맥락",
+        FETCH_RENDERED_SITE_OVERVIEW: "브라우저 렌더링 표면",
+        CAPTURE_SCREENSHOT: "첫 화면 메타데이터",
+        RUN_LIGHTHOUSE_SUMMARY: "Lighthouse summary",
+        FETCH_GITHUB_README: "GitHub README/기본 메타데이터",
+    }
+    return labels.get(tool_name, tool_name)
 
 
 def _list_or_default(value: Any, default: list[str]) -> list[str]:

@@ -104,7 +104,7 @@ async def _run_analysis_job(post_id: int) -> None:
             logger.exception("analysis job failed unexpectedly: post_id=%s", post_id)
             await db.rollback()
             try:
-                await mark_analysis_job_failed(db, post_id, "AI 분석 실패")
+                await mark_analysis_job_failed(db, post_id, "분석 범위 한계")
             except AnalysisPostNotFoundError:
                 logger.warning("analysis job failed after post was removed: post_id=%s", post_id)
 

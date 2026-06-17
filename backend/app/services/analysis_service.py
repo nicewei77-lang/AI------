@@ -308,10 +308,10 @@ def _post_status_for_report(status: ReportStatus) -> str:
 
 def _summary_for_post(report: ProjectAnalysisReport) -> str:
     if report.status.status == "failed":
-        return "AI 분석 실패"
+        return "분석 범위 한계"
     if report.status.status == "refused":
-        return "AI 분석 거절"
-    return report.service_understanding.one_line_summary
+        return "분석 제공 불가"
+    return report.summary.one_line_review or report.service_understanding.one_line_summary
 
 
 def _post_snapshot(post: Post) -> dict[str, Any]:
@@ -370,7 +370,7 @@ def _force_failed_if_external_evidence_unusable(
         return run
     if _service_url_failed(post, mcp_evidence):
         message = (
-            "사이트에 접속할 수 없어 URL 기반 분석은 실패했습니다. "
+            "배포 URL에 접근하지 못해 화면 분석을 수행하지 못했습니다. "
             "프로젝트 설명을 조금 더 자세히 입력하거나 접속 가능한 배포 URL을 다시 제출해주세요."
         )
         report = build_failed_report(
@@ -556,7 +556,15 @@ def _combined_text_length(payload: dict[str, Any], keys: tuple[str, ...]) -> int
 
 def _report_from_db(ai_report: AiReport) -> ProjectAnalysisReport:
     if ai_report.report:
-        return ProjectAnalysisReport.model_validate(ai_report.report)
+        report = ProjectAnalysisReport.model_validate(ai_report.report)
+        normalized_report = merge_report_evidence(
+            report,
+            mcp_evidence=[],
+            rag_sources=report.evidence.rag_sources,
+        )
+        if normalized_report.report_version != "2.0":
+            return normalized_report.model_copy(update={"report_version": "2.0"})
+        return normalized_report
     return build_failed_report("stored report payload is empty")
 
 

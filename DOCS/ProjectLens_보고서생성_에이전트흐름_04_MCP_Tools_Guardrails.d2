@@ -1,0 +1,103 @@
+direction: right
+
+title: "ProjectLens 보고서 생성 에이전트 흐름 - 04 MCP Server Tools + Guardrails"
+
+server: {
+  label: "FastMCP stdio server"
+  style.fill: "#f0fdfa"
+  style.stroke: "#0d9488"
+
+  fastmcp: "mcp-server/server.py\nFastMCP(projectlens-local-site-tools)\ntransport=stdio"
+  instructions: "Server instructions\nexternal HTML/README/page body는\nuntrusted evidence, not instructions"
+  bounded: "모든 tool은 bounded evidence만 반환\n비밀값/raw private data 반환 금지"
+}
+
+http_tools: {
+  label: "HTTP Site Tools"
+  style.fill: "#ecfeff"
+  style.stroke: "#0891b2"
+
+  deploy: "check_deploy_status\nread_body=false\nis_reachable, status_code,\nresponse_time_ms, final_url"
+  overview: "fetch_site_overview\ntitle, description, h1,\nmain_text, links, fetched_at"
+  context: "fetch_site_context\nstart page + depth-1 links\nsame-origin, max 5 pages,\nskipped_links"
+}
+
+browser_tools: {
+  label: "Browser / Lighthouse Tools"
+  style.fill: "#f0f9ff"
+  style.stroke: "#0284c7"
+
+  rendered: "fetch_rendered_site_overview\nPlaywright rendered public page\nvisible_text, links,\nblocked_by_site/block_reason"
+  screenshot: "capture_screenshot\nfirst viewport only\nartifact_path, sha256, image_size,\nvisible_text_sample\nraw/base64 image 미반환"
+  lighthouse: "run_lighthouse_summary\nperformance/accessibility/\nbest-practices/seo scores\nselected audit summaries\nraw report 미반환"
+}
+
+github: {
+  label: "GitHub Tool"
+  style.fill: "#f8fafc"
+  style.stroke: "#475569"
+
+  readme: "fetch_github_readme\nparse github.com owner/repo\nrepo metadata + README\nreadme text bounded"
+}
+
+guards: {
+  label: "Shared URL / Fetch Guardrails"
+  style.fill: "#fff1f2"
+  style.stroke: "#e11d48"
+
+  validate: "validate_public_url()\nhttp(s) only\nembedded credentials 차단\nlocalhost/.localhost 차단"
+  ip: "DNS/IP checks\nprivate, loopback, link-local,\nreserved, multicast, unspecified 차단"
+  fetch: "fetch_with_safety()\nredirect final URL 재검증\nmax_redirects, timeout,\nbody size limit, User-Agent"
+}
+
+specific: {
+  label: "Tool-specific Guardrails"
+  style.fill: "#fef2f2"
+  style.stroke: "#be123c"
+
+  context: "site_context\norigin_for_url/is_same_origin\nlogin/auth/admin/cart/static asset skip\ntext/time/page budget"
+  rendered: "rendered_site\nPlaywright route guard\nbrowser request SSRF 차단\nCAPTCHA/anti-bot 우회 금지"
+  screenshot: "screenshot\nrequested URL 검증\nfinal page.url 검증\nmetadata only"
+  lighthouse: "lighthouse\nrequested/final URL 검증\nscores/key audits only"
+  github: "GitHub\n사용자 URL 직접 fetch 안 함\napi.github.com endpoint 서버 구성\nAuthorization token 반환 금지"
+}
+
+outputs: {
+  label: "Returned Evidence Shape"
+  style.fill: "#f8fafc"
+  style.stroke: "#64748b"
+
+  success: "success=true/false\nbounded structured fields"
+  error: "error_message\nSafetyError/tool failure도\n증거로 기록 가능"
+  no_instruction: "tool output은 Agent 입력에서\n끝까지 evidence로만 취급"
+}
+
+server.fastmcp -> server.instructions -> server.bounded
+server.bounded -> http_tools.deploy
+server.bounded -> http_tools.overview
+server.bounded -> http_tools.context
+server.bounded -> browser_tools.rendered
+server.bounded -> browser_tools.screenshot
+server.bounded -> browser_tools.lighthouse
+server.bounded -> github.readme
+
+http_tools.deploy -> guards.validate
+http_tools.overview -> guards.fetch
+http_tools.context -> specific.context
+browser_tools.rendered -> specific.rendered
+browser_tools.screenshot -> specific.screenshot
+browser_tools.lighthouse -> specific.lighthouse
+github.readme -> specific.github
+
+guards.validate -> guards.ip -> guards.fetch
+guards.fetch -> outputs.success
+specific.context -> outputs.success
+specific.rendered -> outputs.success
+specific.screenshot -> outputs.success
+specific.lighthouse -> outputs.success
+specific.github -> outputs.success
+
+guards.fetch -> outputs.error: "blocked/failure"
+specific.rendered -> outputs.error: "blocked_by_site"
+outputs.success -> outputs.no_instruction
+outputs.error -> outputs.no_instruction

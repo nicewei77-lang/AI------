@@ -1,0 +1,72 @@
+direction: right
+
+title: "ProjectLens 보고서 생성 에이전트 흐름 - 03 function_tool + MCP Client Lifecycle"
+
+agent: {
+  label: "Agent-selected function_tool"
+  style.fill: "#fff7ed"
+  style.stroke: "#ea580c"
+
+  run: "Runner.run() 진행 중\nAgent가 필요한 tool 선택"
+  tools: "get_project_analysis_tools()\n7 function_tool 노출"
+  names: "check_deploy_status\nfetch_site_overview\nfetch_site_context\nfetch_rendered_site_overview\ncapture_screenshot\nrun_lighthouse_summary\nfetch_github_readme"
+}
+
+wrapper: {
+  label: "Backend Tool Wrapper"
+  style.fill: "#fffbeb"
+  style.stroke: "#d97706"
+
+  fn: "call_projectlens_mcp_tool(context, tool_name, arguments)"
+  validate: "_validate_context_url()\nservice_url/github_url이\npost 제출값과 정확히 같아야 함"
+  call: "call_mcp_tool(tool_name, arguments, db=None)"
+  success: "_result_success()\ncheck_deploy_status는 is_reachable 기준\n그 외 success field 우선"
+  error: "_result_error_message()\nerror_message/error 추출"
+  collect: "AnalysisToolContext.mcp_evidence append\nCollectedMcpEvidence(tool, args, result, success, error)"
+  return: "_tool_return_payload()\nAgent에게 structured dict 반환"
+}
+
+client: {
+  label: "Backend MCP Client Boundary"
+  style.fill: "#fefce8"
+  style.stroke: "#ca8a04"
+
+  allow: "ensure_allowed_tool()\nALLOWED_MCP_TOOLS tuple 검증"
+  create: "create_projectlens_mcp_server()\nMCPServerStdio"
+  params: "params\ncommand=sys.executable\nargs=mcp-server/server.py\ncwd=mcp-server"
+  env: "_mcp_env()\ntimeout/body/text/link/page limits\nGITHUB_TOKEN optional\nPATH/VIRTUAL_ENV 전달"
+  filter: "tool_filter\ncreate_static_tool_filter(allowed tools)"
+  approval: "require_approval=never\nuse_structured_content=true\ncache_tools_list=true"
+  connect: "server.connect()"
+  invoke: "server.call_tool(tool_name, arguments)"
+  decode: "_decode_tool_result()\nstructuredContent 우선\ntext JSON fallback"
+  cleanup: "finally server.cleanup()\n호출마다 stdio server 정리"
+}
+
+logging: {
+  label: "Evidence Logging Contract"
+  style.fill: "#f8fafc"
+  style.stroke: "#64748b"
+
+  deferred: "function_tool 경로에서는 db=None\n즉시 DB 저장하지 않고 context에 모음"
+  persist_later: "_persist_analysis() 단계에서\nreport_id 확보 후 record_mcp_evidence()"
+  scrub: "_scrub_for_log()\nsecret/token/password/authorization/cookie/credential redaction"
+  truncate: "MAX_LOG_STRING_LENGTH=12000\n긴 문자열 truncate"
+}
+
+server: {
+  label: "Next Page Boundary"
+  style.fill: "#f0fdfa"
+  style.stroke: "#0d9488"
+
+  fastmcp: "mcp-server/server.py\nFastMCP stdio server"
+  next: "04 페이지에서\nMCP tools + guardrails 상세"
+}
+
+agent.run -> agent.tools -> agent.names
+agent.names -> wrapper.fn -> wrapper.validate -> wrapper.call
+wrapper.call -> client.allow -> client.create -> client.params -> client.env -> client.filter -> client.approval -> client.connect -> client.invoke -> client.decode -> client.cleanup
+client.decode -> wrapper.success -> wrapper.error -> wrapper.collect -> wrapper.return
+wrapper.collect -> logging.deferred -> logging.persist_later -> logging.scrub -> logging.truncate
+client.invoke -> server.fastmcp -> server.next
+wrapper.return -> agent.run: "tool output returns to Agent"

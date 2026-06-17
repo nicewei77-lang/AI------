@@ -17,6 +17,8 @@ export type ConfidenceKind = "confirmed" | "inferred";
 export type Severity = "low" | "medium" | "high";
 export type Priority = "P0" | "P1" | "P2";
 export type RagRankingMode = "cosine" | "weighted";
+export type ActionEffort = "low" | "medium" | "high";
+export type AnalysisConfidenceLevel = "low" | "medium" | "high";
 
 export interface ServiceUnderstanding {
     one_line_summary: string;
@@ -53,6 +55,9 @@ export interface ImprovementAction {
     action: string;
     expected_effect: string;
     based_on: EvidenceKind;
+    impact: ActionEffort;
+    difficulty: ActionEffort;
+    evidence_refs: string[];
 }
 
 export interface Diagnosis {
@@ -93,9 +98,30 @@ export interface RagScoreBreakdown {
     same_type: number;
 }
 
+export interface EvidenceFinding {
+    id: string;
+    kind: EvidenceKind;
+    title: string;
+    observed: string;
+    source: string;
+}
+
 export interface EvidenceBlock {
     mcp_sources: McpSource[];
     rag_sources: RagSource[];
+    findings: EvidenceFinding[];
+}
+
+export interface AnalysisConfidence {
+    level: AnalysisConfidenceLevel;
+    reasons: string[];
+}
+
+export interface ReviewSummary {
+    one_line_review: string;
+    strongest_signals: string[];
+    main_risks: string[];
+    priority_actions: string[];
 }
 
 export interface ReportStatusBlock {
@@ -123,13 +149,46 @@ export interface PresentationDraft {
     closing: string;
 }
 
+export interface EvidenceLinkedText {
+    text: string;
+    source_finding_ids: string[];
+}
+
+export interface PresentationFlowTranslation {
+    steps: string[];
+    source_finding_ids: string[];
+}
+
+export interface ExpectedQuestion {
+    question: string;
+    why_this_question: string;
+    source_finding_ids: string[];
+}
+
+export interface PortfolioTranslation {
+    portfolio_sentence: EvidenceLinkedText;
+    presentation_flow: PresentationFlowTranslation;
+    expected_questions: ExpectedQuestion[];
+}
+
+export interface AnalysisLimitations {
+    seen: string[];
+    not_seen: string[];
+    disclaimers: string[];
+}
+
 export interface ProjectAnalysisReport {
+    report_version: string;
+    summary: ReviewSummary;
     service_understanding: ServiceUnderstanding;
     diagnosis: Diagnosis;
     evidence: EvidenceBlock;
     status: ReportStatusBlock;
     portfolio: PortfolioDraft;
     presentation: PresentationDraft;
+    analysis_confidence: AnalysisConfidence;
+    portfolio_translation: PortfolioTranslation;
+    limitations: AnalysisLimitations;
 }
 
 export interface AnalysisRunResponse {

@@ -4,16 +4,16 @@ const STATUS_LABELS: Record<AnalysisBadgeStatus, string> = {
     not_started: "미실행",
     running: "분석 중",
     completed: "완료",
-    failed: "실패",
+    failed: "범위 한계",
     need_more_info: "정보 필요",
-    refused: "거절됨",
+    refused: "제공 불가",
 };
 
 const STATUS_CLASSES: Record<AnalysisBadgeStatus, string> = {
     not_started: "border-stone-200 bg-stone-100 text-stone-700",
     running: "border-sky-200 bg-sky-50 text-sky-800",
     completed: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    failed: "border-red-200 bg-red-50 text-red-700",
+    failed: "border-amber-200 bg-amber-50 text-amber-800",
     need_more_info: "border-amber-200 bg-amber-50 text-amber-800",
     refused: "border-zinc-300 bg-zinc-100 text-zinc-700",
 };

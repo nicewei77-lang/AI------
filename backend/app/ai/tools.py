@@ -136,8 +136,9 @@ async def capture_screenshot(
     name_override=RUN_LIGHTHOUSE_SUMMARY,
     description_override=(
         "Run a summary Lighthouse check for the submitted public service URL. Use "
-        "only the URL from the ProjectLens post. Scores are technical quality "
-        "evidence for improvement suggestions, not a judgment of product value."
+        "only the URL from the ProjectLens post. Scores are public-demo "
+        "technical-surface evidence for improvement suggestions, not a judgment "
+        "of product value."
     ),
 )
 async def run_lighthouse_summary(

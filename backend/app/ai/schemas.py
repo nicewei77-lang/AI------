@@ -22,6 +22,8 @@ ConfidenceKind = Literal["confirmed", "inferred"]
 Severity = Literal["low", "medium", "high"]
 Priority = Literal["P0", "P1", "P2"]
 RagRankingMode = Literal["cosine", "weighted"]
+ActionEffort = Literal["low", "medium", "high"]
+AnalysisConfidenceLevel = Literal["low", "medium", "high"]
 
 
 class ProjectLensBaseModel(BaseModel):
@@ -72,6 +74,9 @@ class ImprovementAction(ProjectLensBaseModel):
     action: str
     expected_effect: str
     based_on: EvidenceKind
+    impact: ActionEffort = "medium"
+    difficulty: ActionEffort = "medium"
+    evidence_refs: list[str] = Field(default_factory=list)
 
 
 class Diagnosis(ProjectLensBaseModel):
@@ -128,9 +133,30 @@ class RagSource(ProjectLensBaseModel):
     summary: str | None = None
 
 
+class EvidenceFinding(ProjectLensBaseModel):
+    id: str
+    kind: EvidenceKind
+    title: str
+    observed: str
+    source: str = ""
+
+
 class EvidenceBlock(ProjectLensBaseModel):
     mcp_sources: list[McpSource] = Field(default_factory=list)
     rag_sources: list[RagSource] = Field(default_factory=list)
+    findings: list[EvidenceFinding] = Field(default_factory=list)
+
+
+class AnalysisConfidence(ProjectLensBaseModel):
+    level: AnalysisConfidenceLevel = "low"
+    reasons: list[str] = Field(default_factory=list)
+
+
+class ReviewSummary(ProjectLensBaseModel):
+    one_line_review: str = ""
+    strongest_signals: list[str] = Field(default_factory=list)
+    main_risks: list[str] = Field(default_factory=list)
+    priority_actions: list[str] = Field(default_factory=list)
 
 
 class ReportStatusBlock(ProjectLensBaseModel):
@@ -158,10 +184,45 @@ class PresentationDraft(ProjectLensBaseModel):
     closing: str = ""
 
 
+class EvidenceLinkedText(ProjectLensBaseModel):
+    text: str = ""
+    source_finding_ids: list[str] = Field(default_factory=list)
+
+
+class PresentationFlowTranslation(ProjectLensBaseModel):
+    steps: list[str] = Field(default_factory=list)
+    source_finding_ids: list[str] = Field(default_factory=list)
+
+
+class ExpectedQuestion(ProjectLensBaseModel):
+    question: str = ""
+    why_this_question: str = ""
+    source_finding_ids: list[str] = Field(default_factory=list)
+
+
+class PortfolioTranslation(ProjectLensBaseModel):
+    portfolio_sentence: EvidenceLinkedText = Field(default_factory=EvidenceLinkedText)
+    presentation_flow: PresentationFlowTranslation = Field(
+        default_factory=PresentationFlowTranslation
+    )
+    expected_questions: list[ExpectedQuestion] = Field(default_factory=list)
+
+
+class AnalysisLimitations(ProjectLensBaseModel):
+    seen: list[str] = Field(default_factory=list)
+    not_seen: list[str] = Field(default_factory=list)
+    disclaimers: list[str] = Field(default_factory=list)
+
+
 class ProjectAnalysisReport(ProjectLensBaseModel):
+    report_version: str = "2.0"
+    summary: ReviewSummary = Field(default_factory=ReviewSummary)
     service_understanding: ServiceUnderstanding
     diagnosis: Diagnosis
     evidence: EvidenceBlock
     status: ReportStatusBlock
     portfolio: PortfolioDraft = Field(default_factory=PortfolioDraft)
     presentation: PresentationDraft = Field(default_factory=PresentationDraft)
+    analysis_confidence: AnalysisConfidence = Field(default_factory=AnalysisConfidence)
+    portfolio_translation: PortfolioTranslation = Field(default_factory=PortfolioTranslation)
+    limitations: AnalysisLimitations = Field(default_factory=AnalysisLimitations)

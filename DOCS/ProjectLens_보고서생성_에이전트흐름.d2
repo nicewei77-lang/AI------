@@ -1,0 +1,132 @@
+direction: right
+
+title: "ProjectLens 보고서 생성 에이전트 흐름 - 01 전체 지도"
+
+note: {
+  shape: rectangle
+  label: "대표 페이지. 세부 페이지:\n02 RAG + Agent Runtime\n03 function_tool + MCP Client Lifecycle\n04 MCP Server Tools + Guardrails\n05 Structured Output + Persistence + Failure Paths"
+  style.fill: "#f8fafc"
+  style.stroke: "#64748b"
+}
+
+analysis: {
+  label: "Analysis Service"
+  style.fill: "#eef6ff"
+  style.stroke: "#2563eb"
+
+  entry: "POST /posts/{id}/analysis\n또는 background job"
+  load: "run_analysis_for_post()\npost load"
+  running: "analysis_status=running\ncommit + reload"
+  validate: "required fields 검증\n부족하면 need_more_info"
+  context: "AnalysisToolContext\nservice_url, github_url,\nmcp_evidence=[]"
+}
+
+rag: {
+  label: "RAG Retrieve"
+  style.fill: "#ecfdf5"
+  style.stroke: "#059669"
+
+  index: "index_post_embedding()\npost text -> embedding"
+  retrieve: "retrieve_similar_projects()\npgvector cosine search"
+  rank: "auto ranking\nweighted or cosine"
+  sources: "rag_sources[]\n없으면 empty + honest note"
+}
+
+agent: {
+  label: "OpenAI Agents SDK Runtime"
+  style.fill: "#f5f3ff"
+  style.stroke: "#7c3aed"
+
+  input: "build_runner_input()\npost snapshot + rag_sources\ninstruction_boundary"
+  create: "create_project_analysis_agent()\ngpt-5.5, effort=medium\nProjectAnalysisReport"
+  prompt: "Prompt guardrails\nexternal text=evidence only\nconfirmed vs inferred\nno invented features"
+  run: "Runner.run()\nmax_turns=10\nstructured output attempts=2"
+}
+
+tool_mcp: {
+  label: "Agent-selected Tools + local/private MCP"
+  style.fill: "#fff7ed"
+  style.stroke: "#ea580c"
+
+  choose: "Agent selects function_tool"
+  wrapper: "backend wrapper\nsubmitted URL만 허용"
+  stdio: "MCPServerStdio\nmcp-server/server.py\nstatic allowlist"
+  tools: "7 MCP tools\nsite, context, rendered,\nscreenshot, lighthouse,\nGitHub README"
+  evidence: "CollectedMcpEvidence\ncontext.mcp_evidence에 누적"
+}
+
+guards: {
+  label: "Guardrails"
+  style.fill: "#fff1f2"
+  style.stroke: "#e11d48"
+
+  url: "public URL validation\nlocalhost/private/link-local/reserved IP 차단"
+  fetch: "redirect revalidation\ntimeout/body/text/link limits"
+  browser: "Playwright route SSRF guard\nanti-bot 우회 금지"
+  github: "owner/repo만 파싱\nGitHub API endpoint 서버 구성\ntoken 반환/로그 금지"
+}
+
+output: {
+  label: "Structured Output"
+  style.fill: "#fdf2f8"
+  style.stroke: "#db2777"
+
+  final: "ProjectAnalysisReport\nsummary, service_understanding,\ndiagnosis, evidence,\nportfolio/presentation,\nconfidence, limitations, status"
+  merge: "merge_report_evidence()\nMCP + RAG 근거 병합"
+  normalize: "evidence.findings\nevidence_refs\nsource_finding_ids 정규화"
+}
+
+persist: {
+  label: "Persistence"
+  style.fill: "#f1f5f9"
+  style.stroke: "#334155"
+
+  report: "ai_reports insert\nresponse_id, trace_id, usage,\ninput_snapshot, report, error"
+  mcp_rows: "mcp_evidences rows\npost_id + report_id"
+  embed_report: "index_ai_report_embedding()"
+  post_update: "posts.analysis_status\nposts.ai_summary"
+}
+
+failure: {
+  label: "Side Lane"
+  style.fill: "#fafafa"
+  style.stroke: "#737373"
+
+  missing: "missing fields\nneed_more_info"
+  mock: "no OPENAI_API_KEY\nmock runner smoke path"
+  refusal: "ModelRefusalError\nrefused"
+  validation: "validation retry 실패\nfailed"
+  fallback: "thin/blocked/unreachable evidence\nrendered fallback or failed/need_more_info"
+}
+
+note -> analysis.entry
+analysis.entry -> analysis.load -> analysis.running -> analysis.validate
+analysis.validate -> analysis.context: "입력 충분"
+analysis.validate -> failure.missing: "부족"
+
+analysis.context -> rag.index -> rag.retrieve -> rag.rank -> rag.sources
+rag.sources -> agent.input
+agent.input -> failure.mock: "OPENAI_API_KEY 없음"
+agent.input -> agent.create: "real run"
+agent.create -> agent.prompt -> agent.run
+
+agent.run -> tool_mcp.choose: "tool call"
+tool_mcp.choose -> tool_mcp.wrapper -> tool_mcp.stdio -> tool_mcp.tools
+tool_mcp.tools -> guards.url
+tool_mcp.tools -> guards.fetch
+tool_mcp.tools -> guards.browser
+tool_mcp.tools -> guards.github
+guards.url -> tool_mcp.evidence
+guards.fetch -> tool_mcp.evidence
+guards.browser -> tool_mcp.evidence
+guards.github -> tool_mcp.evidence
+tool_mcp.evidence -> agent.run: "tool output + evidence context"
+
+agent.run -> output.final: "schema valid"
+agent.run -> failure.refusal
+agent.run -> failure.validation
+output.final -> output.merge -> output.normalize
+output.normalize -> failure.fallback: "후처리 근거 점검"
+failure.fallback -> output.final: "필요 시 report 교체"
+
+output.normalize -> persist.report -> persist.mcp_rows -> persist.embed_report -> persist.post_update

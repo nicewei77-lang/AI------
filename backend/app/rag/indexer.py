@@ -113,7 +113,25 @@ def build_post_embedding_text(post: Post) -> str:
 def build_report_embedding_text(report: ProjectAnalysisReport) -> str:
     service = report.service_understanding
     diagnosis = report.diagnosis
+    summary = report.summary
+    limitations = report.limitations
+    confidence = report.analysis_confidence
     fields = [
+        _line("review_summary", summary.one_line_review),
+        _line("strongest_signals", _join(summary.strongest_signals)),
+        _line("main_risks", _join(summary.main_risks)),
+        _line("priority_actions", _join(summary.priority_actions)),
+        _line(
+            "evidence_findings",
+            _join(
+                f"{item.id} {item.title}: {item.observed}"
+                for item in report.evidence.findings
+            ),
+        ),
+        _line(
+            "analysis_confidence",
+            f"{confidence.level}: {_join(confidence.reasons)}",
+        ),
         _line("service_summary", service.one_line_summary),
         _line("detailed_summary", service.detailed_summary),
         _line("site_structure", service.site_structure_summary),
@@ -126,8 +144,17 @@ def build_report_embedding_text(report: ProjectAnalysisReport) -> str:
         _line("weaknesses", _join(item.title + ": " + item.reason for item in diagnosis.weaknesses)),
         _line(
             "improvement_plan",
-            _join(item.priority + " " + item.action for item in diagnosis.improvement_plan),
+            _join(
+                item.priority
+                + " "
+                + item.action
+                + " evidence_refs="
+                + ",".join(item.evidence_refs)
+                for item in diagnosis.improvement_plan
+            ),
         ),
+        _line("analysis_seen", _join(limitations.seen)),
+        _line("analysis_not_seen", _join(limitations.not_seen)),
     ]
     return "\n".join(field for field in fields if field)
 

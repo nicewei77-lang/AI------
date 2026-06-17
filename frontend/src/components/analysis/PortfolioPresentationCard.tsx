@@ -1,12 +1,24 @@
 import {useMemo, useState} from "react";
-import type {PortfolioDraft, PresentationDraft} from "../../types/analysis";
+import type {
+    ExpectedQuestion,
+    PortfolioDraft,
+    PortfolioTranslation,
+    PresentationDraft,
+} from "../../types/analysis";
 
 interface PortfolioPresentationCardProps {
     portfolio: PortfolioDraft;
     presentation: PresentationDraft;
+    translation?: PortfolioTranslation;
 }
 
 type CopyState = "idle" | "copied" | "failed";
+
+const EMPTY_TRANSLATION: PortfolioTranslation = {
+    portfolio_sentence: {text: "", source_finding_ids: []},
+    presentation_flow: {steps: [], source_finding_ids: []},
+    expected_questions: [],
+};
 
 function hasPortfolioContent(portfolio: PortfolioDraft) {
     return [
@@ -30,13 +42,25 @@ function hasPresentationContent(presentation: PresentationDraft) {
     ].some((item) => item.trim().length > 0);
 }
 
+function hasTranslationContent(translation: PortfolioTranslation) {
+    return (
+        translation.portfolio_sentence.text.trim().length > 0 ||
+        translation.presentation_flow.steps.some((item) => item.trim().length > 0) ||
+        translation.expected_questions.some((item) => item.question.trim().length > 0)
+    );
+}
+
 function lines(title: string, items: string[]) {
     const clean = items.filter((item) => item.trim());
     if (clean.length === 0) return "";
     return [`${title}`, ...clean.map((item) => `- ${item}`)].join("\n");
 }
 
-function toCopyText(portfolio: PortfolioDraft, presentation: PresentationDraft) {
+function toCopyText(
+    portfolio: PortfolioDraft,
+    presentation: PresentationDraft,
+    translation: PortfolioTranslation,
+) {
     return [
         "[포트폴리오 문장]",
         portfolio.headline,
@@ -53,6 +77,18 @@ function toCopyText(portfolio: PortfolioDraft, presentation: PresentationDraft) 
         lines("데모 흐름", presentation.demo_flow),
         lines("리스크/다음 단계", presentation.risks_or_next_steps),
         presentation.closing,
+        "",
+        "[근거 연결 번역]",
+        translation.portfolio_sentence.text,
+        lines("포트폴리오 근거 ID", translation.portfolio_sentence.source_finding_ids),
+        lines("발표 흐름", translation.presentation_flow.steps),
+        lines("발표 흐름 근거 ID", translation.presentation_flow.source_finding_ids),
+        lines(
+            "예상 질문",
+            translation.expected_questions.map((item) =>
+                `${item.question} - ${item.why_this_question} (${item.source_finding_ids.join(", ")})`,
+            ),
+        ),
     ]
         .filter((item) => item.trim())
         .join("\n");
@@ -80,6 +116,87 @@ function SectionText({label, value}: {label: string; value: string}) {
                 {label}
             </h4>
             <p className="break-words text-sm leading-6 text-stone-700">{value}</p>
+        </div>
+    );
+}
+
+function SourceIdList({ids}: {ids: string[]}) {
+    const clean = ids.filter((item) => item.trim());
+    if (clean.length === 0) return null;
+
+    return (
+        <div className="mt-2 flex flex-wrap gap-2">
+            {clean.map((id) => (
+                <span
+                    key={id}
+                    className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-800"
+                >
+                    근거 {id}
+                </span>
+            ))}
+        </div>
+    );
+}
+
+function ExpectedQuestionList({items}: {items: ExpectedQuestion[]}) {
+    const clean = items.filter((item) => item.question.trim());
+    if (clean.length === 0) return null;
+
+    return (
+        <div className="space-y-2">
+            <h5 className="text-xs font-bold uppercase tracking-wide text-stone-500">
+                예상 질문
+            </h5>
+            <ul className="space-y-3">
+                {clean.map((item) => (
+                    <li key={item.question}>
+                        <strong className="break-words text-sm text-stone-950">
+                            {item.question}
+                        </strong>
+                        {item.why_this_question.trim() ? (
+                            <p className="mt-1 break-words text-sm leading-6 text-stone-700">
+                                {item.why_this_question}
+                            </p>
+                        ) : null}
+                        <SourceIdList ids={item.source_finding_ids} />
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function TranslationBlock({translation}: {translation: PortfolioTranslation}) {
+    if (!hasTranslationContent(translation)) return null;
+
+    return (
+        <div className="mt-5 border-t border-stone-200 pt-4">
+            <h4 className="mb-3 text-sm font-bold text-stone-800">근거 연결 번역</h4>
+            <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
+                    {translation.portfolio_sentence.text.trim() ? (
+                        <div>
+                            <h5 className="mb-1 text-xs font-bold uppercase tracking-wide text-stone-500">
+                                포트폴리오 문장
+                            </h5>
+                            <p className="break-words text-sm leading-6 text-stone-700">
+                                {translation.portfolio_sentence.text}
+                            </p>
+                            <SourceIdList ids={translation.portfolio_sentence.source_finding_ids} />
+                        </div>
+                    ) : null}
+                    {translation.presentation_flow.steps.some((item) => item.trim()) ? (
+                        <div>
+                            <h5 className="mb-1 text-xs font-bold uppercase tracking-wide text-stone-500">
+                                발표 흐름
+                            </h5>
+                            <BulletList items={translation.presentation_flow.steps} />
+                            <SourceIdList ids={translation.presentation_flow.source_finding_ids} />
+                        </div>
+                    ) : null}
+                </div>
+                <ExpectedQuestionList items={translation.expected_questions} />
+            </div>
         </div>
     );
 }
@@ -113,17 +230,22 @@ function CopyButton({text}: {text: string}) {
 function PortfolioPresentationCard({
     portfolio,
     presentation,
+    translation,
 }: PortfolioPresentationCardProps) {
-    const hasContent = hasPortfolioContent(portfolio) || hasPresentationContent(presentation);
+    const safeTranslation = translation ?? EMPTY_TRANSLATION;
+    const hasContent =
+        hasPortfolioContent(portfolio) ||
+        hasPresentationContent(presentation) ||
+        hasTranslationContent(safeTranslation);
     const copyText = useMemo(
-        () => toCopyText(portfolio, presentation),
-        [portfolio, presentation],
+        () => toCopyText(portfolio, presentation, safeTranslation),
+        [portfolio, presentation, safeTranslation],
     );
 
     return (
         <section className="rounded border border-stone-200 bg-white p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-base font-bold text-stone-950">포트폴리오/발표</h3>
+                <h3 className="text-base font-bold text-stone-950">포트폴리오/발표 번역</h3>
                 {hasContent ? <CopyButton text={copyText} /> : null}
             </div>
 
@@ -178,6 +300,7 @@ function PortfolioPresentationCard({
                     </div>
                 </div>
             )}
+            {hasContent ? <TranslationBlock translation={safeTranslation} /> : null}
         </section>
     );
 }
