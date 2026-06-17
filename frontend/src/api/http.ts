@@ -3,7 +3,10 @@
 // 여기서 손으로 펼쳐서 "네트워크 호출의 본질"이 보이게 한다.
 
 const configuredBaseUrl = import.meta.env.VITE_API_URL?.trim();
-const BASE_URL = (configuredBaseUrl || "http://localhost:8000").replace(/\/+$/, "");
+const host = typeof window === "undefined" ? "" : window.location.hostname;
+const isLocalHost = host === "localhost" || host === "127.0.0.1";
+const fallbackBaseUrl = isLocalHost ? "http://localhost:8000" : "https://projectlens-api.onrender.com";
+const BASE_URL = (configuredBaseUrl || fallbackBaseUrl).replace(/\/+$/, "");
 
 interface ApiOptions {
     method?: string;
