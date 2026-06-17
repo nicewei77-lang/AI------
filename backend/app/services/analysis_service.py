@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 from typing import Any
 
 from sqlalchemy import select
@@ -31,6 +32,8 @@ from app.mcp_client.tools import (
 from app.models import AiReport, Post
 from app.rag.indexer import index_ai_report_embedding, index_post_embedding
 from app.rag.retriever import retrieve_similar_projects
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisPostNotFoundError(LookupError):
@@ -195,11 +198,40 @@ async def get_analysis_job_status_for_post(db: AsyncSession, post_id: int) -> An
     )
 
 
-async def mark_analysis_job_failed(db: AsyncSession, post_id: int, message: str) -> None:
+async def mark_analysis_job_failed(
+    db: AsyncSession,
+    post_id: int,
+    message: str,
+    *,
+    exc: Exception | None = None,
+) -> None:
     post = await _load_post(db, post_id)
     if post is None:
         raise AnalysisPostNotFoundError(post_id)
 
+    report = build_failed_report(message)
+    error = _error_payload("analysis_job_error", exc) if exc else {
+        "type": "analysis_job_error",
+        "message": message,
+    }
+    ai_report = AiReport(
+        post_id=post.id,
+        status="failed",
+        report_type="full_analysis",
+        model=settings.agent_model,
+        reasoning_effort=settings.reasoning_effort,
+        response_id=None,
+        trace_id=None,
+        usage=None,
+        input_snapshot=build_runner_input(
+            post=_post_snapshot(post),
+            mcp_evidence=[],
+            rag_sources=[],
+        ),
+        report=report.model_dump(mode="json"),
+        error=error,
+    )
+    db.add(ai_report)
     post.analysis_status = "failed"
     post.ai_summary = message
     await db.commit()
@@ -267,24 +299,42 @@ async def _persist_analysis(
     db.add(ai_report)
     await db.flush()
 
-    for item in mcp_evidence:
-        await record_mcp_evidence(
-            db,
-            tool_name=item.tool_name,
-            arguments=item.arguments,
-            result=item.result,
-            success=item.success,
-            error_message=item.error_message,
-            post_id=post.id,
-            report_id=ai_report.id,
-        )
-
-    await index_ai_report_embedding(db, ai_report, run.report)
-
     post.analysis_status = _post_status_for_report(status)
     post.ai_summary = _summary_for_post(run.report)
     await db.commit()
     await db.refresh(ai_report)
+
+    try:
+        for item in mcp_evidence:
+            await record_mcp_evidence(
+                db,
+                tool_name=item.tool_name,
+                arguments=item.arguments,
+                result=item.result,
+                success=item.success,
+                error_message=item.error_message,
+                post_id=post.id,
+                report_id=ai_report.id,
+            )
+        await db.commit()
+    except Exception:
+        logger.exception(
+            "failed to persist MCP evidence after report save: post_id=%s report_id=%s",
+            post.id,
+            ai_report.id,
+        )
+        await db.rollback()
+
+    try:
+        await index_ai_report_embedding(db, ai_report, run.report)
+        await db.commit()
+    except Exception:
+        logger.exception(
+            "failed to index analysis report embedding after report save: post_id=%s report_id=%s",
+            post.id,
+            ai_report.id,
+        )
+        await db.rollback()
 
     return PersistedAnalysis(
         status=status,
