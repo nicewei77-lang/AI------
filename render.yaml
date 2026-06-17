@@ -6,7 +6,6 @@ services:
     dockerfilePath: ./Dockerfile.backend
     dockerContext: .
     healthCheckPath: /health
-    preDeployCommand: cd /app/backend && python scripts/apply_schema.py
     envVars:
       - key: DATABASE_URL
         fromDatabase:
