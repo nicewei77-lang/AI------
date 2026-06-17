@@ -8,14 +8,17 @@ import type {
     McpSource,
     ReportStatus,
 } from "../../types/analysis";
+import type {Post} from "../../types/post";
 import AnalysisStatusBadge from "./AnalysisStatusBadge";
 import DiagnosisCard from "./DiagnosisCard";
+import ImprovementPromptCard from "./ImprovementPromptCard";
 import ReviewSummaryCard from "./ReviewSummaryCard";
 import ServiceUnderstandingCard from "./ServiceUnderstandingCard";
 import SimilarProjectsCard from "./SimilarProjectsCard";
 
 interface AnalysisReportProps {
     analysis: AnalysisResponse | null;
+    post: Post;
     postStatus: AnalysisBadgeStatus;
     isLoading: boolean;
     isRunning: boolean;
@@ -29,6 +32,7 @@ const REPORT_TOC_ITEMS = [
     {id: "report-summary", label: "요약"},
     {id: "report-service", label: "서비스 이해"},
     {id: "report-diagnosis", label: "AI 해석/리스크"},
+    {id: "report-improvement-prompt", label: "개선 프롬프트"},
     {id: "report-similar", label: "유사 프로젝트"},
 ];
 
@@ -379,6 +383,7 @@ function EvidenceCard({analysis}: {analysis: AnalysisResponse}) {
 
 function AnalysisReport({
     analysis,
+    post,
     postStatus,
     isLoading,
     isRunning,
@@ -462,6 +467,9 @@ function AnalysisReport({
                                 </div>
                                 <div id="report-diagnosis" className="scroll-mt-4">
                                     <DiagnosisCard diagnosis={analysis.report.diagnosis} />
+                                </div>
+                                <div id="report-improvement-prompt" className="scroll-mt-4">
+                                    <ImprovementPromptCard post={post} analysis={analysis} />
                                 </div>
                                 <div id="report-similar" className="scroll-mt-4">
                                     <SimilarProjectsCard sources={analysis.report.evidence.rag_sources} />

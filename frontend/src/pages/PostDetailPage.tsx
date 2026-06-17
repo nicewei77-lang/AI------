@@ -384,6 +384,7 @@ function PostDetailPage() {
 
                 <AnalysisReport
                     analysis={analysis}
+                    post={post}
                     postStatus={post.analysisStatus}
                     isLoading={analysisLoading}
                     isRunning={analysisRunning}
