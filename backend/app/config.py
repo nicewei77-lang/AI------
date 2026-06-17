@@ -8,7 +8,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_algorism: str = "HS256"
     backend_cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
-    backend_cors_origin_regex: str | None = r"https://.*\.vercel\.app"
+    backend_cors_origin_regex: str | None = (
+        r"https://.*\.vercel\.app|http://(localhost|127\.0\.0\.1|15\.164\.98\.162):5173"
+    )
     openai_api_key: str | None = None
     agent_model: str = "gpt-5.5"
     reasoning_effort: str = "medium"

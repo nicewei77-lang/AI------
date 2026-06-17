@@ -1,9 +1,13 @@
+import logging
+
 from sqlalchemy import select                          # (1) select 함수
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Post, Tag
 from app.schemas import PostCreate
 from app.repositories.posts import create_post
 from app.rag.indexer import index_post_embedding
+
+logger = logging.getLogger(__name__)
 
 async def create(
     session: AsyncSession,
@@ -20,7 +24,6 @@ async def create(
         found = {t.slug for t in tags}
         missing = set(body.tag_ids) - found
         raise ValueError(f"unkown tags: {missing}")
-    
     # 완성된 post를 INSERT 한다.(commit 전)
     post = await create_post(
         session,
@@ -35,6 +38,13 @@ async def create(
         tech_stack=body.tech_stack,
         tags=tags,
     )
-    await index_post_embedding(session, post)
     await session.commit()
+
+    try:
+        await index_post_embedding(session, post)
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        logger.exception("post embedding indexing failed after post creation", extra={"post_id": post.id})
+
     return post
