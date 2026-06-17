@@ -1,0 +1,111 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "ProjectLens" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e7]:
+        - textbox "프로젝트 검색" [ref=e8]
+        - button "검색" [ref=e9]
+      - generic [ref=e10]:
+        - link "가입" [ref=e11] [cursor=pointer]:
+          - /url: /signup
+        - link "로그인" [ref=e12] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: AI Project Review
+          - generic [ref=e19]:
+            - generic [ref=e20]: OpenAI
+            - generic [ref=e21]: GPT-5.5 기반
+        - paragraph [ref=e22]: ProjectLens
+        - heading "프로젝트를 올리면, AI가 근거를 읽고 리뷰를 남깁니다." [level=1] [ref=e23]
+        - paragraph [ref=e24]: ProjectLens는 URL, GitHub README, 화면 품질, 유사 프로젝트 데이터를 바탕으로 서비스 이해, 강점, 리스크, 개선 액션을 구조화된 리뷰 카드로 정리합니다.
+        - generic [ref=e25]:
+          - generic [ref=e26]: Powered by OpenAI GPT-5.5
+          - generic [ref=e27]: MCP Tools
+          - generic [ref=e28]: RAG Search
+          - generic [ref=e29]: Structured Review
+        - generic [ref=e30]:
+          - link "새 프로젝트 등록" [ref=e31] [cursor=pointer]:
+            - /url: /new
+          - link "최신 리뷰 보기" [ref=e32] [cursor=pointer]:
+            - /url: "#latest-reviews"
+      - complementary [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - paragraph [ref=e36]: Review Preview
+            - heading "근거 기반 AI 리뷰 카드" [level=2] [ref=e37]
+          - generic [ref=e38]: completed
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - heading "확인된 근거" [level=3] [ref=e41]
+            - generic [ref=e42]:
+              - generic [ref=e43]: 사이트 개요
+              - generic [ref=e44]: GitHub README
+              - generic [ref=e45]: 화면 품질
+              - generic [ref=e46]: Lighthouse summary
+          - generic [ref=e47]:
+            - heading "AI 리뷰" [level=3] [ref=e48]
+            - generic [ref=e49]:
+              - generic [ref=e50]: 서비스 이해
+              - generic [ref=e51]: 강점
+              - generic [ref=e52]: 리스크
+              - generic [ref=e53]: 개선 액션
+          - generic [ref=e54]:
+            - heading "분석 범위" [level=3] [ref=e55]
+            - paragraph [ref=e56]: 확인한 것과 확인하지 못한 것을 분리해, 없는 기능을 지어내지 않습니다.
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Agent Pipeline
+          - heading "AI 리뷰는 이렇게 생성됩니다" [level=2] [ref=e61]
+        - paragraph [ref=e62]: Agent는 게시글만 읽지 않습니다. 제출된 URL과 GitHub를 안전하게 확인하고, 게시판에 쌓인 유사 프로젝트를 함께 참고한 뒤, 검증 가능한 리뷰 카드로 저장합니다.
+      - generic [ref=e63]:
+        - article [ref=e64]:
+          - generic [ref=e65]:
+            - generic [ref=e66]: 📝
+            - generic [ref=e67]: "1"
+          - heading "프로젝트 게시글" [level=3] [ref=e68]
+          - paragraph [ref=e69]: URL, GitHub, 작성자 설명을 하나의 리뷰 요청으로 묶습니다.
+        - article [ref=e70]:
+          - generic [ref=e71]: →
+          - generic [ref=e72]:
+            - generic [ref=e73]: 🔎
+            - generic [ref=e74]: "2"
+          - heading "RAG Search" [level=3] [ref=e75]
+          - paragraph [ref=e76]: 게시판에 쌓인 유사 프로젝트와 기존 리뷰 근거를 검색합니다.
+        - article [ref=e77]:
+          - generic [ref=e78]: →
+          - generic [ref=e79]:
+            - generic [ref=e80]: 🛠️
+            - generic [ref=e81]: "3"
+          - heading "MCP Tools" [level=3] [ref=e82]
+          - paragraph [ref=e83]: 사이트, README, 렌더링 화면, Lighthouse 요약을 안전하게 확인합니다.
+        - article [ref=e84]:
+          - generic [ref=e85]: →
+          - generic [ref=e86]:
+            - generic [ref=e87]: 🧠
+            - generic [ref=e88]: "4"
+          - heading "ProjectLens Agent" [level=3] [ref=e89]
+          - paragraph [ref=e90]: OpenAI GPT-5.5가 근거를 비교하고 리뷰 구조를 결정합니다.
+        - article [ref=e91]:
+          - generic [ref=e92]: →
+          - generic [ref=e93]:
+            - generic [ref=e94]: 🧩
+            - generic [ref=e95]: "5"
+          - heading "Structured Output" [level=3] [ref=e96]
+          - paragraph [ref=e97]: 서비스 이해, 강점, 리스크, 개선 액션을 카드 데이터로 만듭니다.
+        - article [ref=e98]:
+          - generic [ref=e99]: →
+          - generic [ref=e100]:
+            - generic [ref=e101]: 💾
+            - generic [ref=e102]: "6"
+          - heading "리뷰 카드 저장" [level=3] [ref=e103]
+          - paragraph [ref=e104]: 검증 가능한 AI 리뷰를 게시글 상세 화면에 저장하고 보여줍니다.
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - paragraph [ref=e107]: Community Reviews
+        - heading "최신 프로젝트 리뷰" [level=2] [ref=e108]
+      - paragraph [ref=e109]: 불러오는 중...
