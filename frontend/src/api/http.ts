@@ -2,7 +2,8 @@
 // axios가 자동으로 해주는 일(baseURL·JSON 직렬화·토큰 첨부·에러 변환)을
 // 여기서 손으로 펼쳐서 "네트워크 호출의 본질"이 보이게 한다.
 
-const BASE_URL = "http://localhost:8000"; // 백엔드 주소(CORS 허용됨). 실무에선 import.meta.env.VITE_API_URL
+const configuredBaseUrl = import.meta.env.VITE_API_URL?.trim();
+const BASE_URL = (configuredBaseUrl || "http://localhost:8000").replace(/\/+$/, "");
 
 interface ApiOptions {
     method?: string;

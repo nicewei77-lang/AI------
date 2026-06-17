@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     jwt_algorism: str = "HS256"
+    backend_cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     openai_api_key: str | None = None
     agent_model: str = "gpt-5.5"
     reasoning_effort: str = "medium"
@@ -32,6 +33,13 @@ class Settings(BaseSettings):
     mcp_github_readme_limit_chars: int = 6_000
     mcp_max_links: int = 20
     mcp_max_redirects: int = 5
+
+    def cors_origins(self) -> list[str]:
+        return [
+            origin.rstrip("/")
+            for origin in (item.strip() for item in self.backend_cors_origins.split(","))
+            if origin
+        ]
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 # 다른 곳에서 쓸 객체 인스턴스 만들기

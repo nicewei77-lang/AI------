@@ -1,0 +1,14 @@
+.git
+.venv
+backend/.venv
+frontend/node_modules
+mcp-server/node_modules
+reference
+output
+outputs
+tmp
+**/.env
+**/.env.*
+openAIKey.rtf
+*.pyc
+__pycache__/

@@ -6,8 +6,17 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy import text
 from app.config import settings
 
+def _to_async_sqlalchemy_url(database_url: str) -> str:
+    if database_url.startswith("postgresql+asyncpg://"):
+        return database_url
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    return database_url
+
 # 연결 풀 관리자 객체인 엔진을 만든다.
-engine = create_async_engine(settings.database_url, echo=True)
+engine = create_async_engine(_to_async_sqlalchemy_url(settings.database_url), echo=True)
 
 # 호출되면 세션을 생성하는 객체를 만든다.
 SessionLocal = async_sessionmaker(

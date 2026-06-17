@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: projectlens-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    healthCheckPath: /health
+    preDeployCommand: cd /app/backend && python scripts/apply_schema.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: projectlens-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AGENT_MODEL
+        value: gpt-5.5
+      - key: REASONING_EFFORT
+        value: medium
+
+databases:
+  - name: projectlens-db
+    plan: free
+    databaseName: projectlens
+    user: projectlens
