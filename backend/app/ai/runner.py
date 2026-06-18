@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from dataclasses import asdict, dataclass
@@ -157,15 +158,18 @@ async def run_project_analysis(
         ):
             for attempt in range(STRUCTURED_OUTPUT_MAX_ATTEMPTS):
                 try:
-                    result = await Runner.run(
-                        agent,
-                        _json_dumps(
-                            _retry_input_payload(input_payload, validation_errors[-1])
-                            if validation_errors
-                            else input_payload
+                    result = await asyncio.wait_for(
+                        Runner.run(
+                            agent,
+                            _json_dumps(
+                                _retry_input_payload(input_payload, validation_errors[-1])
+                                if validation_errors
+                                else input_payload
+                            ),
+                            context=active_tool_context,
+                            max_turns=settings.agent_max_turns,
                         ),
-                        context=active_tool_context,
-                        max_turns=settings.agent_max_turns,
+                        timeout=settings.analysis_model_timeout_seconds,
                     )
                     report = result.final_output_as(
                         ProjectAnalysisReport,
@@ -213,6 +217,11 @@ async def run_project_analysis(
                             "errors": validation_errors,
                         },
                     )
+    except asyncio.TimeoutError as exc:
+        timeout_seconds = int(settings.analysis_model_timeout_seconds)
+        raise AnalysisRunnerError(
+            f"OpenAI analysis did not finish within {timeout_seconds} seconds."
+        ) from exc
     except Exception as exc:
         raise AnalysisRunnerError(str(exc)) from exc
 

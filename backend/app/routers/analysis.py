@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
+from time import monotonic
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.db import SessionLocal, get_db
 from app.schemas import AnalysisJobOut, AnalysisLatestOut, AnalysisRunOut
 from app.services.analysis_service import (
@@ -20,6 +22,7 @@ from app.services.analysis_service import (
 
 router = APIRouter(prefix="/posts/{post_id}/analysis")
 logger = logging.getLogger(__name__)
+_active_analysis_jobs: dict[int, float] = {}
 
 
 @router.post("", response_model=AnalysisRunOut, response_model_by_alias=True)
@@ -51,6 +54,10 @@ async def start_analysis_job(
     except AnalysisPostNotFoundError:
         raise HTTPException(status_code=404, detail="post not found")
 
+    if _analysis_job_is_active(post_id):
+        return _job_out(state, "AI analysis job already running")
+
+    _active_analysis_jobs[post_id] = monotonic()
     background_tasks.add_task(_run_analysis_job, post_id)
     return _job_out(state, "AI analysis job started")
 
@@ -64,6 +71,15 @@ async def get_analysis_status(
         state = await get_analysis_job_status_for_post(db, post_id)
     except AnalysisPostNotFoundError:
         raise HTTPException(status_code=404, detail="post not found")
+
+    if state.status == "running" and _analysis_job_is_stale(post_id):
+        _active_analysis_jobs.pop(post_id, None)
+        await mark_analysis_job_failed(
+            db,
+            post_id,
+            "이전 AI 분석 작업이 제한 시간을 넘어 중단되었습니다. 다시 실행할 수 있습니다.",
+        )
+        state = await get_analysis_job_status_for_post(db, post_id)
 
     return _job_out(state)
 
@@ -112,6 +128,8 @@ async def _run_analysis_job(post_id: int) -> None:
                 )
             except AnalysisPostNotFoundError:
                 logger.warning("analysis job failed after post was removed: post_id=%s", post_id)
+        finally:
+            _active_analysis_jobs.pop(post_id, None)
 
 
 def _job_out(state: AnalysisJobState, message: str | None = None) -> AnalysisJobOut:
@@ -122,3 +140,19 @@ def _job_out(state: AnalysisJobState, message: str | None = None) -> AnalysisJob
         latest_report_status=state.latest_report_status,  # type: ignore[arg-type]
         message=message,
     )
+
+
+def _analysis_job_is_active(post_id: int) -> bool:
+    started_at = _active_analysis_jobs.get(post_id)
+    return started_at is not None and monotonic() - started_at <= _analysis_job_timeout_seconds()
+
+
+def _analysis_job_is_stale(post_id: int) -> bool:
+    started_at = _active_analysis_jobs.get(post_id)
+    if started_at is None:
+        return True
+    return monotonic() - started_at > _analysis_job_timeout_seconds()
+
+
+def _analysis_job_timeout_seconds() -> float:
+    return max(settings.analysis_model_timeout_seconds + 30.0, 30.0)
