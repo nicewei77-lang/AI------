@@ -158,6 +158,10 @@ async def get_latest_analysis_for_post(db: AsyncSession, post_id: int) -> Persis
     ai_report = await _load_latest_ai_report(db, post_id)
     if ai_report is None:
         raise AnalysisReportNotFoundError(post_id)
+    if _is_transient_connection_failure(ai_report):
+        completed_report = await _load_latest_completed_ai_report(db, post_id)
+        if completed_report is not None:
+            ai_report = completed_report
 
     report = _report_from_db(ai_report)
     return PersistedAnalysis(
@@ -254,6 +258,32 @@ async def _load_latest_ai_report(db: AsyncSession, post_id: int) -> AiReport | N
         .limit(1)
     )
     return (await db.execute(stmt)).scalar_one_or_none()
+
+
+async def _load_latest_completed_ai_report(db: AsyncSession, post_id: int) -> AiReport | None:
+    stmt = (
+        select(AiReport)
+        .where(AiReport.post_id == post_id, AiReport.status == "completed")
+        .order_by(AiReport.created_at.desc(), AiReport.id.desc())
+        .limit(1)
+    )
+    return (await db.execute(stmt)).scalar_one_or_none()
+
+
+def _is_transient_connection_failure(ai_report: AiReport) -> bool:
+    if ai_report.status != "failed" or not isinstance(ai_report.error, dict):
+        return False
+    error_type = str(ai_report.error.get("type") or "")
+    exception = str(ai_report.error.get("exception") or "")
+    message = str(ai_report.error.get("message") or "")
+    return (
+        error_type == "analysis_error"
+        and (
+            exception == "APIConnectionError"
+            or "Connection error" in message
+            or "connection error" in message.lower()
+        )
+    )
 
 
 def _missing_required_fields(post: Post) -> tuple[list[str], list[str]]:
