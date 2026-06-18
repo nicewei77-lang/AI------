@@ -12,6 +12,8 @@ import type {Post} from "../../types/post";
 import AnalysisStatusBadge from "./AnalysisStatusBadge";
 import DiagnosisCard from "./DiagnosisCard";
 import ImprovementPromptCard from "./ImprovementPromptCard";
+import LimitationsCard from "./LimitationsCard";
+import PortfolioPresentationCard from "./PortfolioPresentationCard";
 import ReviewSummaryCard from "./ReviewSummaryCard";
 import ServiceUnderstandingCard from "./ServiceUnderstandingCard";
 import SimilarProjectsCard from "./SimilarProjectsCard";
@@ -32,8 +34,10 @@ const REPORT_TOC_ITEMS = [
     {id: "report-summary", label: "요약"},
     {id: "report-service", label: "서비스 이해"},
     {id: "report-diagnosis", label: "AI 해석/리스크"},
+    {id: "report-portfolio", label: "포트폴리오/발표"},
     {id: "report-improvement-prompt", label: "개선 프롬프트"},
     {id: "report-similar", label: "유사 프로젝트"},
+    {id: "report-limitations", label: "분석 범위와 한계"},
 ];
 
 const REPORT_STATUS_COPY: Record<ReportStatus, {title: string; body: string}> = {
@@ -468,11 +472,21 @@ function AnalysisReport({
                                 <div id="report-diagnosis" className="scroll-mt-4">
                                     <DiagnosisCard diagnosis={analysis.report.diagnosis} />
                                 </div>
+                                <div id="report-portfolio" className="scroll-mt-4">
+                                    <PortfolioPresentationCard
+                                        portfolio={analysis.report.portfolio}
+                                        presentation={analysis.report.presentation}
+                                        translation={analysis.report.portfolio_translation}
+                                    />
+                                </div>
                                 <div id="report-improvement-prompt" className="scroll-mt-4">
                                     <ImprovementPromptCard post={post} analysis={analysis} />
                                 </div>
                                 <div id="report-similar" className="scroll-mt-4">
                                     <SimilarProjectsCard sources={analysis.report.evidence.rag_sources} />
+                                </div>
+                                <div id="report-limitations" className="scroll-mt-4">
+                                    <LimitationsCard limitations={analysis.report.limitations} />
                                 </div>
                             </div>
 

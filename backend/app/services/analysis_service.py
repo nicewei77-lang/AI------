@@ -99,8 +99,7 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
     )
     rag_sources = []
     try:
-        await index_post_embedding(db, post)
-        rag_sources = await retrieve_similar_projects(db, post)
+        post, rag_sources = await _prepare_rag_context(db, post)
         input_payload = build_runner_input(
             post=_post_snapshot(post),
             mcp_evidence=tool_context.mcp_evidence,
@@ -132,6 +131,7 @@ async def run_analysis_for_post(db: AsyncSession, post_id: int) -> PersistedAnal
             )
         run = _force_failed_if_external_evidence_unusable(post, run, tool_context.mcp_evidence)
     except Exception as exc:
+        await _collect_failure_evidence_if_empty(post, tool_context)
         error = _error_payload("analysis_error", exc)
         run = ProjectAnalysisRun(
             report=build_failed_report(
@@ -172,6 +172,50 @@ async def get_latest_analysis_for_post(db: AsyncSession, post_id: int) -> Persis
         error=ai_report.error,
         created_at=ai_report.created_at,
     )
+
+
+async def _prepare_rag_context(
+    db: AsyncSession,
+    post: Post,
+) -> tuple[Post, list]:
+    try:
+        await index_post_embedding(db, post)
+        return post, await retrieve_similar_projects(db, post)
+    except Exception:
+        logger.exception(
+            "failed to prepare RAG context; continuing analysis without similar projects: post_id=%s",
+            post.id,
+        )
+        await db.rollback()
+        reloaded_post = await _load_post(db, post.id)
+        return reloaded_post or post, []
+
+
+async def _collect_failure_evidence_if_empty(
+    post: Post,
+    tool_context: AnalysisToolContext,
+) -> None:
+    if tool_context.mcp_evidence:
+        return
+
+    service_url = (post.service_url or "").strip()
+    if service_url:
+        for tool_name in (CHECK_DEPLOY_STATUS, FETCH_SITE_OVERVIEW, FETCH_SITE_CONTEXT):
+            await call_projectlens_mcp_tool(
+                tool_context,
+                tool_name,
+                {"url": post.service_url},
+                expected_url=tool_context.service_url,
+            )
+
+    github_url = (post.github_url or "").strip()
+    if github_url:
+        await call_projectlens_mcp_tool(
+            tool_context,
+            FETCH_GITHUB_README,
+            {"github_url": post.github_url},
+            expected_url=tool_context.github_url,
+        )
 
 
 async def start_analysis_job_for_post(db: AsyncSession, post_id: int) -> AnalysisJobState:

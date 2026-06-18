@@ -251,7 +251,7 @@ function PortfolioPresentationCard({
 
             {!hasContent ? (
                 <p className="rounded border border-stone-200 bg-stone-50 p-3 text-sm leading-6 text-stone-600">
-                    completed 리포트가 생성되면 포트폴리오 문장과 발표 요약이 표시됩니다.
+                    저장된 포트폴리오/발표 번역이 없습니다. 현재 리포트는 확인된 근거와 개선 액션 중심으로 표시됩니다.
                 </p>
             ) : (
                 <div className="grid gap-5 md:grid-cols-2">

@@ -100,7 +100,7 @@ async def _run_analysis_job(post_id: int) -> None:
             await run_analysis_for_post(db, post_id)
         except AnalysisPostNotFoundError:
             logger.warning("analysis job post not found: post_id=%s", post_id)
-        except Exception:
+        except Exception as exc:
             logger.exception("analysis job failed unexpectedly: post_id=%s", post_id)
             await db.rollback()
             try:

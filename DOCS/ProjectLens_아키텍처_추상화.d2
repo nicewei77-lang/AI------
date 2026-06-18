@@ -1,0 +1,112 @@
+direction: down
+
+surface: {
+  label: "Product Surface"
+  direction: right
+  style.fill: "#f8fafc"
+  style.stroke: "#94a3b8"
+  style.stroke-width: 3
+  style.font-size: 28
+
+  user: {
+    label: "User\n\n프로젝트 등록\n분석 요청"
+    style.fill: "#ffffff"
+    style.stroke: "#334155"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  web: {
+    label: "Web App\n\nReact + TypeScript\n게시판 / 리포트 카드"
+    style.fill: "#dbeafe"
+    style.stroke: "#2563eb"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  backend: {
+    label: "Backend Core\n\nFastAPI\n상태 관리 / polling"
+    style.fill: "#e0e7ff"
+    style.stroke: "#4f46e5"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  user -> web: {
+    style.stroke-width: 6
+  }
+
+  web -> backend: {
+    style.stroke-width: 6
+  }
+}
+
+engine: {
+  label: "AI Diagnosis Engine"
+  direction: right
+  style.fill: "#fbfbff"
+  style.stroke: "#94a3b8"
+  style.stroke-width: 3
+  style.font-size: 28
+
+  evidence: {
+    label: "Evidence\n\nlocal/private MCP\n사이트 / README / 화면"
+    style.fill: "#ffedd5"
+    style.stroke: "#ea580c"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  agent: {
+    label: "AI Agent\n\nRAG 검색\n근거 기반 진단"
+    style.fill: "#f3e8ff"
+    style.stroke: "#7c3aed"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  store: {
+    label: "Storage\n\nPostgreSQL + pgvector\nreports / evidence / embeddings"
+    style.fill: "#dcfce7"
+    style.stroke: "#16a34a"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  report: {
+    label: "Output\n\nStructured Report\n진단 카드 / 포트폴리오 문장"
+    style.fill: "#fce7f3"
+    style.stroke: "#db2777"
+    style.stroke-width: 5
+    style.font-size: 38
+  }
+
+  evidence -> agent: {
+    style.stroke-width: 6
+  }
+
+  agent -> store: {
+    style.stroke-width: 6
+  }
+
+  store -> report: {
+    style.stroke-width: 6
+  }
+}
+
+safety: {
+  label: "Safety Contract\nSSRF guard | 외부 텍스트는 근거만\n없는 기능 생성 금지 | 비밀값 저장 금지"
+  style.fill: "#fff1f2"
+  style.stroke: "#e11d48"
+  style.stroke-width: 4
+  style.font-size: 32
+}
+
+surface.backend -> engine.evidence: {
+  style.stroke-width: 6
+}
+
+safety -> engine.evidence: {
+  style.stroke-width: 5
+  style.stroke-dash: 6
+}

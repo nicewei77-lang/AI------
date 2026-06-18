@@ -85,7 +85,9 @@ function ServiceHero() {
                         ProjectLens
                     </p>
                     <h1 className="max-w-3xl text-3xl font-black leading-tight text-white md:text-5xl">
-                        프로젝트를 올리면, AI가 근거를 읽고 리뷰를 남깁니다.
+                        프로젝트를 올리면,
+                        <br />
+                        AI가 근거를 읽고 리뷰를 남깁니다.
                     </h1>
                     <p className="mt-4 max-w-2xl text-base leading-7 text-stone-200 md:text-lg">
                         ProjectLens는 URL, GitHub README, 화면 품질, 유사 프로젝트 데이터를 바탕으로
