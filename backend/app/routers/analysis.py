@@ -150,7 +150,7 @@ def _analysis_job_is_active(post_id: int) -> bool:
 def _analysis_job_is_stale(post_id: int) -> bool:
     started_at = _active_analysis_jobs.get(post_id)
     if started_at is None:
-        return True
+        return False
     return monotonic() - started_at > _analysis_job_timeout_seconds()
 
 
