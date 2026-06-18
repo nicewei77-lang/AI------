@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     rag_weighted_min_indexed_posts: int = 20
     rag_weighted_candidate_multiplier: int = 4
     agent_max_turns: int = 10
+    openai_request_timeout_seconds: float = 30.0
     analysis_model_timeout_seconds: float = 120.0
     mcp_server_url: str | None = None
     mcp_server_command: str | None = None

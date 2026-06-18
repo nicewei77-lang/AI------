@@ -40,7 +40,11 @@ async def embed_text(
             is_fake=True,
         )
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = AsyncOpenAI(
+        api_key=settings.openai_api_key,
+        timeout=settings.openai_request_timeout_seconds,
+        max_retries=1,
+    )
     response = await client.embeddings.create(model=model_name, input=bounded_text)
     vector = list(response.data[0].embedding)
     if len(vector) != EMBEDDING_DIMENSIONS:
@@ -73,4 +77,3 @@ def _prepare_text(text: str) -> str:
     if not stripped:
         return "empty ProjectLens source"
     return stripped[:12_000]
-
