@@ -332,7 +332,19 @@ function PostDetailPage() {
                             {post.aiSummary}
                         </p>
                     ) : null}
+                </article>
 
+                <AnalysisReport
+                    analysis={analysis}
+                    post={post}
+                    postStatus={post.analysisStatus}
+                    isLoading={analysisLoading}
+                    isRunning={analysisRunning}
+                    error={analysisError}
+                    onRun={() => void handleRunAnalysis()}
+                />
+
+                <section className="mx-auto max-w-3xl rounded border border-stone-200 bg-white p-5">
                     <p className="whitespace-pre-wrap leading-7 text-stone-800">{post.body}</p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
@@ -380,17 +392,7 @@ function PostDetailPage() {
                             공유
                         </button>
                     </div>
-                </article>
-
-                <AnalysisReport
-                    analysis={analysis}
-                    post={post}
-                    postStatus={post.analysisStatus}
-                    isLoading={analysisLoading}
-                    isRunning={analysisRunning}
-                    error={analysisError}
-                    onRun={() => void handleRunAnalysis()}
-                />
+                </section>
 
                 {message ? (
                     <p
